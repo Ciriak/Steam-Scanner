@@ -1,0 +1,34 @@
+{
+  "name": "steamer",
+  "version": "1.0.0",
+  "description": "Electron app that automatically add your game to you Steam library",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsc ./src/app.ts --outDir ./dist --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nj-neer/steamer.git"
+  },
+  "keywords": [
+    "steam",
+    "electron",
+    "game",
+    "sync",
+    "uplay",
+    "origin"
+  ],
+  "author": "Cyriaque DELAUNAY",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nj-neer/steamer/issues"
+  },
+  "homepage": "https://github.com/nj-neer/steamer#readme",
+  "dependencies": {
+    "@types/electron": "^1.6.10",
+    "electron": "^1.8.4",
+    "node-steam-shortcuts": "^1.1.0",
+    "typescript": "^2.7.2"
+  }
+}
