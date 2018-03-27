@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc ./src/app.ts --outDir ./dist --watch"
+    "dev": "tsc ./src/app.ts --outDir ./dist --watch",
+    "build": "tsc ./src/app.ts --outDir ./dist && electron dist/app.js"
   },
   "repository": {
     "type": "git",
@@ -27,7 +28,10 @@
   "homepage": "https://github.com/nj-neer/steamer#readme",
   "dependencies": {
     "@types/electron": "^1.6.10",
+    "@types/es6-promise": "^3.3.0",
+    "@types/fs-extra": "^5.0.1",
     "electron": "^1.8.4",
+    "fs-extra": "^5.0.0",
     "node-steam-shortcuts": "^1.1.0",
     "typescript": "^2.7.2"
   }

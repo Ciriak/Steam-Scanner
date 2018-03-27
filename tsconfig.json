@@ -5,6 +5,10 @@
     "sourceMap": true,
     "outDir": "dist",
     "baseUrl": ".",
+    "target": "es6",
+    "lib": [
+      "es2015"
+    ],
     "paths": {
       "*": [
         "node_modules/*"
