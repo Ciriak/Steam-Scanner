@@ -62,6 +62,10 @@ var Steamer = /** @class */ (function () {
             }
         }
         this.log(userDirectories.length + " user(s) found");
+        this.log("Retrieving shortcut files for each user...");
+        for (var _b = 0, userDirectories_1 = userDirectories; _b < userDirectories_1.length; _b++) {
+            var user = userDirectories_1[_b];
+        }
     };
     Steamer.prototype.generateShortcutFilesList = function () {
         return ["dd"];
