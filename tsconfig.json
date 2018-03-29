@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "baseUrl": ".",
+    "target": "es6",
+    "lib": [
+      "es2015"
+    ],
+    "paths": {
+      "*": [
+        "node_modules/*"
+      ]
+    }
+  }
+}
