@@ -4,10 +4,10 @@
   "description": "Electron app that automatically add your game to you Steam library",
   "main": "app.js",
   "scripts": {
-    "postinstall": "./node_modules/.bin/electron-rebuild",
+    "postinstall": "./node_modules/.bin/electron-rebuild && gulp",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "",
-    "build": "electron dist/app.js"
+    "dev": "gulp dev",
+    "build": "gulp build && electron dist/app.js"
   },
   "repository": {
     "type": "git",
@@ -37,6 +37,9 @@
     "electron-rebuild": "^1.7.3",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-plugin-import": "^2.9.0"
+    "eslint-plugin-import": "^2.9.0",
+    "gulp": "^4.0.0",
+    "gulp-clean": "^0.4.0",
+    "gulp-concat": "^2.6.1"
   }
 }
