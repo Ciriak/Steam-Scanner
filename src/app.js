@@ -1,7 +1,6 @@
-const { app, BrowserWindow } = require('electron');
-const Steamer = require('./Steamer.js');
+const { app } = require("electron");
+const Steamer = require("./Steamer.js");
 
-let steamer;
-app.on('ready', () => {
-  steamer = new Steamer();
+app.on("ready", () => {
+  let steamer = new Steamer();
 });
