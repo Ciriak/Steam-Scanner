@@ -13,6 +13,7 @@ const possibleSteamLocations = [
 
 const shortcutsConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
 const helper: SteamerHelpers = new SteamerHelpers();
+const drmManager = new DRMManager();
 
 export class Steamer {
   public steamDirectory: string;
@@ -35,7 +36,6 @@ export class Steamer {
    * Scan for Installed DRM and add them to steam
    */
   public async updateGames() {
-    const drmManager = new DRMManager();
     this.externalGames = await drmManager.getAllGames();
     return new Promise((resolve) => {
       resolve();

@@ -38,8 +38,36 @@ exports.__esModule = true;
 var DRM_1 = require("./DRM");
 var SteamerHelpers_1 = require("./SteamerHelpers");
 var helper = new SteamerHelpers_1.SteamerHelpers();
+// For the gamesProperties :
+// %pattern% :getPath method of Electron => https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
+// $this.xxx = a propertie of the current item (ex : name)
+var drmList = [
+    {
+        name: "Uplay",
+        exePossibleLocations: [
+            "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\UbisoftGameLauncher.exe",
+            "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\UbisoftGameLauncher.exe"
+        ],
+        configProperties: {
+            configFilePath: "%home%/AppData/Local/Ubisoft Game Launcher/settings.yml",
+            gamesPathPropertieAccess: "misc.game_installation_path"
+        }
+    },
+    {
+        name: "Origin",
+        exePossibleLocations: [
+            "$drive\\Program Files (x86)\\Origin\\Origin.exe",
+            "$drive\\Programmes\\Origin\\Origin.exe"
+        ],
+        configProperties: {
+            configFilePath: "%home%/AppData/Roaming/Origin/local.xml",
+            gamesPathPropertieAccess: "Settings.Setting.0.$.value"
+        }
+    }
+];
 var DRMManager = /** @class */ (function () {
     function DRMManager() {
+        this.detectedDrm = [];
     }
     /**
      * Return a list of all found game (other than steam)
@@ -51,15 +79,15 @@ var DRMManager = /** @class */ (function () {
                 switch (_f.label) {
                     case 0:
                         _a = [];
-                        for (_b in this.drmList)
+                        for (_b in drmList)
                             _a.push(_b);
                         _i = 0;
                         _f.label = 1;
                     case 1:
                         if (!(_i < _a.length)) return [3 /*break*/, 4];
                         drmName = _a[_i];
-                        if (!this.drmList.hasOwnProperty(drmName)) return [3 /*break*/, 3];
-                        drm = new DRM_1.DRM(drmName);
+                        if (!drmList.hasOwnProperty(drmName)) return [3 /*break*/, 3];
+                        drm = new DRM_1.DRM(drmList[drmName]);
                         return [4 /*yield*/, drm.checkInstallation()];
                     case 2:
                         _f.sent();
@@ -79,7 +107,7 @@ var DRMManager = /** @class */ (function () {
                     case 5:
                         if (!(_e < _c.length)) return [3 /*break*/, 8];
                         drmIndex = _c[_e];
-                        if (!this.drmList.hasOwnProperty(drmIndex)) return [3 /*break*/, 7];
+                        if (!drmList.hasOwnProperty(drmIndex)) return [3 /*break*/, 7];
                         drm = this.detectedDrm[drmIndex];
                         return [4 /*yield*/, drm.getGames()];
                     case 6:

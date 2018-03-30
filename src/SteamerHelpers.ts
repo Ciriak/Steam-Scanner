@@ -1,4 +1,5 @@
 declare const Promise: any;
+import { app } from "electron";
 import * as fs from "fs-extra";
 import * as path from "path";
 const drivelist = require("drivelist");
@@ -46,5 +47,19 @@ export class SteamerHelpers {
         resolve(parsedPossibleLocations);
       });
     });
+  }
+
+  public parseFilePath(givenPath: string) {
+    let parsedPath: string;
+    const regex = /%.*?%/;
+    const occurences = givenPath.match(regex);
+    const isolatedOccurence = occurences[0].replace(/%/g, "");
+
+    parsedPath = givenPath.replace(
+      occurences[0], // %appdata%
+      app.getPath(isolatedOccurence) // appdata
+    );
+    parsedPath = path.normalize(parsedPath);
+    return parsedPath;
   }
 }

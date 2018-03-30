@@ -1,5 +1,6 @@
 "use strict";
 exports.__esModule = true;
+var electron_1 = require("electron");
 var path = require("path");
 var drivelist = require("drivelist");
 var SteamerHelpers = /** @class */ (function () {
@@ -44,6 +45,17 @@ var SteamerHelpers = /** @class */ (function () {
                 resolve(parsedPossibleLocations);
             });
         });
+    };
+    SteamerHelpers.prototype.parseFilePath = function (givenPath) {
+        var parsedPath;
+        var regex = /%.*?%/;
+        var occurences = givenPath.match(regex);
+        var isolatedOccurence = occurences[0].replace(/%/g, "");
+        parsedPath = givenPath.replace(occurences[0], // %appdata%
+        electron_1.app.getPath(isolatedOccurence) // appdata
+        );
+        parsedPath = path.normalize(parsedPath);
+        return parsedPath;
     };
     return SteamerHelpers;
 }());

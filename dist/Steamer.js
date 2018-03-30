@@ -46,6 +46,7 @@ var possibleSteamLocations = [
 ];
 var shortcutsConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
 var helper = new SteamerHelpers_1.SteamerHelpers();
+var drmManager = new DRMManager_1.DRMManager();
 var Steamer = /** @class */ (function () {
     function Steamer() {
         this.init();
@@ -73,11 +74,10 @@ var Steamer = /** @class */ (function () {
      */
     Steamer.prototype.updateGames = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var drmManager, _a;
+            var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        drmManager = new DRMManager_1.DRMManager();
                         _a = this;
                         return [4 /*yield*/, drmManager.getAllGames()];
                     case 1:

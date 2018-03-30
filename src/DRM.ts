@@ -1,59 +1,31 @@
 declare const Promise: any;
 import * as fs from "fs-extra";
 import * as _ from "lodash";
+import * as objectPath from "object-path";
 import * as path from "path";
-import { SteamerHelpers } from "./SteamerHelpers";
-const helper: SteamerHelpers = new SteamerHelpers();
 
-// For the gamesProperties :
-// %APPDATA% => appData method of Electron
-// $this.xxx = a propertie of the current item (ex : name)
-const drmList = [
-  {
-    name: "Uplay",
-    exePossibleLocations: [
-      "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\UbisoftGameLauncher.exe",
-      "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\UbisoftGameLauncher.exe"
-    ],
-    configProperties: {
-      configFilePath: "%APPDATA%/Local/Ubisoft Game Launcher/settings.yml",
-      configFileType: "yml",
-      gamesPathPropertieName: "misc.game_installation_path"
-    }
-  },
-  {
-    name: "Origin",
-    exePossibleLocations: [
-      "$drive\\Program Files (x86)\\Origin\\Origin.exe",
-      "$drive\\Programmes\\Origin\\Origin.exe"
-    ],
-    configProperties: {
-      configFilePath: "%APPDATA%/Roaming/Origin/local.xml",
-      configFileType: "xml",
-      gamesPathPropertieName: "DownloadInPlaceDir"
-    }
-  }
-];
+import { parseString } from "xml2js";
+import { SteamerHelpers } from "./SteamerHelpers";
+
+const helper: SteamerHelpers = new SteamerHelpers();
+const parseXml = parseString;
 
 export class DRM {
   public name: any;
   public isAvailable: boolean;
   public exePossibleLocations: string[] = [];
   public exeLocation: string;
+  public configPath: string;
   public configProperties: any;
+  public gamesDirectory;
 
-  constructor(drmName: string) {
-    // find the drm from the list and add the properties
-    const drmIndexFromList = _.indexOf(drmList, {
-      name: drmName
-    });
-    if (drmIndexFromList === -1) {
-      throw new Error("ERR_UNKNOWN_DRM");
-    }
-    const drmFromList = drmList[drmIndexFromList];
-    this.name = drmFromList.name;
-    this.exePossibleLocations = drmFromList.exePossibleLocations;
-    this.configProperties = drmFromList.configProperties;
+  constructor(drmItem: any) {
+    this.name = drmItem.name;
+    this.exePossibleLocations = drmItem.exePossibleLocations;
+    this.configProperties = drmItem.configProperties;
+    this.configPath = helper.parseFilePath(
+      this.configProperties.configFilePath
+    );
   }
 
   public async checkInstallation() {
@@ -79,7 +51,47 @@ export class DRM {
     });
   }
 
-  public getGames() {
-    return false;
+  public async getGames() {
+    if (!this.gamesDirectory) {
+      await this.getGamesDirectory();
+    }
+    return new Promise((resolve) => {
+      resolve();
+    });
+  }
+
+  private async getGamesDirectory() {
+    let configData: any;
+    const propertieAccess = this.configProperties.gamesPathPropertieAccess;
+    const configFileType = path.extname(this.configPath).replace(".", "");
+    let drmRef = this;
+
+    try {
+      configData = fs.readFileSync(this.configPath, "utf-8");
+    } catch (e) {
+      helper.error(e);
+    }
+
+    switch (configFileType) {
+      case "xml":
+        await parseString(configData, function(err, result) {
+          if (err) {
+            helper.error(err);
+          }
+          drmRef.gamesDirectory = objectPath.get(result, propertieAccess);
+          if (!drmRef.gamesDirectory) {
+            helper.error(
+              "[" + this.name + "] ERR_INVALID_CONFIG_PROPERTIE_PATH"
+            );
+          }
+        });
+        break;
+
+      default:
+        helper.error("[" + this.name + "] ERR_INVALID_CONFIG_EXT");
+    }
+    return new Promise((resolve) => {
+      resolve();
+    });
   }
 }

@@ -36,52 +36,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var fs = require("fs-extra");
-var _ = require("lodash");
+var objectPath = require("object-path");
+var path = require("path");
+var xml2js_1 = require("xml2js");
 var SteamerHelpers_1 = require("./SteamerHelpers");
 var helper = new SteamerHelpers_1.SteamerHelpers();
-// For the gamesProperties :
-// %APPDATA% => appData method of Electron
-// $this.xxx = a propertie of the current item (ex : name)
-var drmList = [
-    {
-        name: "Uplay",
-        exePossibleLocations: [
-            "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\UbisoftGameLauncher.exe",
-            "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\UbisoftGameLauncher.exe"
-        ],
-        configProperties: {
-            configFilePath: "%APPDATA%/Local/Ubisoft Game Launcher/settings.yml",
-            configFileType: "yml",
-            gamesPathPropertieName: "misc.game_installation_path"
-        }
-    },
-    {
-        name: "Origin",
-        exePossibleLocations: [
-            "$drive\\Program Files (x86)\\Origin\\Origin.exe",
-            "$drive\\Programmes\\Origin\\Origin.exe"
-        ],
-        configProperties: {
-            configFilePath: "%APPDATA%/Roaming/Origin/local.xml",
-            configFileType: "xml",
-            gamesPathPropertieName: "DownloadInPlaceDir"
-        }
-    }
-];
+var parseXml = xml2js_1.parseString;
 var DRM = /** @class */ (function () {
-    function DRM(drmName) {
+    function DRM(drmItem) {
         this.exePossibleLocations = [];
-        // find the drm from the list and add the properties
-        var drmIndexFromList = _.indexOf(drmList, {
-            name: drmName
-        });
-        if (drmIndexFromList === -1) {
-            throw new Error("ERR_UNKNOWN_DRM");
-        }
-        var drmFromList = drmList[drmIndexFromList];
-        this.name = drmFromList.name;
-        this.exePossibleLocations = drmFromList.exePossibleLocations;
-        this.configProperties = drmFromList.configProperties;
+        this.name = drmItem.name;
+        this.exePossibleLocations = drmItem.exePossibleLocations;
+        this.configProperties = drmItem.configProperties;
+        this.configPath = helper.parseFilePath(this.configProperties.configFilePath);
     }
     DRM.prototype.checkInstallation = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -116,7 +83,63 @@ var DRM = /** @class */ (function () {
         });
     };
     DRM.prototype.getGames = function () {
-        return false;
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!!this.gamesDirectory) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.getGamesDirectory()];
+                    case 1:
+                        _a.sent();
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, new Promise(function (resolve) {
+                            resolve();
+                        })];
+                }
+            });
+        });
+    };
+    DRM.prototype.getGamesDirectory = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var configData, propertieAccess, configFileType, drmRef, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        propertieAccess = this.configProperties.gamesPathPropertieAccess;
+                        configFileType = path.extname(this.configPath).replace(".", "");
+                        drmRef = this;
+                        try {
+                            configData = fs.readFileSync(this.configPath, "utf-8");
+                        }
+                        catch (e) {
+                            helper.error(e);
+                        }
+                        _a = configFileType;
+                        switch (_a) {
+                            case "xml": return [3 /*break*/, 1];
+                        }
+                        return [3 /*break*/, 3];
+                    case 1: return [4 /*yield*/, xml2js_1.parseString(configData, function (err, result) {
+                            if (err) {
+                                helper.error(err);
+                            }
+                            drmRef.gamesDirectory = objectPath.get(result, propertieAccess);
+                            if (!drmRef.gamesDirectory) {
+                                helper.error("[" + this.name + "] ERR_INVALID_CONFIG_PROPERTIE_PATH");
+                            }
+                        })];
+                    case 2:
+                        _b.sent();
+                        return [3 /*break*/, 4];
+                    case 3:
+                        helper.error("[" + this.name + "] ERR_INVALID_CONFIG_EXT");
+                        _b.label = 4;
+                    case 4: return [2 /*return*/, new Promise(function (resolve) {
+                            resolve();
+                        })];
+                }
+            });
+        });
     };
     return DRM;
 }());
