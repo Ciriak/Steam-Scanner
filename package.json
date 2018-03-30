@@ -4,17 +4,10 @@
   "description": "Electron app that automatically add your game to you Steam library",
   "main": "app.js",
   "scripts": {
-<<<<<<< HEAD
-    "postinstall": "./node_modules/.bin/electron-rebuild && gulp",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "gulp dev",
-    "build": "gulp build && electron dist/app.js"
-=======
     "postinstall": "./node_modules/.bin/electron-rebuild && tsc ./src/app.ts --outDir ./dist/",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsc ./src/app.ts --outDir ./dist/ --watch",
     "build": "tsc ./src/app.ts --outDir ./dist/ && electron dist/app.js"
->>>>>>> parent of b689592... //WIP JS rework
   },
   "repository": {
     "type": "git",
@@ -46,6 +39,5 @@
   "devDependencies": {
     "@types/es6-promise": "^3.3.0",
     "electron-rebuild": "^1.7.3"
->>>>>>> parent of b689592... //WIP JS rework
   }
 }

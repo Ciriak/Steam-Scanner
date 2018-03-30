@@ -131,4 +131,3 @@ export class Steamer {
     }
   }
 }
->>>>>>> parent of b689592... //WIP JS rework:src/Steamer.ts
