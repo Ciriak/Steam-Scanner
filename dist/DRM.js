@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var fs = require("fs-extra");
+var yaml = require("js-yaml");
 var objectPath = require("object-path");
 var path = require("path");
 var xml2js_1 = require("xml2js");
@@ -101,7 +102,7 @@ var DRM = /** @class */ (function () {
     };
     DRM.prototype.getGamesDirectory = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var configData, propertieAccess, configFileType, drmRef, _a;
+            var configData, propertieAccess, configFileType, drmRef, _a, result;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -117,26 +118,38 @@ var DRM = /** @class */ (function () {
                         _a = configFileType;
                         switch (_a) {
                             case "xml": return [3 /*break*/, 1];
+                            case "yml": return [3 /*break*/, 3];
                         }
-                        return [3 /*break*/, 3];
-                    case 1: return [4 /*yield*/, xml2js_1.parseString(configData, function (err, result) {
+                        return [3 /*break*/, 4];
+                    case 1: return [4 /*yield*/, parseXml(configData, function (err, result) {
                             if (err) {
                                 helper.error(err);
                             }
                             drmRef.gamesDirectory = objectPath.get(result, propertieAccess);
-                            if (!drmRef.gamesDirectory) {
-                                helper.error("[" + this.name + "] ERR_INVALID_CONFIG_PROPERTIE_PATH");
-                            }
                         })];
                     case 2:
                         _b.sent();
-                        return [3 /*break*/, 4];
+                        return [3 /*break*/, 5];
                     case 3:
+                        try {
+                            result = yaml.safeLoad(configData);
+                            drmRef.gamesDirectory = objectPath.get(result, propertieAccess);
+                            console.log(drmRef.gamesDirectory);
+                        }
+                        catch (e) {
+                            helper.error(e);
+                        }
+                        return [3 /*break*/, 5];
+                    case 4:
                         helper.error("[" + this.name + "] ERR_INVALID_CONFIG_EXT");
-                        _b.label = 4;
-                    case 4: return [2 /*return*/, new Promise(function (resolve) {
-                            resolve();
-                        })];
+                        _b.label = 5;
+                    case 5:
+                        if (!drmRef.gamesDirectory) {
+                            helper.error("[" + this.name + "] ERR_INVALID_CONFIG_PROPERTIE_PATH");
+                        }
+                        return [2 /*return*/, new Promise(function (resolve) {
+                                resolve();
+                            })];
                 }
             });
         });

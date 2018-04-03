@@ -1,5 +1,6 @@
 declare const Promise: any;
 import * as fs from "fs-extra";
+import * as yaml from "js-yaml";
 import * as _ from "lodash";
 import * as objectPath from "object-path";
 import * as path from "path";
@@ -64,7 +65,7 @@ export class DRM {
     let configData: any;
     const propertieAccess = this.configProperties.gamesPathPropertieAccess;
     const configFileType = path.extname(this.configPath).replace(".", "");
-    let drmRef = this;
+    const drmRef = this;
 
     try {
       configData = fs.readFileSync(this.configPath, "utf-8");
@@ -74,22 +75,29 @@ export class DRM {
 
     switch (configFileType) {
       case "xml":
-        await parseString(configData, function(err, result) {
+        await parseXml(configData, function(err, result) {
           if (err) {
             helper.error(err);
           }
           drmRef.gamesDirectory = objectPath.get(result, propertieAccess);
-          if (!drmRef.gamesDirectory) {
-            helper.error(
-              "[" + this.name + "] ERR_INVALID_CONFIG_PROPERTIE_PATH"
-            );
-          }
         });
         break;
-
+      case "yml":
+        try {
+          const result = yaml.safeLoad(configData);
+          drmRef.gamesDirectory = objectPath.get(result, propertieAccess);
+        } catch (e) {
+          helper.error(e);
+        }
+        break;
       default:
         helper.error("[" + this.name + "] ERR_INVALID_CONFIG_EXT");
     }
+
+    if (!drmRef.gamesDirectory) {
+      helper.error("[" + this.name + "] ERR_INVALID_CONFIG_PROPERTIE_PATH");
+    }
+
     return new Promise((resolve) => {
       resolve();
     });
