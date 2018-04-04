@@ -39,6 +39,8 @@ var fs = require("fs-extra");
 var yaml = require("js-yaml");
 var objectPath = require("object-path");
 var path = require("path");
+var psList = require("ps-list");
+var recursive = require("recursive-readdir");
 var xml2js_1 = require("xml2js");
 var SteamerHelpers_1 = require("./SteamerHelpers");
 var helper = new SteamerHelpers_1.SteamerHelpers();
@@ -48,7 +50,9 @@ var DRM = /** @class */ (function () {
         this.exePossibleLocations = [];
         this.name = drmItem.name;
         this.exePossibleLocations = drmItem.exePossibleLocations;
+        this.exeName = drmItem.exeName;
         this.configProperties = drmItem.configProperties;
+        this.games = [];
         this.configPath = helper.parseFilePath(this.configProperties.configFilePath);
     }
     DRM.prototype.checkInstallation = function () {
@@ -64,6 +68,7 @@ var DRM = /** @class */ (function () {
                                 // first we locate steam directory
                                 for (var _i = 0, parsedPossibleLocations_1 = parsedPossibleLocations; _i < parsedPossibleLocations_1.length; _i++) {
                                     var loc = parsedPossibleLocations_1[_i];
+                                    loc = path.normalize(path.join(loc, _this.exeName));
                                     // try to list all the users in the userdata folder of steam
                                     if (fs.existsSync(loc)) {
                                         _this.exeLocation = loc;
@@ -87,22 +92,28 @@ var DRM = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        if (!!this.gamesDirectory) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.getGamesDirectory()];
+                    case 0: 
+                    // be sure to get Games Directory
+                    return [4 /*yield*/, this.getGamesInstallDirectory()];
                     case 1:
+                        // be sure to get Games Directory
                         _a.sent();
-                        _a.label = 2;
-                    case 2: return [2 /*return*/, new Promise(function (resolve) {
-                            resolve();
-                        })];
+                        return [4 /*yield*/, this.getGamesDirectories()];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, this.getGamesBinaries()];
+                    case 3:
+                        _a.sent();
+                        return [2 /*return*/, new Promise(function (resolve) {
+                                resolve();
+                            })];
                 }
             });
         });
     };
-    DRM.prototype.getGamesDirectory = function () {
+    DRM.prototype.getGamesInstallDirectory = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var configData, propertieAccess, configFileType, drmRef, _a, result;
+            var configData, propertieAccess, configFileType, drmRef, _a, result, exists;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -125,7 +136,7 @@ var DRM = /** @class */ (function () {
                             if (err) {
                                 helper.error(err);
                             }
-                            drmRef.gamesDirectory = objectPath.get(result, propertieAccess);
+                            drmRef.gamesInstallDirectory = objectPath.get(result, propertieAccess);
                         })];
                     case 2:
                         _b.sent();
@@ -133,8 +144,7 @@ var DRM = /** @class */ (function () {
                     case 3:
                         try {
                             result = yaml.safeLoad(configData);
-                            drmRef.gamesDirectory = objectPath.get(result, propertieAccess);
-                            console.log(drmRef.gamesDirectory);
+                            drmRef.gamesInstallDirectory = objectPath.get(result, propertieAccess);
                         }
                         catch (e) {
                             helper.error(e);
@@ -142,14 +152,95 @@ var DRM = /** @class */ (function () {
                         return [3 /*break*/, 5];
                     case 4:
                         helper.error("[" + this.name + "] ERR_INVALID_CONFIG_EXT");
-                        _b.label = 5;
+                        return [2 /*return*/];
                     case 5:
-                        if (!drmRef.gamesDirectory) {
+                        // if no game directory propertie found
+                        if (!drmRef.gamesInstallDirectory) {
                             helper.error("[" + this.name + "] ERR_INVALID_CONFIG_PROPERTIE_PATH");
+                            return [2 /*return*/];
+                        }
+                        return [4 /*yield*/, fs.pathExists(drmRef.gamesInstallDirectory)];
+                    case 6:
+                        exists = _b.sent();
+                        // if not
+                        if (!exists) {
+                            // unset the propertie
+                            drmRef.gamesInstallDirectory = null;
+                            helper.error("[" + this.name + "] ERR_SPECIFIED_DIR_DONT_EXIST");
+                        }
+                        if (!this.gamesInstallDirectory) {
+                            helper.log("[" + this.name + "] Unable to get games, games directory not found !");
                         }
                         return [2 /*return*/, new Promise(function (resolve) {
                                 resolve();
                             })];
+                }
+            });
+        });
+    };
+    // use the found games directories
+    DRM.prototype.getGamesDirectories = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var items, _i, items_1, dir, currentGameDir;
+            return __generator(this, function (_a) {
+                if (!this.gamesInstallDirectory) {
+                    return [2 /*return*/, false];
+                }
+                try {
+                    items = fs.readdirSync(this.gamesInstallDirectory);
+                    // only keep the directories
+                    for (_i = 0, items_1 = items; _i < items_1.length; _i++) {
+                        dir = items_1[_i];
+                        currentGameDir = path.normalize(path.join(this.gamesInstallDirectory, dir));
+                        if (fs.lstatSync(currentGameDir).isDirectory()) {
+                            this.games.push(currentGameDir);
+                        }
+                    }
+                }
+                catch (e) {
+                    helper.error(e);
+                }
+                return [2 /*return*/, new Promise(function (resolve) {
+                        resolve();
+                    })];
+            });
+        });
+    };
+    DRM.prototype.getGamesBinaries = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _i, _a, gameDirectory, exeList, _b, exeList_1, fileName, v;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _i = 0, _a = this.games;
+                        _c.label = 1;
+                    case 1:
+                        if (!(_i < _a.length)) return [3 /*break*/, 5];
+                        gameDirectory = _a[_i];
+                        return [4 /*yield*/, recursive(gameDirectory)];
+                    case 2:
+                        exeList = _c.sent();
+                        for (_b = 0, exeList_1 = exeList; _b < exeList_1.length; _b++) {
+                            fileName = exeList_1[_b];
+                            if (fileName.search(".exe") > -1) {
+                                // console.log(fileName);
+                            }
+                        }
+                        console.log("retrieving process list...");
+                        return [4 /*yield*/, psList({
+                                all: false
+                            })];
+                    case 3:
+                        v = _c.sent();
+                        console.log(v);
+                        console.log(v.length + " process found");
+                        _c.label = 4;
+                    case 4:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 5: return [2 /*return*/, new Promise(function (resolve) {
+                            resolve();
+                        })];
                 }
             });
         });

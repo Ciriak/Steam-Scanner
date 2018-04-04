@@ -35,6 +35,8 @@
     "lodash": "^4.17.5",
     "node-steam-shortcuts": "^1.1.0",
     "object-path": "^0.11.4",
+    "ps-list": "^4.0.0",
+    "recursive-readdir": "^2.2.2",
     "ts-object-path": "^0.1.2",
     "typescript": "^2.7.2",
     "xml2js": "^0.4.19"

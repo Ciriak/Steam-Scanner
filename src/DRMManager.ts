@@ -11,9 +11,10 @@ const helper: SteamerHelpers = new SteamerHelpers();
 const drmList = [
   {
     name: "Uplay",
+    exeName: "UbisoftGameLauncher.exe",
     exePossibleLocations: [
-      "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\UbisoftGameLauncher.exe",
-      "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\UbisoftGameLauncher.exe"
+      "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher",
+      "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher"
     ],
     configProperties: {
       configFilePath: "%home%/AppData/Local/Ubisoft Game Launcher/settings.yml",
@@ -22,9 +23,10 @@ const drmList = [
   },
   {
     name: "Origin",
+    exeName: "Origin.exe",
     exePossibleLocations: [
-      "$drive\\Program Files (x86)\\Origin\\Origin.exe",
-      "$drive\\Programmes\\Origin\\Origin.exe"
+      "$drive\\Program Files (x86)\\Origin",
+      "$drive\\Programmes\\Origin"
     ],
     configProperties: {
       configFilePath: "%home%/AppData/Roaming/Origin/local.xml",
