@@ -18,21 +18,18 @@ export class DRM {
   public isAvailable: boolean;
   public binaryName: string;
   public binaryPossibleLocations: string[] = [];
+  public gamesPossibleLocations: string[] = [];
   public binaryLocation: string;
   public configPath: string;
-  public configProperties: any;
   public gamesInstallDirectory;
-  public games: string[];
+  public games: any[];
 
   constructor(drmItem: any) {
     this.name = drmItem.name;
     this.binaryPossibleLocations = drmItem.binaryPossibleLocations;
+    this.gamesPossibleLocations = drmItem.gamesPossibleLocations;
     this.binaryName = drmItem.binaryName;
-    this.configProperties = drmItem.configProperties;
     this.games = [];
-    this.configPath = helper.parseFilePath(
-      this.configProperties.configFilePath
-    );
   }
 
   public async checkInstallation() {
@@ -60,8 +57,6 @@ export class DRM {
   }
 
   public async getGames() {
-    // be sure to get Games Directory
-    await this.getGamesInstallDirectory();
 
     await this.getGamesDirectories();
 
@@ -72,88 +67,29 @@ export class DRM {
     });
   }
 
-  private async getGamesInstallDirectory() {
-    let configData: any;
-    const propertieAccess = this.configProperties.gamesPathPropertieAccess;
-    const configFileType = path.extname(this.configPath).replace(".", "");
-    const drmRef = this;
-
-    try {
-      configData = fs.readFileSync(this.configPath, "utf-8");
-    } catch (e) {
-      helper.error(e);
-    }
-
-    switch (configFileType) {
-      case "xml":
-        await parseXml(configData, function(err, result) {
-          if (err) {
-            helper.error(err);
-          }
-          drmRef.gamesInstallDirectory = objectPath.get(
-            result,
-            propertieAccess
-          );
-        });
-        break;
-      case "yml":
-        try {
-          const result = yaml.safeLoad(configData);
-          drmRef.gamesInstallDirectory = objectPath.get(
-            result,
-            propertieAccess
-          );
-        } catch (e) {
-          helper.error(e);
-        }
-        break;
-      // unknown config file scenario
-      default:
-        helper.error("[" + this.name + "] ERR_INVALID_CONFIG_EXT");
-        return;
-    }
-
-    // if no game directory propertie found
-    if (!drmRef.gamesInstallDirectory) {
-      helper.error("[" + this.name + "] ERR_INVALID_CONFIG_PROPERTIE_PATH");
-      return;
-    }
-
-    // ensure that the directory specified exist
-    const exists = await fs.pathExists(drmRef.gamesInstallDirectory);
-    // if not
-    if (!exists) {
-      helper.log(
-        "[" + this.name + "] Unable to get games, games directory not found ! (" + drmRef.gamesInstallDirectory + ")"
-      );
-      // unset the propertie
-      drmRef.gamesInstallDirectory = null;
-      helper.error("[" + this.name + "] ERR_SPECIFIED_DIR_DONT_EXIST");
-    }
-
-    return new Promise((resolve) => {
-      resolve();
-    });
-  }
-
   // use the found games directories
   private async getGamesDirectories() {
-    if (!this.gamesInstallDirectory) {
-      return false;
-    }
-    try {
-      const items = fs.readdirSync(this.gamesInstallDirectory);
-      // only keep the directories
-      for (const dir of items) {
-        const currentGameDir = path.normalize(
-          path.join(this.gamesInstallDirectory, dir)
-        );
-        if (fs.lstatSync(currentGameDir).isDirectory()) {
-          this.games.push(currentGameDir);
+
+    const parsedGamesPossibleLocations = await helper.addDrivesToPossibleLocations(this.gamesPossibleLocations);
+
+    for (const gamesPossibleLocation of parsedGamesPossibleLocations) {
+      try {
+        const items = fs.readdirSync(gamesPossibleLocation);
+        // only keep the directories
+        for (const dir of items) {
+          const currentGameDir = path.normalize(
+            path.join(gamesPossibleLocation, dir)
+          );
+          if (fs.lstatSync(currentGameDir).isDirectory()) {
+            this.games.push({
+              directory: currentGameDir
+            });
+          }
         }
+        // skip if the possible game folder don't exist
+      } catch (e) {
+        continue;
       }
-    } catch (e) {
-      helper.error(e);
     }
 
     return new Promise((resolve) => {
@@ -162,19 +98,20 @@ export class DRM {
   }
 
   private async getGamesBinaries() {
-    for (const gameDirectory of this.games) {
+    for (let gameIndex = 0; gameIndex < this.games.length; gameIndex++) {
+      const gameItem = this.games[gameIndex];
       // ignore files named "foo.cs" or files that end in ".html".
-      const filesList = await recursive(gameDirectory);
-      const binariesList = [];
+      const filesList = await recursive(gameItem.directory);
+      const binariesPathList = [];
       for (const fileName of filesList) {
         if (fileName.search(".exe") > -1) {
-          binariesList.push(fileName);
+          binariesPathList.push(fileName);
         }
       }
 
       // if there is only one binaries then its the game binary (will never happend lol)
-      if (binariesList.length === 1) {
-        this.games.push(binariesList[0]);
+      if (binariesPathList.length === 1) {
+        this.games[gameIndex].binary = binariesPathList[0];
         return new Promise((resolve) => {
           resolve();
         });
@@ -185,12 +122,25 @@ export class DRM {
       */
       helper.log("Trying to find the process");
 
-      console.log("retrieving process list...");
-      const v = await psList({
+      helper.log("retrieving process list...");
+      const processList = await psList({
         all: false
       });
-      console.log(v);
-      console.log(v.length + " process found");
+      helper.log(processList.length + " process found");
+
+      processListLoop:
+      for (const processItem of processList) {
+        for (const binaryPath of binariesPathList) {
+          const binary = path.parse(binaryPath);  // full/path/item.exe => item.exe
+          if (processItem.name === binary.base) {
+            // EXE FOUND !!!
+            // add the remaining info
+            this.games[gameIndex].binaryPath = binaryPath;
+            this.games[gameIndex].binary = binary.base;
+            break processListLoop;
+          }
+        }
+      }
     }
 
     return new Promise((resolve) => {

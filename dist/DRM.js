@@ -36,8 +36,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var fs = require("fs-extra");
-var yaml = require("js-yaml");
-var objectPath = require("object-path");
 var path = require("path");
 var psList = require("ps-list");
 var recursive = require("recursive-readdir");
@@ -47,13 +45,13 @@ var helper = new SteamerHelpers_1.SteamerHelpers();
 var parseXml = xml2js_1.parseString;
 var DRM = /** @class */ (function () {
     function DRM(drmItem) {
-        this.exePossibleLocations = [];
+        this.binaryPossibleLocations = [];
+        this.gamesPossibleLocations = [];
         this.name = drmItem.name;
-        this.exePossibleLocations = drmItem.exePossibleLocations;
-        this.exeName = drmItem.exeName;
-        this.configProperties = drmItem.configProperties;
+        this.binaryPossibleLocations = drmItem.binaryPossibleLocations;
+        this.gamesPossibleLocations = drmItem.gamesPossibleLocations;
+        this.binaryName = drmItem.binaryName;
         this.games = [];
-        this.configPath = helper.parseFilePath(this.configProperties.configFilePath);
     }
     DRM.prototype.checkInstallation = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -61,23 +59,23 @@ var DRM = /** @class */ (function () {
             var parsedPossibleLocations;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, helper.addDrivesToPossibleLocations(this.exePossibleLocations)];
+                    case 0: return [4 /*yield*/, helper.addDrivesToPossibleLocations(this.binaryPossibleLocations)];
                     case 1:
                         parsedPossibleLocations = _a.sent();
                         return [2 /*return*/, new Promise(function (resolve) {
                                 // first we locate steam directory
                                 for (var _i = 0, parsedPossibleLocations_1 = parsedPossibleLocations; _i < parsedPossibleLocations_1.length; _i++) {
                                     var loc = parsedPossibleLocations_1[_i];
-                                    loc = path.normalize(path.join(loc, _this.exeName));
+                                    loc = path.normalize(path.join(loc, _this.binaryName));
                                     // try to list all the users in the userdata folder of steam
                                     if (fs.existsSync(loc)) {
-                                        _this.exeLocation = loc;
+                                        _this.binaryLocation = loc;
                                         break;
                                     }
                                 }
-                                if (_this.exeLocation) {
+                                if (_this.binaryLocation) {
                                     _this.isAvailable = true;
-                                    helper.log(_this.name + " located at " + _this.exeLocation);
+                                    helper.log(_this.name + " located at " + _this.binaryLocation);
                                 }
                                 else {
                                     helper.log(_this.name + " not found");
@@ -92,83 +90,12 @@ var DRM = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: 
-                    // be sure to get Games Directory
-                    return [4 /*yield*/, this.getGamesInstallDirectory()];
+                    case 0: return [4 /*yield*/, this.getGamesDirectories()];
                     case 1:
-                        // be sure to get Games Directory
-                        _a.sent();
-                        return [4 /*yield*/, this.getGamesDirectories()];
-                    case 2:
                         _a.sent();
                         return [4 /*yield*/, this.getGamesBinaries()];
-                    case 3:
-                        _a.sent();
-                        return [2 /*return*/, new Promise(function (resolve) {
-                                resolve();
-                            })];
-                }
-            });
-        });
-    };
-    DRM.prototype.getGamesInstallDirectory = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var configData, propertieAccess, configFileType, drmRef, _a, result, exists;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        propertieAccess = this.configProperties.gamesPathPropertieAccess;
-                        configFileType = path.extname(this.configPath).replace(".", "");
-                        drmRef = this;
-                        try {
-                            configData = fs.readFileSync(this.configPath, "utf-8");
-                        }
-                        catch (e) {
-                            helper.error(e);
-                        }
-                        _a = configFileType;
-                        switch (_a) {
-                            case "xml": return [3 /*break*/, 1];
-                            case "yml": return [3 /*break*/, 3];
-                        }
-                        return [3 /*break*/, 4];
-                    case 1: return [4 /*yield*/, parseXml(configData, function (err, result) {
-                            if (err) {
-                                helper.error(err);
-                            }
-                            drmRef.gamesInstallDirectory = objectPath.get(result, propertieAccess);
-                        })];
                     case 2:
-                        _b.sent();
-                        return [3 /*break*/, 5];
-                    case 3:
-                        try {
-                            result = yaml.safeLoad(configData);
-                            drmRef.gamesInstallDirectory = objectPath.get(result, propertieAccess);
-                        }
-                        catch (e) {
-                            helper.error(e);
-                        }
-                        return [3 /*break*/, 5];
-                    case 4:
-                        helper.error("[" + this.name + "] ERR_INVALID_CONFIG_EXT");
-                        return [2 /*return*/];
-                    case 5:
-                        // if no game directory propertie found
-                        if (!drmRef.gamesInstallDirectory) {
-                            helper.error("[" + this.name + "] ERR_INVALID_CONFIG_PROPERTIE_PATH");
-                            return [2 /*return*/];
-                        }
-                        return [4 /*yield*/, fs.pathExists(drmRef.gamesInstallDirectory)];
-                    case 6:
-                        exists = _b.sent();
-                        // if not
-                        if (!exists) {
-                            helper.log("[" + this.name + "] Unable to get games, games directory not found ! (" + drmRef.gamesInstallDirectory + ")");
-                            // unset the propertie
-                            drmRef.gamesInstallDirectory = null;
-                            helper.error("[" + this.name + "] ERR_SPECIFIED_DIR_DONT_EXIST");
-                        }
+                        _a.sent();
                         return [2 /*return*/, new Promise(function (resolve) {
                                 resolve();
                             })];
@@ -179,55 +106,64 @@ var DRM = /** @class */ (function () {
     // use the found games directories
     DRM.prototype.getGamesDirectories = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var items, _i, items_1, dir, currentGameDir;
-            return __generator(this, function (_a) {
-                if (!this.gamesInstallDirectory) {
-                    return [2 /*return*/, false];
-                }
-                try {
-                    items = fs.readdirSync(this.gamesInstallDirectory);
-                    // only keep the directories
-                    for (_i = 0, items_1 = items; _i < items_1.length; _i++) {
-                        dir = items_1[_i];
-                        currentGameDir = path.normalize(path.join(this.gamesInstallDirectory, dir));
-                        if (fs.lstatSync(currentGameDir).isDirectory()) {
-                            this.games.push(currentGameDir);
+            var parsedGamesPossibleLocations, _i, parsedGamesPossibleLocations_1, gamesPossibleLocation, items, _a, items_1, dir, currentGameDir;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, helper.addDrivesToPossibleLocations(this.gamesPossibleLocations)];
+                    case 1:
+                        parsedGamesPossibleLocations = _b.sent();
+                        for (_i = 0, parsedGamesPossibleLocations_1 = parsedGamesPossibleLocations; _i < parsedGamesPossibleLocations_1.length; _i++) {
+                            gamesPossibleLocation = parsedGamesPossibleLocations_1[_i];
+                            try {
+                                items = fs.readdirSync(gamesPossibleLocation);
+                                // only keep the directories
+                                for (_a = 0, items_1 = items; _a < items_1.length; _a++) {
+                                    dir = items_1[_a];
+                                    currentGameDir = path.normalize(path.join(gamesPossibleLocation, dir));
+                                    if (fs.lstatSync(currentGameDir).isDirectory()) {
+                                        this.games.push({
+                                            directory: currentGameDir
+                                        });
+                                    }
+                                }
+                                // skip if the possible game folder don't exist
+                            }
+                            catch (e) {
+                                continue;
+                            }
                         }
-                    }
+                        helper.log(this.games.length + " " + this.name + " game(s) found");
+                        return [2 /*return*/, new Promise(function (resolve) {
+                                resolve();
+                            })];
                 }
-                catch (e) {
-                    helper.error(e);
-                }
-                return [2 /*return*/, new Promise(function (resolve) {
-                        resolve();
-                    })];
             });
         });
     };
     DRM.prototype.getGamesBinaries = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, gameDirectory, filesList, exeList, _b, filesList_1, fileName, v;
+            var gameIndex, gameItem, filesList, binariesPathList, _i, filesList_1, fileName, processList, _a, processList_1, processItem, _b, binariesPathList_1, binaryPath, binary;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _i = 0, _a = this.games;
+                        gameIndex = 0;
                         _c.label = 1;
                     case 1:
-                        if (!(_i < _a.length)) return [3 /*break*/, 5];
-                        gameDirectory = _a[_i];
-                        return [4 /*yield*/, recursive(gameDirectory)];
+                        if (!(gameIndex < this.games.length)) return [3 /*break*/, 5];
+                        gameItem = this.games[gameIndex];
+                        return [4 /*yield*/, recursive(gameItem.directory)];
                     case 2:
                         filesList = _c.sent();
-                        exeList = [];
-                        for (_b = 0, filesList_1 = filesList; _b < filesList_1.length; _b++) {
-                            fileName = filesList_1[_b];
+                        binariesPathList = [];
+                        for (_i = 0, filesList_1 = filesList; _i < filesList_1.length; _i++) {
+                            fileName = filesList_1[_i];
                             if (fileName.search(".exe") > -1) {
-                                exeList.push(fileName);
+                                binariesPathList.push(fileName);
                             }
                         }
-                        // if there is only one exe then its the game binary (will never happend lol)
-                        if (exeList.length === 1) {
-                            this.games.push(exeList[0]);
+                        // if there is only one binaries then its the game binary (will never happend lol)
+                        if (binariesPathList.length === 1) {
+                            this.games[gameIndex].binary = binariesPathList[0];
                             return [2 /*return*/, new Promise(function (resolve) {
                                     resolve();
                                 })];
@@ -236,21 +172,35 @@ var DRM = /** @class */ (function () {
                           Here, we will listen for an active process to have the same name than a binarie found in the game files
                         */
                         helper.log("Trying to find the process");
-                        console.log("retrieving process list...");
+                        helper.log("retrieving process list...");
                         return [4 /*yield*/, psList({
                                 all: false
                             })];
                     case 3:
-                        v = _c.sent();
-                        console.log(v);
-                        console.log(v.length + " process found");
+                        processList = _c.sent();
+                        helper.log(processList.length + " process found");
+                        processListLoop: for (_a = 0, processList_1 = processList; _a < processList_1.length; _a++) {
+                            processItem = processList_1[_a];
+                            for (_b = 0, binariesPathList_1 = binariesPathList; _b < binariesPathList_1.length; _b++) {
+                                binaryPath = binariesPathList_1[_b];
+                                binary = path.parse(binaryPath);
+                                if (processItem.name === binary.base) {
+                                    // EXE FOUND !!!
+                                    this.games[gameIndex].binaryPath = binaryPath;
+                                    this.games[gameIndex].binary = binary.base;
+                                    break processListLoop;
+                                }
+                            }
+                        }
                         _c.label = 4;
                     case 4:
-                        _i++;
+                        gameIndex++;
                         return [3 /*break*/, 1];
-                    case 5: return [2 /*return*/, new Promise(function (resolve) {
-                            resolve();
-                        })];
+                    case 5:
+                        console.log(this.games);
+                        return [2 /*return*/, new Promise(function (resolve) {
+                                resolve();
+                            })];
                 }
             });
         });

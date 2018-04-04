@@ -44,27 +44,27 @@ var helper = new SteamerHelpers_1.SteamerHelpers();
 var drmList = [
     {
         name: "Uplay",
-        exeName: "UbisoftGameLauncher.exe",
-        exePossibleLocations: [
+        binaryName: "UbisoftGameLauncher.exe",
+        binaryPossibleLocations: [
             "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher",
             "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher"
         ],
-        configProperties: {
-            configFilePath: "%home%/AppData/Local/Ubisoft Game Launcher/settings.yml",
-            gamesPathPropertieAccess: "misc.game_installation_path"
-        }
+        gamesPossibleLocations: [
+            "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\games",
+            "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\games"
+        ]
     },
     {
         name: "Origin",
-        exeName: "Origin.exe",
-        exePossibleLocations: [
+        binaryName: "Origin.exe",
+        binaryPossibleLocations: [
             "$drive\\Program Files (x86)\\Origin",
             "$drive\\Programmes\\Origin"
         ],
-        configProperties: {
-            configFilePath: "%home%/AppData/Roaming/Origin/local.xml",
-            gamesPathPropertieAccess: "Settings.Setting.0.$.value"
-        }
+        gamesPossibleLocations: [
+            "$drive\\Program Files (x86)\\Origin Games",
+            "$drive\\Programmes\\Origin Games"
+        ]
     }
 ];
 var DRMManager = /** @class */ (function () {

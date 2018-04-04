@@ -16,10 +16,10 @@ const drmList = [
       "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher",
       "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher"
     ],
-    configProperties: {
-      configFilePath: "%home%/AppData/Local/Ubisoft Game Launcher/settings.yml",
-      gamesPathPropertieAccess: "misc.game_installation_path"
-    }
+    gamesPossibleLocations: [
+      "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\games",
+      "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\games"
+    ]
   },
   {
     name: "Origin",
@@ -29,13 +29,9 @@ const drmList = [
       "$drive\\Programmes\\Origin"
     ],
     gamesPossibleLocations: [
-      "$drive\\Program Files (x86)\\Origin",
-      "$drive\\Programmes\\Origin"
-    ],
-    configProperties: {
-      configFilePath: "%home%/AppData/Roaming/Origin/local.xml",
-      gamesPathPropertieAccess: "Settings.Setting.0.$.value"
-    }
+      "$drive\\Program Files (x86)\\Origin Games",
+      "$drive\\Programmes\\Origin Games"
+    ]
   }
 ];
 
