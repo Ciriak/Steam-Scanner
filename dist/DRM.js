@@ -164,12 +164,10 @@ var DRM = /** @class */ (function () {
                         exists = _b.sent();
                         // if not
                         if (!exists) {
+                            helper.log("[" + this.name + "] Unable to get games, games directory not found ! (" + drmRef.gamesInstallDirectory + ")");
                             // unset the propertie
                             drmRef.gamesInstallDirectory = null;
                             helper.error("[" + this.name + "] ERR_SPECIFIED_DIR_DONT_EXIST");
-                        }
-                        if (!this.gamesInstallDirectory) {
-                            helper.log("[" + this.name + "] Unable to get games, games directory not found !");
                         }
                         return [2 /*return*/, new Promise(function (resolve) {
                                 resolve();
@@ -208,7 +206,7 @@ var DRM = /** @class */ (function () {
     };
     DRM.prototype.getGamesBinaries = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, gameDirectory, exeList, _b, exeList_1, fileName, v;
+            var _i, _a, gameDirectory, filesList, exeList, _b, filesList_1, fileName, v;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -219,13 +217,25 @@ var DRM = /** @class */ (function () {
                         gameDirectory = _a[_i];
                         return [4 /*yield*/, recursive(gameDirectory)];
                     case 2:
-                        exeList = _c.sent();
-                        for (_b = 0, exeList_1 = exeList; _b < exeList_1.length; _b++) {
-                            fileName = exeList_1[_b];
+                        filesList = _c.sent();
+                        exeList = [];
+                        for (_b = 0, filesList_1 = filesList; _b < filesList_1.length; _b++) {
+                            fileName = filesList_1[_b];
                             if (fileName.search(".exe") > -1) {
-                                // console.log(fileName);
+                                exeList.push(fileName);
                             }
                         }
+                        // if there is only one exe then its the game binary (will never happend lol)
+                        if (exeList.length === 1) {
+                            this.games.push(exeList[0]);
+                            return [2 /*return*/, new Promise(function (resolve) {
+                                    resolve();
+                                })];
+                        }
+                        /*
+                          Here, we will listen for an active process to have the same name than a binarie found in the game files
+                        */
+                        helper.log("Trying to find the process");
                         console.log("retrieving process list...");
                         return [4 /*yield*/, psList({
                                 all: false

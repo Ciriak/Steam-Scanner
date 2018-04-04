@@ -16,9 +16,9 @@ const parseXml = parseString;
 export class DRM {
   public name: any;
   public isAvailable: boolean;
-  public exeName: string;
-  public exePossibleLocations: string[] = [];
-  public exeLocation: string;
+  public binaryName: string;
+  public binaryPossibleLocations: string[] = [];
+  public binaryLocation: string;
   public configPath: string;
   public configProperties: any;
   public gamesInstallDirectory;
@@ -26,8 +26,8 @@ export class DRM {
 
   constructor(drmItem: any) {
     this.name = drmItem.name;
-    this.exePossibleLocations = drmItem.exePossibleLocations;
-    this.exeName = drmItem.exeName;
+    this.binaryPossibleLocations = drmItem.binaryPossibleLocations;
+    this.binaryName = drmItem.binaryName;
     this.configProperties = drmItem.configProperties;
     this.games = [];
     this.configPath = helper.parseFilePath(
@@ -37,21 +37,21 @@ export class DRM {
 
   public async checkInstallation() {
     const parsedPossibleLocations: string[] = await helper.addDrivesToPossibleLocations(
-      this.exePossibleLocations
+      this.binaryPossibleLocations
     );
     return new Promise((resolve) => {
       // first we locate steam directory
       for (let loc of parsedPossibleLocations) {
-        loc = path.normalize(path.join(loc, this.exeName));
+        loc = path.normalize(path.join(loc, this.binaryName));
         // try to list all the users in the userdata folder of steam
         if (fs.existsSync(loc)) {
-          this.exeLocation = loc;
+          this.binaryLocation = loc;
           break;
         }
       }
-      if (this.exeLocation) {
+      if (this.binaryLocation) {
         this.isAvailable = true;
-        helper.log(this.name + " located at " + this.exeLocation);
+        helper.log(this.name + " located at " + this.binaryLocation);
       } else {
         helper.log(this.name + " not found");
       }
@@ -123,15 +123,12 @@ export class DRM {
     const exists = await fs.pathExists(drmRef.gamesInstallDirectory);
     // if not
     if (!exists) {
+      helper.log(
+        "[" + this.name + "] Unable to get games, games directory not found ! (" + drmRef.gamesInstallDirectory + ")"
+      );
       // unset the propertie
       drmRef.gamesInstallDirectory = null;
       helper.error("[" + this.name + "] ERR_SPECIFIED_DIR_DONT_EXIST");
-    }
-
-    if (!this.gamesInstallDirectory) {
-      helper.log(
-        "[" + this.name + "] Unable to get games, games directory not found !"
-      );
     }
 
     return new Promise((resolve) => {
@@ -168,16 +165,16 @@ export class DRM {
     for (const gameDirectory of this.games) {
       // ignore files named "foo.cs" or files that end in ".html".
       const filesList = await recursive(gameDirectory);
-      const exeList = [];
+      const binariesList = [];
       for (const fileName of filesList) {
         if (fileName.search(".exe") > -1) {
-          exeList.push(fileName);
+          binariesList.push(fileName);
         }
       }
 
-      // if there is only one exe then its the game binarie (will never hapenned lol)
-      if (exeList.length === 1) {
-        this.games.push(exeList[0]);
+      // if there is only one binaries then its the game binary (will never happend lol)
+      if (binariesList.length === 1) {
+        this.games.push(binariesList[0]);
         return new Promise((resolve) => {
           resolve();
         });

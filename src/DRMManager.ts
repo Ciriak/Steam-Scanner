@@ -11,8 +11,8 @@ const helper: SteamerHelpers = new SteamerHelpers();
 const drmList = [
   {
     name: "Uplay",
-    exeName: "UbisoftGameLauncher.exe",
-    exePossibleLocations: [
+    binaryName: "UbisoftGameLauncher.exe",
+    binaryPossibleLocations: [
       "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher",
       "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher"
     ],
@@ -23,8 +23,12 @@ const drmList = [
   },
   {
     name: "Origin",
-    exeName: "Origin.exe",
-    exePossibleLocations: [
+    binaryName: "Origin.exe",
+    binaryPossibleLocations: [
+      "$drive\\Program Files (x86)\\Origin",
+      "$drive\\Programmes\\Origin"
+    ],
+    gamesPossibleLocations: [
       "$drive\\Program Files (x86)\\Origin",
       "$drive\\Programmes\\Origin"
     ],
