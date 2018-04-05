@@ -85,15 +85,17 @@ var SteamerHelpers = /** @class */ (function () {
             // create a clean config file if don't exist or is corrupted
             configData = this.getCleanConfig();
         }
+        objectPath.ensureExists(configData, key, value);
         objectPath.set(configData, key, value);
         try {
+            console.log(configPath);
             fs.writeJsonSync(configPath, configData);
-            return value;
         }
         catch (e) {
             this.error(e);
             return false;
         }
+        return value;
     };
     SteamerHelpers.prototype.getCleanConfig = function () {
         return { steamDirectory: null, drm: {} };

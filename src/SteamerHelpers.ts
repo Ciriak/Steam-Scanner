@@ -94,14 +94,16 @@ export class SteamerHelpers {
     }
 
     objectPath.ensureExists(configData, key, value);
+    objectPath.set(configData, key, value);
 
     try {
+      console.log(configPath);
       fs.writeJsonSync(configPath, configData);
-      return value;
     } catch (e) {
       this.error(e);
       return false;
     }
+    return value;
   }
 
   private getCleanConfig() {

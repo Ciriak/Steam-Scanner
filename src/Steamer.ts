@@ -115,20 +115,32 @@ export class Steamer {
     When a active process correspond to one of the game binaries, then it is considered as the game main binarie
   */
   private async binariesListener() {
-    const processList = await psList({ all: false });
-    helper.log(processList.length + " process found");
 
-    processListLoop: for (const processItem of processList) {
-      for (const binaryPath of binariesPathList) {
-        const binary = path.parse(binaryPath); // full/path/item.exe => item.exe
-        if (processItem.name === binary.base) {
-          // EXE FOUND !!!
-          // add the remaining info
-          this.games[gameIndex].binaryPath = binaryPath;
-          this.games[gameIndex].binary = binary.base;
-          break processListLoop;
-        }
-      }
-    }
+    //   // we retrieve all waiting binaries
+
+    //   // for heaven !
+    //   const drmList: any = helper.getConfig("drm");
+    //   const watchedBinaries;
+    //   for (const drm of drmList) {
+    //     for (const game of drm.games) {
+
+    //     }
+    //   }
+
+    //   // const processList = await psList({ all: false });
+    //   helper.log(processList.length + " process found");
+
+    //   processListLoop: for (const processItem of processList) {
+    //     for (const binaryPath of binariesPathList) {
+    //       const binary = path.parse(binaryPath); // full/path/item.exe => item.exe
+    //       if (processItem.name === binary.base) {
+    //         // EXE FOUND !!!
+    //         // add the remaining info
+    //         this.games[gameIndex].binaryPath = binaryPath;
+    //         this.games[gameIndex].binary = binary.base;
+    //         break processListLoop;
+    //       }
+    //     }
+    //   }
+    // }
   }
-}

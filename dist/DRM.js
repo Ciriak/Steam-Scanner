@@ -175,12 +175,16 @@ var DRM = /** @class */ (function () {
                             helper.setConfig("drm." + this.name + ".games." + gameItem.name, gameItem);
                             return [3 /*break*/, 3];
                         }
-                        /*
-                          Here, we will listen for an active process to have the same name than a binarie found in the game files
-                          add the game the the listener, things hapened in "Steamer.ts"
-                        */
-                        helper.log("Trying to find the process for " + gameItem.name);
-                        helper.setConfig("drm." + this.name + ".games." + gameItem.name + ".listenedBinaries", binariesPathList);
+                        if (binariesPathList.length > 1) {
+                            helper.setConfig("drm." + this.name + ".games." + gameItem.name, gameItem);
+                            console.log(helper.getConfig("drm." + this.name + ".games"));
+                            /*
+                            Here, we will listen for an active process to have the same name than a binarie found in the game files
+                            add the game the the listener, things hapened in "Steamer.ts"
+                          */
+                            helper.log("Trying to find the process for " + gameItem.name);
+                            helper.setConfig("drm." + this.name + ".games." + gameItem.name + ".listenedBinaries", binariesPathList);
+                        }
                         _a.label = 3;
                     case 3:
                         gameIndex++;

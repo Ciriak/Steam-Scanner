@@ -133,17 +133,27 @@ export class DRM {
         );
         continue;
       }
+      if (binariesPathList.length > 1) {
+        helper.setConfig(
+          "drm." + this.name + ".games." + gameItem.name,
+          gameItem
+        );
 
-      /*
+        console.log(helper.getConfig("drm." + this.name + ".games"));
+
+        /*
         Here, we will listen for an active process to have the same name than a binarie found in the game files
         add the game the the listener, things hapened in "Steamer.ts"
       */
-      helper.log("Trying to find the process for " + gameItem.name);
+        helper.log("Trying to find the process for " + gameItem.name);
 
-      helper.setConfig(
-        "drm." + this.name + ".games." + gameItem.name + ".listenedBinaries",
-        binariesPathList
-      );
+        helper.setConfig(
+          "drm." + this.name + ".games." + gameItem.name + ".listenedBinaries",
+          binariesPathList
+        );
+
+      }
+
     }
 
     return new Promise((resolve) => {
