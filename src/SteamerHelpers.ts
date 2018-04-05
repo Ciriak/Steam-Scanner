@@ -93,7 +93,7 @@ export class SteamerHelpers {
       configData = this.getCleanConfig();
     }
 
-    objectPath.set(configData, key, value);
+    objectPath.ensureExists(configData, key, value);
 
     try {
       fs.writeJsonSync(configPath, configData);
