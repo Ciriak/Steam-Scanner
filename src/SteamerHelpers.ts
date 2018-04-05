@@ -3,6 +3,9 @@ import { app } from "electron";
 import * as fs from "fs-extra";
 import * as path from "path";
 const drivelist = require("drivelist");
+const configPath = path.normalize(
+  path.join(app.getPath("appData"), "Steamer", "config.json")
+);
 
 export class SteamerHelpers {
   /**
@@ -61,5 +64,39 @@ export class SteamerHelpers {
     );
     parsedPath = path.normalize(parsedPath);
     return parsedPath;
+  }
+
+  // retrieve a propertie into the config
+  public getConfig(key: string) {
+    try {
+      // be sure that the file exist
+      fs.ensureFileSync(configPath);
+      const configData = fs.readJsonSync(configPath)[key];
+      return configData;
+    } catch (e) {
+      this.error(e);
+      return false;
+    }
+  }
+
+  // save a propertie into the config
+  public setConfig(key: string, value: any) {
+    let configData: object;
+    try {
+      // be sure that the file exist
+      fs.ensureFileSync(configPath);
+      configData = fs.readJsonSync(configPath);
+    } catch (e) {
+      configData = {};
+    }
+
+    configData[key] = value;
+    try {
+      fs.writeJsonSync(configPath, configData);
+      return value;
+    } catch (e) {
+      this.error(e);
+      return false;
+    }
   }
 }

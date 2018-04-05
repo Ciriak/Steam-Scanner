@@ -46,11 +46,16 @@ export class Steamer {
    * Check if steam is installed
    */
   private async checkSteamInstallation() {
-    console.log("Checking Steam location...");
-    const parsedPossibleSteamLocations: string[] = await helper.addDrivesToPossibleLocations(
-      possibleSteamLocations
-    );
-    return new Promise((resolve) => {
+    helper.log("Checking Steam location...");
+
+    this.steamDirectory = helper.getConfig("steamDirectory");
+
+    // if steam directory not found, try to find it
+    if (!this.steamDirectory) {
+      const parsedPossibleSteamLocations: string[] = await helper.addDrivesToPossibleLocations(
+        possibleSteamLocations
+      );
+
       // first we locate steam directory
       for (const loc of parsedPossibleSteamLocations) {
         // try to list all the users in the userdata folder of steam
@@ -66,33 +71,39 @@ export class Steamer {
         helper.error("ERR_STEAM_NOT_FOUND");
         return;
       }
+    }
 
-      helper.log("Steam directory located at " + this.steamDirectory);
-      helper.log("Looking for steam accounts...");
+    helper.log("Steam directory located at " + this.steamDirectory);
 
-      const userDirectories: string[] = [];
-      const usersDir = path.join(this.steamDirectory, "userdata");
-      const items = fs.readdirSync(usersDir);
+    // save steam location
+    helper.setConfig("steamDirectory", this.steamDirectory);
 
-      // only keep the directories
-      for (const dir of items) {
-        const dirPath = path.join(usersDir, dir);
-        try {
-          if (fs.lstatSync(dirPath).isDirectory()) {
-            userDirectories.push(dirPath);
-          }
-        } catch (e) {
-          helper.error(e);
-          continue;
+    helper.log("Looking for steam accounts...");
+
+    const userDirectories: string[] = [];
+    const usersDir = path.join(this.steamDirectory, "userdata");
+    const items = fs.readdirSync(usersDir);
+
+    // only keep the directories
+    for (const dir of items) {
+      const dirPath = path.join(usersDir, dir);
+      try {
+        if (fs.lstatSync(dirPath).isDirectory()) {
+          userDirectories.push(dirPath);
         }
+      } catch (e) {
+        helper.error(e);
+        continue;
       }
+    }
 
-      helper.log(userDirectories.length + " user(s) found");
+    helper.log(userDirectories.length + " user(s) found");
 
-      for (const userDir of userDirectories) {
-        const userId = path.basename(userDir);
-        const user = new SteamUser(userId, this);
-      }
+    for (const userDir of userDirectories) {
+      const userId = path.basename(userDir);
+      const user = new SteamUser(userId, this);
+    }
+    return new Promise((resolve) => {
       resolve();
     });
   }

@@ -1,8 +1,10 @@
 "use strict";
 exports.__esModule = true;
 var electron_1 = require("electron");
+var fs = require("fs-extra");
 var path = require("path");
 var drivelist = require("drivelist");
+var configPath = path.normalize(path.join(electron_1.app.getPath("appData"), "Steamer", "config.json"));
 var SteamerHelpers = /** @class */ (function () {
     function SteamerHelpers() {
     }
@@ -56,6 +58,40 @@ var SteamerHelpers = /** @class */ (function () {
         );
         parsedPath = path.normalize(parsedPath);
         return parsedPath;
+    };
+    // retrieve a propertie into the config
+    SteamerHelpers.prototype.getConfig = function (key) {
+        try {
+            // be sure that the file exist
+            fs.ensureFileSync(configPath);
+            var configData = fs.readJsonSync(configPath)[key];
+            return configData;
+        }
+        catch (e) {
+            this.error(e);
+            return false;
+        }
+    };
+    // save a propertie into the config
+    SteamerHelpers.prototype.setConfig = function (key, value) {
+        var configData;
+        try {
+            // be sure that the file exist
+            fs.ensureFileSync(configPath);
+            configData = fs.readJsonSync(configPath);
+        }
+        catch (e) {
+            configData = {};
+        }
+        configData[key] = value;
+        try {
+            fs.writeJsonSync(configPath, configData);
+            return value;
+        }
+        catch (e) {
+            this.error(e);
+            return false;
+        }
     };
     return SteamerHelpers;
 }());

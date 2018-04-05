@@ -132,7 +132,6 @@ var DRM = /** @class */ (function () {
                                 continue;
                             }
                         }
-                        helper.log(this.games.length + " " + this.name + " game(s) found");
                         return [2 /*return*/, new Promise(function (resolve) {
                                 resolve();
                             })];
@@ -186,6 +185,7 @@ var DRM = /** @class */ (function () {
                                 binary = path.parse(binaryPath);
                                 if (processItem.name === binary.base) {
                                     // EXE FOUND !!!
+                                    // add the remaining info
                                     this.games[gameIndex].binaryPath = binaryPath;
                                     this.games[gameIndex].binary = binary.base;
                                     break processListLoop;
@@ -196,11 +196,9 @@ var DRM = /** @class */ (function () {
                     case 4:
                         gameIndex++;
                         return [3 /*break*/, 1];
-                    case 5:
-                        console.log(this.games);
-                        return [2 /*return*/, new Promise(function (resolve) {
-                                resolve();
-                            })];
+                    case 5: return [2 /*return*/, new Promise(function (resolve) {
+                            resolve();
+                        })];
                 }
             });
         });

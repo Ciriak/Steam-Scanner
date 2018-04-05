@@ -94,58 +94,63 @@ var Steamer = /** @class */ (function () {
      */
     Steamer.prototype.checkSteamInstallation = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
-            var parsedPossibleSteamLocations;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var parsedPossibleSteamLocations, _i, parsedPossibleSteamLocations_1, loc, dir, userDirectories, usersDir, items, _a, items_1, dir, dirPath, _b, userDirectories_1, userDir, userId, user;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
-                        console.log("Checking Steam location...");
+                        helper.log("Checking Steam location...");
+                        this.steamDirectory = helper.getConfig("steamDirectory");
+                        if (!!this.steamDirectory) return [3 /*break*/, 2];
                         return [4 /*yield*/, helper.addDrivesToPossibleLocations(possibleSteamLocations)];
                     case 1:
-                        parsedPossibleSteamLocations = _a.sent();
+                        parsedPossibleSteamLocations = _c.sent();
+                        // first we locate steam directory
+                        for (_i = 0, parsedPossibleSteamLocations_1 = parsedPossibleSteamLocations; _i < parsedPossibleSteamLocations_1.length; _i++) {
+                            loc = parsedPossibleSteamLocations_1[_i];
+                            // try to list all the users in the userdata folder of steam
+                            try {
+                                dir = path.join(loc, "userdata");
+                                fs.readdirSync(dir);
+                                this.steamDirectory = dir.replace("userdata", "");
+                            }
+                            catch (e) {
+                                continue;
+                            }
+                        }
+                        if (!this.steamDirectory) {
+                            helper.error("ERR_STEAM_NOT_FOUND");
+                            return [2 /*return*/];
+                        }
+                        _c.label = 2;
+                    case 2:
+                        helper.log("Steam directory located at " + this.steamDirectory);
+                        // save steam location
+                        helper.setConfig("steamDirectory", this.steamDirectory);
+                        helper.log("Looking for steam accounts...");
+                        userDirectories = [];
+                        usersDir = path.join(this.steamDirectory, "userdata");
+                        items = fs.readdirSync(usersDir);
+                        // only keep the directories
+                        for (_a = 0, items_1 = items; _a < items_1.length; _a++) {
+                            dir = items_1[_a];
+                            dirPath = path.join(usersDir, dir);
+                            try {
+                                if (fs.lstatSync(dirPath).isDirectory()) {
+                                    userDirectories.push(dirPath);
+                                }
+                            }
+                            catch (e) {
+                                helper.error(e);
+                                continue;
+                            }
+                        }
+                        helper.log(userDirectories.length + " user(s) found");
+                        for (_b = 0, userDirectories_1 = userDirectories; _b < userDirectories_1.length; _b++) {
+                            userDir = userDirectories_1[_b];
+                            userId = path.basename(userDir);
+                            user = new SteamUser_1.SteamUser(userId, this);
+                        }
                         return [2 /*return*/, new Promise(function (resolve) {
-                                // first we locate steam directory
-                                for (var _i = 0, parsedPossibleSteamLocations_1 = parsedPossibleSteamLocations; _i < parsedPossibleSteamLocations_1.length; _i++) {
-                                    var loc = parsedPossibleSteamLocations_1[_i];
-                                    // try to list all the users in the userdata folder of steam
-                                    try {
-                                        var dir = path.join(loc, "userdata");
-                                        fs.readdirSync(dir);
-                                        _this.steamDirectory = dir.replace("userdata", "");
-                                    }
-                                    catch (e) {
-                                        continue;
-                                    }
-                                }
-                                if (!_this.steamDirectory) {
-                                    helper.error("ERR_STEAM_NOT_FOUND");
-                                    return;
-                                }
-                                helper.log("Steam directory located at " + _this.steamDirectory);
-                                helper.log("Looking for steam accounts...");
-                                var userDirectories = [];
-                                var usersDir = path.join(_this.steamDirectory, "userdata");
-                                var items = fs.readdirSync(usersDir);
-                                // only keep the directories
-                                for (var _a = 0, items_1 = items; _a < items_1.length; _a++) {
-                                    var dir = items_1[_a];
-                                    var dirPath = path.join(usersDir, dir);
-                                    try {
-                                        if (fs.lstatSync(dirPath).isDirectory()) {
-                                            userDirectories.push(dirPath);
-                                        }
-                                    }
-                                    catch (e) {
-                                        helper.error(e);
-                                        continue;
-                                    }
-                                }
-                                helper.log(userDirectories.length + " user(s) found");
-                                for (var _b = 0, userDirectories_1 = userDirectories; _b < userDirectories_1.length; _b++) {
-                                    var userDir = userDirectories_1[_b];
-                                    var userId = path.basename(userDir);
-                                    var user = new SteamUser_1.SteamUser(userId, _this);
-                                }
                                 resolve();
                             })];
                 }
