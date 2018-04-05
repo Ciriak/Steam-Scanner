@@ -1,6 +1,7 @@
 declare const Promise: any;
 import { app } from "electron";
 import * as fs from "fs-extra";
+import * as objectPath from "object-path";
 import * as path from "path";
 const drivelist = require("drivelist");
 const configPath = path.normalize(
@@ -59,20 +60,21 @@ export class SteamerHelpers {
     const isolatedOccurence = occurences[0].replace(/%/g, "");
 
     parsedPath = givenPath.replace(
-      occurences[0], // %appdata%
-      app.getPath(isolatedOccurence) // appdata
-    );
+      occurences[0],
+      app.getPath(isolatedOccurence)
+    ); // %appdata% // appdata
     parsedPath = path.normalize(parsedPath);
     return parsedPath;
   }
-
   // retrieve a propertie into the config
+  // key can be an object path
   public getConfig(key: string) {
     try {
       // be sure that the file exist
       fs.ensureFileSync(configPath);
-      const configData = fs.readJsonSync(configPath)[key];
-      return configData;
+      const configData = fs.readJsonSync(configPath);
+      const configDataTarget = objectPath.get(configData, key);
+      return configDataTarget;
     } catch (e) {
       this.error(e);
       return false;
@@ -87,10 +89,12 @@ export class SteamerHelpers {
       fs.ensureFileSync(configPath);
       configData = fs.readJsonSync(configPath);
     } catch (e) {
-      configData = {};
+      // create a clean config file if don't exist or is corrupted
+      configData = this.getCleanConfig();
     }
 
-    configData[key] = value;
+    objectPath.set(configData, key, value);
+
     try {
       fs.writeJsonSync(configPath, configData);
       return value;
@@ -98,5 +102,9 @@ export class SteamerHelpers {
       this.error(e);
       return false;
     }
+  }
+
+  private getCleanConfig() {
+    return { steamDirectory: null, drm: {} };
   }
 }

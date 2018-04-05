@@ -1,6 +1,7 @@
 declare const Promise: any;
 import * as fs from "fs-extra";
 import * as path from "path";
+import * as psList from "ps-list";
 
 import { DRMManager } from "./DRMManager";
 import { SteamerHelpers } from "./SteamerHelpers";
@@ -16,7 +17,7 @@ const helper: SteamerHelpers = new SteamerHelpers();
 const drmManager = new DRMManager();
 
 export class Steamer {
-  public steamDirectory: string;
+  public steamDirectory: any;
   public externalGames: any;
 
   constructor() {
@@ -48,6 +49,7 @@ export class Steamer {
   private async checkSteamInstallation() {
     helper.log("Checking Steam location...");
 
+    // try to get steam directory from the config
     this.steamDirectory = helper.getConfig("steamDirectory");
 
     // if steam directory not found, try to find it
@@ -106,5 +108,27 @@ export class Steamer {
     return new Promise((resolve) => {
       resolve();
     });
+  }
+
+  /* A listener that try to find missing binaries for detected games
+    We have a list of binaries found in the games directories
+    When a active process correspond to one of the game binaries, then it is considered as the game main binarie
+  */
+  private async binariesListener() {
+    const processList = await psList({ all: false });
+    helper.log(processList.length + " process found");
+
+    processListLoop: for (const processItem of processList) {
+      for (const binaryPath of binariesPathList) {
+        const binary = path.parse(binaryPath); // full/path/item.exe => item.exe
+        if (processItem.name === binary.base) {
+          // EXE FOUND !!!
+          // add the remaining info
+          this.games[gameIndex].binaryPath = binaryPath;
+          this.games[gameIndex].binary = binary.base;
+          break processListLoop;
+        }
+      }
+    }
   }
 }

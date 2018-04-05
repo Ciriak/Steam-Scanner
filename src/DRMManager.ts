@@ -46,7 +46,7 @@ export class DRMManager {
       if (drmList.hasOwnProperty(drmName)) {
         const drm = new DRM(drmList[drmName]);
         await drm.checkInstallation();
-        if (drm.isAvailable) {
+        if (drm.binaryLocation) {
           this.detectedDrm.push(drm);
         }
       }

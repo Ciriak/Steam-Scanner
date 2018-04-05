@@ -93,7 +93,7 @@ var DRMManager = /** @class */ (function () {
                         return [4 /*yield*/, drm.checkInstallation()];
                     case 2:
                         _f.sent();
-                        if (drm.isAvailable) {
+                        if (drm.binaryLocation) {
                             this.detectedDrm.push(drm);
                         }
                         _f.label = 3;

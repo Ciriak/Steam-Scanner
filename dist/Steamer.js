@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var fs = require("fs-extra");
 var path = require("path");
+var psList = require("ps-list");
 var DRMManager_1 = require("./DRMManager");
 var SteamerHelpers_1 = require("./SteamerHelpers");
 var SteamUser_1 = require("./SteamUser");
@@ -99,6 +100,7 @@ var Steamer = /** @class */ (function () {
                 switch (_c.label) {
                     case 0:
                         helper.log("Checking Steam location...");
+                        // try to get steam directory from the config
                         this.steamDirectory = helper.getConfig("steamDirectory");
                         if (!!this.steamDirectory) return [3 /*break*/, 2];
                         return [4 /*yield*/, helper.addDrivesToPossibleLocations(possibleSteamLocations)];
@@ -153,6 +155,38 @@ var Steamer = /** @class */ (function () {
                         return [2 /*return*/, new Promise(function (resolve) {
                                 resolve();
                             })];
+                }
+            });
+        });
+    };
+    /* A listener that try to find missing binaries for detected games
+      We have a list of binaries found in the games directories
+      When a active process correspond to one of the game binaries, then it is considered as the game main binarie
+    */
+    Steamer.prototype.binariesListener = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var processList, _i, processList_1, processItem, _a, binariesPathList_1, binaryPath, binary;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, psList({ all: false })];
+                    case 1:
+                        processList = _b.sent();
+                        helper.log(processList.length + " process found");
+                        processListLoop: for (_i = 0, processList_1 = processList; _i < processList_1.length; _i++) {
+                            processItem = processList_1[_i];
+                            for (_a = 0, binariesPathList_1 = binariesPathList; _a < binariesPathList_1.length; _a++) {
+                                binaryPath = binariesPathList_1[_a];
+                                binary = path.parse(binaryPath);
+                                if (processItem.name === binary.base) {
+                                    // EXE FOUND !!!
+                                    // add the remaining info
+                                    this.games[gameIndex].binaryPath = binaryPath;
+                                    this.games[gameIndex].binary = binary.base;
+                                    break processListLoop;
+                                }
+                            }
+                        }
+                        return [2 /*return*/];
                 }
             });
         });
