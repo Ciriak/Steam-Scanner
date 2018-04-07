@@ -74,14 +74,11 @@ var Steamer = /** @class */ (function () {
      */
     Steamer.prototype.updateGames = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _a = this;
-                        return [4 /*yield*/, drmManager.getAllGames()];
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, drmManager.getAllGames()];
                     case 1:
-                        _a.externalGames = _b.sent();
+                        _a.sent();
                         return [2 /*return*/, new Promise(function (resolve) {
                                 resolve();
                             })];

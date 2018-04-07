@@ -55,6 +55,7 @@ export class DRMManager {
     for (const drmIndex in this.detectedDrm) {
       if (drmList.hasOwnProperty(drmIndex)) {
         const drm = this.detectedDrm[drmIndex];
+
         await drm.getGames();
       }
     }

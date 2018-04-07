@@ -48,7 +48,7 @@ var DRM = /** @class */ (function () {
         this.binaryPossibleLocations = drmItem.binaryPossibleLocations;
         this.gamesPossibleLocations = drmItem.gamesPossibleLocations;
         this.binaryName = drmItem.binaryName;
-        this.games = [];
+        this.games = {};
     }
     DRM.prototype.checkInstallation = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -125,7 +125,7 @@ var DRM = /** @class */ (function () {
                                     dir = items_1[_a];
                                     currentGameDir = path.normalize(path.join(gamesPossibleLocation, dir));
                                     if (fs.lstatSync(currentGameDir).isDirectory()) {
-                                        this.games.push({ directory: currentGameDir });
+                                        this.games[dir] = { directory: currentGameDir };
                                     }
                                 }
                                 // skip if the possible game folder don't exist
@@ -143,15 +143,23 @@ var DRM = /** @class */ (function () {
     };
     DRM.prototype.getGamesBinaries = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var gameIndex, gameItem, parsedGamepath, gameConfig, filesList, binariesPathList, _i, filesList_1, fileName;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, _b, _i, gameName, gameItem, parsedGamepath, gameConfig, filesList, binariesPathList, _c, filesList_1, fileName;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
-                        gameIndex = 0;
-                        _a.label = 1;
+                        console.log("a");
+                        console.log(this.games);
+                        _a = [];
+                        for (_b in this.games)
+                            _a.push(_b);
+                        _i = 0;
+                        _d.label = 1;
                     case 1:
-                        if (!(gameIndex < this.games.length)) return [3 /*break*/, 4];
-                        gameItem = this.games[gameIndex];
+                        if (!(_i < _a.length)) return [3 /*break*/, 4];
+                        gameName = _a[_i];
+                        if (!this.games.hasOwnProperty(gameName)) return [3 /*break*/, 3];
+                        gameItem = this.games[gameName];
+                        console.log("b");
                         parsedGamepath = path.parse(gameItem.directory);
                         gameItem.name = parsedGamepath.name;
                         gameConfig = helper.getConfig("drm." + this.name + ".games." + gameItem.name);
@@ -161,17 +169,17 @@ var DRM = /** @class */ (function () {
                         }
                         return [4 /*yield*/, recursive(gameItem.directory)];
                     case 2:
-                        filesList = _a.sent();
+                        filesList = _d.sent();
                         binariesPathList = [];
-                        for (_i = 0, filesList_1 = filesList; _i < filesList_1.length; _i++) {
-                            fileName = filesList_1[_i];
+                        for (_c = 0, filesList_1 = filesList; _c < filesList_1.length; _c++) {
+                            fileName = filesList_1[_c];
                             if (fileName.search(".exe") > -1) {
                                 binariesPathList.push(fileName);
                             }
                         }
                         // if there is only one binaries then its the game binary (will never happend lol)
                         if (binariesPathList.length === 1) {
-                            this.games[gameIndex].binary = binariesPathList[0];
+                            this.games[gameName].binary = binariesPathList[0];
                             helper.setConfig("drm." + this.name + ".games." + gameItem.name, gameItem);
                             return [3 /*break*/, 3];
                         }
@@ -185,9 +193,9 @@ var DRM = /** @class */ (function () {
                             helper.log("Trying to find the process for " + gameItem.name);
                             helper.setConfig("drm." + this.name + ".games." + gameItem.name + ".listenedBinaries", binariesPathList);
                         }
-                        _a.label = 3;
+                        _d.label = 3;
                     case 3:
-                        gameIndex++;
+                        _i++;
                         return [3 /*break*/, 1];
                     case 4: return [2 /*return*/, new Promise(function (resolve) {
                             resolve();

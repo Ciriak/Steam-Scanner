@@ -83,7 +83,7 @@ export class SteamerHelpers {
 
   // save a propertie into the config
   public setConfig(key: string, value: any) {
-    let configData: object;
+    let configData: any;
     try {
       // be sure that the file exist
       fs.ensureFileSync(configPath);
@@ -97,7 +97,6 @@ export class SteamerHelpers {
     objectPath.set(configData, key, value);
 
     try {
-      console.log(configPath);
       fs.writeJsonSync(configPath, configData);
     } catch (e) {
       this.error(e);

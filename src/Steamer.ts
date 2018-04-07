@@ -37,7 +37,7 @@ export class Steamer {
    * Scan for Installed DRM and add them to steam
    */
   public async updateGames() {
-    this.externalGames = await drmManager.getAllGames();
+    await drmManager.getAllGames();
     return new Promise((resolve) => {
       resolve();
     });
@@ -142,5 +142,5 @@ export class Steamer {
     //       }
     //     }
     //   }
-    // }
   }
+}

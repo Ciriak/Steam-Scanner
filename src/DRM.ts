@@ -15,7 +15,7 @@ export class DRM {
   public binaryLocation: string;
   public configPath: string;
   public gamesInstallDirectory;
-  public games: any[];
+  public games: any;
   private binaryPossibleLocations: string[] = [];
   private gamesPossibleLocations: string[] = [];
 
@@ -24,7 +24,7 @@ export class DRM {
     this.binaryPossibleLocations = drmItem.binaryPossibleLocations;
     this.gamesPossibleLocations = drmItem.gamesPossibleLocations;
     this.binaryName = drmItem.binaryName;
-    this.games = [];
+    this.games = {};
   }
 
   public async checkInstallation() {
@@ -84,7 +84,7 @@ export class DRM {
             path.join(gamesPossibleLocation, dir)
           );
           if (fs.lstatSync(currentGameDir).isDirectory()) {
-            this.games.push({ directory: currentGameDir });
+            this.games[dir] = { directory: currentGameDir };
           }
         }
         // skip if the possible game folder don't exist
@@ -99,59 +99,62 @@ export class DRM {
   }
 
   private async getGamesBinaries() {
-    for (let gameIndex = 0; gameIndex < this.games.length; gameIndex++) {
-      const gameItem = this.games[gameIndex];
+    console.log("a");
+    console.log(this.games);
+    for (const gameName in this.games) {
+      if (this.games.hasOwnProperty(gameName)) {
+        const gameItem = this.games[gameName];
+        console.log("b");
+        // set the game name based on his folder
+        const parsedGamepath = path.parse(gameItem.directory);
+        gameItem.name = parsedGamepath.name;
 
-      // set the game name based on his folder
-      const parsedGamepath = path.parse(gameItem.directory);
-      gameItem.name = parsedGamepath.name;
+        const gameConfig: any = helper.getConfig(
+          "drm." + this.name + ".games." + gameItem.name
+        );
 
-      const gameConfig: any = helper.getConfig(
-        "drm." + this.name + ".games." + gameItem.name
-      );
-
-      // if game and his binary are already known => skip
-      if (gameConfig && gameConfig.binarie) {
-        continue;
-      }
-
-      // ignore files named "foo.cs" or files that end in ".html".
-      const filesList = await recursive(gameItem.directory);
-      const binariesPathList = [];
-      for (const fileName of filesList) {
-        if (fileName.search(".exe") > -1) {
-          binariesPathList.push(fileName);
+        // if game and his binary are already known => skip
+        if (gameConfig && gameConfig.binarie) {
+          continue;
         }
-      }
 
-      // if there is only one binaries then its the game binary (will never happend lol)
-      if (binariesPathList.length === 1) {
-        this.games[gameIndex].binary = binariesPathList[0];
-        helper.setConfig(
-          "drm." + this.name + ".games." + gameItem.name,
-          gameItem
-        );
-        continue;
-      }
-      if (binariesPathList.length > 1) {
-        helper.setConfig(
-          "drm." + this.name + ".games." + gameItem.name,
-          gameItem
-        );
+        // ignore files named "foo.cs" or files that end in ".html".
+        const filesList = await recursive(gameItem.directory);
+        const binariesPathList = [];
+        for (const fileName of filesList) {
+          if (fileName.search(".exe") > -1) {
+            binariesPathList.push(fileName);
+          }
+        }
 
-        console.log(helper.getConfig("drm." + this.name + ".games"));
+        // if there is only one binaries then its the game binary (will never happend lol)
+        if (binariesPathList.length === 1) {
+          this.games[gameName].binary = binariesPathList[0];
+          helper.setConfig(
+            "drm." + this.name + ".games." + gameItem.name,
+            gameItem
+          );
+          continue;
+        }
+        if (binariesPathList.length > 1) {
+          helper.setConfig(
+            "drm." + this.name + ".games." + gameItem.name,
+            gameItem
+          );
 
-        /*
-        Here, we will listen for an active process to have the same name than a binarie found in the game files
-        add the game the the listener, things hapened in "Steamer.ts"
-      */
-        helper.log("Trying to find the process for " + gameItem.name);
+          console.log(helper.getConfig("drm." + this.name + ".games"));
 
-        helper.setConfig(
-          "drm." + this.name + ".games." + gameItem.name + ".listenedBinaries",
-          binariesPathList
-        );
+          /*
+          Here, we will listen for an active process to have the same name than a binarie found in the game files
+          add the game the the listener, things hapened in "Steamer.ts"
+        */
+          helper.log("Trying to find the process for " + gameItem.name);
 
+          helper.setConfig(
+            "drm." + this.name + ".games." + gameItem.name + ".listenedBinaries",
+            binariesPathList
+          );
+        }
       }
 
     }
@@ -160,4 +163,5 @@ export class DRM {
       resolve();
     });
   }
+
 }

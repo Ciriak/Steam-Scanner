@@ -88,7 +88,6 @@ var SteamerHelpers = /** @class */ (function () {
         objectPath.ensureExists(configData, key, value);
         objectPath.set(configData, key, value);
         try {
-            console.log(configPath);
             fs.writeJsonSync(configPath, configData);
         }
         catch (e) {
