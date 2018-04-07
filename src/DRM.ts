@@ -99,12 +99,9 @@ export class DRM {
   }
 
   private async getGamesBinaries() {
-    console.log("a");
-    console.log(this.games);
     for (const gameName in this.games) {
       if (this.games.hasOwnProperty(gameName)) {
         const gameItem = this.games[gameName];
-        console.log("b");
         // set the game name based on his folder
         const parsedGamepath = path.parse(gameItem.directory);
         gameItem.name = parsedGamepath.name;
