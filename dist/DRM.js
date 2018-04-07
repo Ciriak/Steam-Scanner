@@ -147,8 +147,6 @@ var DRM = /** @class */ (function () {
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
-                        console.log("a");
-                        console.log(this.games);
                         _a = [];
                         for (_b in this.games)
                             _a.push(_b);
@@ -159,12 +157,11 @@ var DRM = /** @class */ (function () {
                         gameName = _a[_i];
                         if (!this.games.hasOwnProperty(gameName)) return [3 /*break*/, 3];
                         gameItem = this.games[gameName];
-                        console.log("b");
                         parsedGamepath = path.parse(gameItem.directory);
                         gameItem.name = parsedGamepath.name;
-                        gameConfig = helper.getConfig("drm." + this.name + ".games." + gameItem.name);
+                        gameConfig = helper.getConfig("drm." + this.name + ".games." + gameName);
                         // if game and his binary are already known => skip
-                        if (gameConfig && gameConfig.binarie) {
+                        if (gameConfig && gameConfig.binary) {
                             return [3 /*break*/, 3];
                         }
                         return [4 /*yield*/, recursive(gameItem.directory)];
@@ -185,7 +182,6 @@ var DRM = /** @class */ (function () {
                         }
                         if (binariesPathList.length > 1) {
                             helper.setConfig("drm." + this.name + ".games." + gameItem.name, gameItem);
-                            console.log(helper.getConfig("drm." + this.name + ".games"));
                             /*
                             Here, we will listen for an active process to have the same name than a binarie found in the game files
                             add the game the the listener, things hapened in "Steamer.ts"

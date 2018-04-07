@@ -76,7 +76,7 @@ var DRMManager = /** @class */ (function () {
      */
     DRMManager.prototype.getAllGames = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, _b, _i, drmName, drm, _c, _d, _e, drmIndex, drm;
+            var _a, _b, _i, drmName, drm, _c, _d, _e, drmName, drm;
             return __generator(this, function (_f) {
                 switch (_f.label) {
                     case 0:
@@ -108,9 +108,9 @@ var DRMManager = /** @class */ (function () {
                         _f.label = 5;
                     case 5:
                         if (!(_e < _c.length)) return [3 /*break*/, 8];
-                        drmIndex = _c[_e];
-                        if (!drmList.hasOwnProperty(drmIndex)) return [3 /*break*/, 7];
-                        drm = this.detectedDrm[drmIndex];
+                        drmName = _c[_e];
+                        if (!drmList.hasOwnProperty(drmName)) return [3 /*break*/, 7];
+                        drm = this.detectedDrm[drmName];
                         return [4 /*yield*/, drm.getGames()];
                     case 6:
                         _f.sent();
@@ -122,6 +122,20 @@ var DRMManager = /** @class */ (function () {
                             resolve();
                         })];
                 }
+            });
+        });
+    };
+    // set the given binary the main one for the given game and save it
+    DRMManager.prototype.setBinaryForGame = function (drmName, gameName, binaryPath) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                // set the bninary
+                helper.setConfig("drm." + drmName + ".games." + gameName + ".binary", binaryPath);
+                // clean listenedBinaries prtopertie
+                helper.setConfig("drm." + drmName + ".games." + gameName + ".listenedBinaries", null);
+                return [2 /*return*/, new Promise(function (resolve) {
+                        resolve();
+                    })];
             });
         });
     };

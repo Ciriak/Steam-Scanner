@@ -107,11 +107,11 @@ export class DRM {
         gameItem.name = parsedGamepath.name;
 
         const gameConfig: any = helper.getConfig(
-          "drm." + this.name + ".games." + gameItem.name
+          "drm." + this.name + ".games." + gameName
         );
 
         // if game and his binary are already known => skip
-        if (gameConfig && gameConfig.binarie) {
+        if (gameConfig && gameConfig.binary) {
           continue;
         }
 
@@ -138,8 +138,6 @@ export class DRM {
             "drm." + this.name + ".games." + gameItem.name,
             gameItem
           );
-
-          console.log(helper.getConfig("drm." + this.name + ".games"));
 
           /*
           Here, we will listen for an active process to have the same name than a binarie found in the game files

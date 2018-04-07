@@ -69,6 +69,8 @@ export class SteamerHelpers {
   // retrieve a propertie into the config
   // key can be an object path
   public getConfig(key: string) {
+    console.log("GET CONFIG");
+    console.log(key);
     try {
       // be sure that the file exist
       fs.ensureFileSync(configPath);

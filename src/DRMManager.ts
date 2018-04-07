@@ -52,14 +52,25 @@ export class DRMManager {
       }
     }
 
-    for (const drmIndex in this.detectedDrm) {
-      if (drmList.hasOwnProperty(drmIndex)) {
-        const drm = this.detectedDrm[drmIndex];
+    for (const drmName in this.detectedDrm) {
+      if (drmList.hasOwnProperty(drmName)) {
+        const drm = this.detectedDrm[drmName];
 
         await drm.getGames();
       }
     }
 
+    return new Promise((resolve) => {
+      resolve();
+    });
+  }
+
+  // set the given binary the main one for the given game and save it
+  public async setBinaryForGame(drmName: string, gameName: string, binaryPath: string) {
+    // set the bninary
+    helper.setConfig("drm." + drmName + ".games." + gameName + ".binary", binaryPath);
+    // clean listenedBinaries prtopertie
+    helper.setConfig("drm." + drmName + ".games." + gameName + ".listenedBinaries", null);
     return new Promise((resolve) => {
       resolve();
     });

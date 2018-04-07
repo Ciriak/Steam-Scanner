@@ -61,6 +61,8 @@ var SteamerHelpers = /** @class */ (function () {
     // retrieve a propertie into the config
     // key can be an object path
     SteamerHelpers.prototype.getConfig = function (key) {
+        console.log("GET CONFIG");
+        console.log(key);
         try {
             // be sure that the file exist
             fs.ensureFileSync(configPath);
