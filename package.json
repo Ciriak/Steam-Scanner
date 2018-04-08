@@ -37,6 +37,7 @@
     "object-path": "^0.11.4",
     "process-list": "^1.2.2",
     "recursive-readdir": "^2.2.2",
+    "steam-shortcut-editor": "^3.1.1",
     "ts-object-path": "^0.1.2",
     "typescript": "^2.7.2",
     "xml2js": "^0.4.19"

@@ -39,6 +39,7 @@ var fs = require("fs-extra");
 var _ = require("lodash");
 var path = require("path");
 var snapshot = require("process-list").snapshot;
+var timers_1 = require("timers");
 var DRMManager_1 = require("./DRMManager");
 var SteamerHelpers_1 = require("./SteamerHelpers");
 var SteamUser_1 = require("./SteamUser");
@@ -46,29 +47,53 @@ var possibleSteamLocations = [
     "$drive\\Program Files (x86)\\Steam",
     "$drive\\Programmes\\Steam"
 ];
-var shortcutsConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
+var shortcusConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
+var defaultCheckInterval = (5 * 60) * 1000; // 5min
 var helper = new SteamerHelpers_1.SteamerHelpers();
 var drmManager = new DRMManager_1.DRMManager();
+var binariesCheckerInterval;
+var binaryCheckerCount = 0;
+var maxBinaryChecking = 10;
 var Steamer = /** @class */ (function () {
     function Steamer() {
+        var _this = this;
+        this.steamUsers = [];
+        var checkInterval = helper.getConfig("checkInterval");
+        // set default value for check interval and save it
+        if (!checkInterval) {
+            checkInterval = defaultCheckInterval;
+            helper.setConfig("checkInterval", checkInterval);
+        }
         this.init();
+        setInterval(function () { return _this.init(); }, checkInterval);
     }
     Steamer.prototype.init = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
+            var checkInterval;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.checkSteamInstallation()];
+                    case 0:
+                        checkInterval = helper.getConfig("checkInterval");
+                        // set default value for check interval and save it
+                        if (!checkInterval) {
+                            checkInterval = defaultCheckInterval;
+                            helper.setConfig("checkInterval", checkInterval);
+                        }
+                        return [4 /*yield*/, this.checkSteamInstallation()];
                     case 1:
                         _a.sent();
                         return [4 /*yield*/, this.updateGames()];
                     case 2:
                         _a.sent();
-                        helper.log("Init done !");
-                        return [4 /*yield*/, this.binariesListener()];
+                        return [4 /*yield*/, this.updateShortcuts()];
                     case 3:
                         _a.sent();
-                        setInterval(function () { return _this.binariesListener(); }, 1000 * 60); // every min
+                        return [4 /*yield*/, this.binariesListener()];
+                    case 4:
+                        _a.sent();
+                        timers_1.clearInterval(binariesCheckerInterval);
+                        binariesCheckerInterval = setInterval(function () { return _this.binariesListener(); }, 10 * 1000); // every 10 sec - 10 times
                         return [2 /*return*/, new Promise(function (resolve) {
                                 resolve();
                             })];
@@ -154,6 +179,7 @@ var Steamer = /** @class */ (function () {
                             userDir = userDirectories_1[_b];
                             userId = path.basename(userDir);
                             user = new SteamUser_1.SteamUser(userId, this);
+                            this.steamUsers.push(user);
                         }
                         return [2 /*return*/, new Promise(function (resolve) {
                                 resolve();
@@ -172,6 +198,12 @@ var Steamer = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
+                        binaryCheckerCount++;
+                        // clear the scan interval if this the 10th time
+                        if (binaryCheckerCount > maxBinaryChecking) {
+                            timers_1.clearInterval(binariesCheckerInterval);
+                            binaryCheckerCount = 0;
+                        }
                         drmList = helper.getConfig("drm");
                         watchedItems = [];
                         // references all watched binaries on all found games
@@ -209,34 +241,63 @@ var Steamer = /** @class */ (function () {
                                     resolve();
                                 })];
                         }
+                        helper.log("Scanning process... [" + binaryCheckerCount + "/" + maxBinaryChecking + "]");
                         return [4 /*yield*/, snapshot("cpu", "name")];
                     case 1:
                         processList = _c.sent();
                         // order by cpu usage for perf reason (shorten the loop)
                         processList = _.orderBy(processList, "cpu", "desc");
-                        helper.log(processList.length + " process found");
+                        helper.log(processList.length + " process found, looking for games...");
                         gameBinariesFound = [];
                         _b = 0, watchedItems_1 = watchedItems;
                         _c.label = 2;
                     case 2:
-                        if (!(_b < watchedItems_1.length)) return [3 /*break*/, 5];
+                        if (!(_b < watchedItems_1.length)) return [3 /*break*/, 6];
                         item = watchedItems_1[_b];
                         // skip if the binary of the game has already been found
                         if (gameBinariesFound.indexOf(item.game.name) > -1) {
-                            return [3 /*break*/, 4];
+                            return [3 /*break*/, 5];
                         }
                         binaryProcessIndex = _.findIndex(processList, { name: item.binary });
-                        if (!(binaryProcessIndex > -1)) return [3 /*break*/, 4];
+                        if (!(binaryProcessIndex > -1)) return [3 /*break*/, 5];
                         helper.log("Process found for " + item.game.name + " ! => " + item.binary);
                         return [4 /*yield*/, drmManager.setBinaryForGame(item.drm.name, item.game.name, item.binaryPath)];
                     case 3:
                         _c.sent();
                         gameBinariesFound.push(item.game.name);
-                        _c.label = 4;
+                        return [4 /*yield*/, this.updateShortcuts()];
                     case 4:
+                        _c.sent();
+                        _c.label = 5;
+                    case 5:
                         _b++;
                         return [3 /*break*/, 2];
-                    case 5: return [2 /*return*/, new Promise(function (resolve) {
+                    case 6: return [2 /*return*/, new Promise(function (resolve) {
+                            resolve();
+                        })];
+                }
+            });
+        });
+    };
+    Steamer.prototype.updateShortcuts = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _i, _a, steamUser;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _i = 0, _a = this.steamUsers;
+                        _b.label = 1;
+                    case 1:
+                        if (!(_i < _a.length)) return [3 /*break*/, 4];
+                        steamUser = _a[_i];
+                        return [4 /*yield*/, steamUser.updateShortcuts()];
+                    case 2:
+                        _b.sent();
+                        _b.label = 3;
+                    case 3:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 4: return [2 /*return*/, new Promise(function (resolve) {
                             resolve();
                         })];
                 }

@@ -131,7 +131,6 @@ var DRMManager = /** @class */ (function () {
             return __generator(this, function (_a) {
                 // set the bninary
                 helper.setConfig("drm." + drmName + ".games." + gameName + ".binary", binaryPath);
-                console.log("SETTING BINARY");
                 // clean listenedBinaries prtopertie
                 helper.setConfig("drm." + drmName + ".games." + gameName + ".listenedBinaries", null);
                 return [2 /*return*/, new Promise(function (resolve) {

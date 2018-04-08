@@ -92,6 +92,7 @@ export class SteamerHelpers {
       configData = fs.readJsonSync(configPath);
     } catch (e) {
       // create a clean config file if don't exist or is corrupted
+      this.log("WARNING - corrupted or invalid config file - creating a clean config file...");
       configData = this.getCleanConfig();
     }
 

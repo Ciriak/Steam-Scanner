@@ -4,6 +4,7 @@ import * as _ from "lodash";
 import * as path from "path";
 const { snapshot } = require("process-list");
 
+import { clearInterval } from "timers";
 import { DRMManager } from "./DRMManager";
 import { SteamerHelpers } from "./SteamerHelpers";
 import { SteamUser } from "./SteamUser";
@@ -13,24 +14,46 @@ const possibleSteamLocations = [
   "$drive\\Programmes\\Steam"
 ];
 
-const shortcutsConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
+const shortcusConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
+const defaultCheckInterval: number = (5 * 60) * 1000; // 5min
 const helper: SteamerHelpers = new SteamerHelpers();
 const drmManager = new DRMManager();
+let binariesCheckerInterval: any;
+let binaryCheckerCount: number = 0;
+const maxBinaryChecking: number = 10;
 
 export class Steamer {
   public steamDirectory: any;
   public externalGames: any;
+  public steamUsers: any[] = [];
 
   constructor() {
+    let checkInterval: any = helper.getConfig("checkInterval");
+    // set default value for check interval and save it
+
+    if (!checkInterval) {
+      checkInterval = defaultCheckInterval;
+      helper.setConfig("checkInterval", checkInterval);
+    }
     this.init();
+    setInterval(() => this.init(), checkInterval);
   }
 
   public async init() {
+    let checkInterval: any = helper.getConfig("checkInterval");
+    // set default value for check interval and save it
+
+    if (!checkInterval) {
+      checkInterval = defaultCheckInterval;
+      helper.setConfig("checkInterval", checkInterval);
+    }
+
     await this.checkSteamInstallation();
     await this.updateGames();
-    helper.log("Init done !");
+    await this.updateShortcuts();
     await this.binariesListener();
-    setInterval(() => this.binariesListener(), 1000 * 60);  // every min
+    clearInterval(binariesCheckerInterval);
+    binariesCheckerInterval = setInterval(() => this.binariesListener(), 10 * 1000);  // every 10 sec - 10 times
     return new Promise((resolve) => {
       resolve();
     });
@@ -107,6 +130,7 @@ export class Steamer {
     for (const userDir of userDirectories) {
       const userId = path.basename(userDir);
       const user = new SteamUser(userId, this);
+      this.steamUsers.push(user);
     }
     return new Promise((resolve) => {
       resolve();
@@ -118,6 +142,12 @@ export class Steamer {
     When a active process correspond to one of the game binaries, then it is considered as the game main binarie
   */
   private async binariesListener() {
+    binaryCheckerCount++;
+    // clear the scan interval if this the 10th time
+    if (binaryCheckerCount > maxBinaryChecking) {
+      clearInterval(binariesCheckerInterval);
+      binaryCheckerCount = 0;
+    }
     // we retrieve all waiting binaries
 
     //  heaven of for !
@@ -163,12 +193,14 @@ export class Steamer {
       });
     }
 
+    helper.log("Scanning process... [" + binaryCheckerCount + "/" + maxBinaryChecking + "]");
+
     // retrieve the list of all current active process
     let processList = await snapshot("cpu", "name");
 
     // order by cpu usage for perf reason (shorten the loop)
     processList = _.orderBy(processList, "cpu", "desc");
-    helper.log(processList.length + " process found");
+    helper.log(processList.length + " process found, looking for games...");
 
     // when a game binary is found, we add it to this array
     // this allow to skip the loop if needed
@@ -189,9 +221,20 @@ export class Steamer {
         helper.log("Process found for " + item.game.name + " ! => " + item.binary);
         await drmManager.setBinaryForGame(item.drm.name, item.game.name, item.binaryPath);
         gameBinariesFound.push(item.game.name);
+        await this.updateShortcuts();
       }
     }
 
+    return new Promise((resolve) => {
+      resolve();
+    });
+  }
+
+  private async updateShortcuts() {
+    // update the shortcuts for all found user
+    for (const steamUser of this.steamUsers) {
+      await steamUser.updateShortcuts();
+    }
     return new Promise((resolve) => {
       resolve();
     });
