@@ -49,6 +49,7 @@ export class Steamer {
     }
 
     await this.checkSteamInstallation();
+    await helper.checkArgv(this);
     await this.updateGames();
     await this.updateShortcuts();
     await this.binariesListener();
@@ -232,8 +233,10 @@ export class Steamer {
 
   private async updateShortcuts() {
     // update the shortcuts for all found user
+    let isFirstInstance: boolean = true;
     for (const steamUser of this.steamUsers) {
-      await steamUser.updateShortcuts();
+      await steamUser.updateShortcuts(isFirstInstance);
+      isFirstInstance = false;
     }
     return new Promise((resolve) => {
       resolve();

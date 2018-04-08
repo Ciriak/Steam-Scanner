@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var _ = require("lodash");
+var notifier = require("node-notifier");
 var path = require("path");
 var shortcut = require("steam-shortcut-editor");
 var SteamerHelpers_1 = require("./SteamerHelpers");
@@ -46,62 +47,68 @@ var SteamUser = /** @class */ (function () {
         this.steamerInstance = steamer;
         this.initUser();
     }
-    SteamUser.prototype.updateShortcuts = function () {
+    // isFirstInstance : used in case of multiple users, only the first instance send log and notifications
+    // this prevent spam (ex : 6 notification because there is 6 steam accounts)
+    SteamUser.prototype.updateShortcuts = function (isFirstInstance) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
-            var addedShortcuts;
             return __generator(this, function (_a) {
-                addedShortcuts = 0;
-                shortcut.parseFile(this.shortcutsFilePath, function (err, shortcutData) {
-                    if (err) {
-                        helper.error(err);
-                        return new Promise(function (resolve) {
-                            resolve();
-                        });
-                    }
-                    var drmList = helper.getConfig("drm");
-                    for (var drmName in drmList) {
-                        if (drmList.hasOwnProperty(drmName)) {
-                            var drm = drmList[drmName];
-                            for (var gameName in drm.games) {
-                                if (drm.games.hasOwnProperty(gameName)) {
-                                    var game = drm.games[gameName];
-                                    // skip if the binary of the game in unknown
-                                    if (!game.binary) {
-                                        continue;
+                return [2 /*return*/, new Promise(function (resolve) {
+                        var addedShortcuts = 0;
+                        shortcut.parseFile(_this.shortcutsFilePath, function (err, shortcutData) {
+                            // if can't parse (ex: shortcut file don't exist) , create a clean object
+                            if (err || !shortcutData || !shortcutData.shortcuts) {
+                                shortcutData = {
+                                    shortcuts: []
+                                };
+                            }
+                            var drmList = helper.getConfig("drm");
+                            for (var drmName in drmList) {
+                                if (drmList.hasOwnProperty(drmName)) {
+                                    var drm = drmList[drmName];
+                                    for (var gameName in drm.games) {
+                                        if (drm.games.hasOwnProperty(gameName)) {
+                                            var game = drm.games[gameName];
+                                            // skip if the binary of the game in unknown
+                                            if (!game.binary) {
+                                                continue;
+                                            }
+                                            // check if the game is already in the steam shortcuts
+                                            var gameShortcutIndex = _.findIndex(shortcutData.shortcuts, { exe: game.binary });
+                                            // skip this game
+                                            if (gameShortcutIndex > -1) {
+                                                continue;
+                                            }
+                                            if (isFirstInstance) {
+                                                helper.log("Added a shortcut for " + game.name);
+                                                notifier.notify({
+                                                    title: game.name,
+                                                    message: "This game has been added to your game library, please restart Steam"
+                                                });
+                                            }
+                                            shortcutData.shortcuts.push({
+                                                exe: game.binary,
+                                                tags: [drm.name],
+                                                appName: game.name,
+                                                StartDir: game.directory
+                                            });
+                                            addedShortcuts++;
+                                        }
                                     }
-                                    // check if the game is already in the steam shortcuts
-                                    var gameShortcutIndex = _.findIndex(shortcutData.shortcuts, { exe: game.binary });
-                                    // skip this game
-                                    if (gameShortcutIndex > -1) {
-                                        continue;
-                                    }
-                                    helper.log("Added a shortcut for " + game.name);
-                                    shortcutData.shortcuts.push({
-                                        exe: game.binary,
-                                        tags: [drm.name],
-                                        appName: game.name,
-                                        StartDir: game.directory
-                                    });
-                                    addedShortcuts++;
                                 }
                             }
-                        }
-                    }
-                    shortcut.writeFile(_this.shortcutsFilePath, shortcutData, function (errW) {
-                        if (errW) {
-                            helper.error(errW);
-                            return new Promise(function (resolve) {
-                                resolve();
+                            shortcut.writeFile(_this.shortcutsFilePath, shortcutData, function (errW) {
+                                if (errW) {
+                                    helper.error(errW);
+                                    return resolve();
+                                }
                             });
-                        }
-                    });
-                });
-                if (addedShortcuts > 0) {
-                    helper.log(addedShortcuts + " shortcut(s) added, Steam restart required !");
-                }
-                return [2 /*return*/, new Promise(function (resolve) {
-                        resolve();
+                            if (addedShortcuts > 0 && isFirstInstance) {
+                                helper.log(addedShortcuts + " shortcut(s) added, Steam restart required !");
+                            }
+                            return resolve();
+                        });
+                        return resolve();
                     })];
             });
         });

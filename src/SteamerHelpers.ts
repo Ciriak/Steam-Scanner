@@ -4,6 +4,8 @@ import * as fs from "fs-extra";
 import * as objectPath from "object-path";
 import * as path from "path";
 const drivelist = require("drivelist");
+import { Steamer } from "./Steamer";
+import { SteamUser } from "./SteamUser";
 const configPath = path.normalize(
   path.join(app.getPath("appData"), "Steamer", "config.json")
 );
@@ -106,6 +108,41 @@ export class SteamerHelpers {
       return false;
     }
     return value;
+  }
+
+  public async checkArgv(steamerInstance: Steamer) {
+    const argv = process.argv;
+    if (argv.indexOf("--clean") > -1) {
+      await this.clean(steamerInstance);
+    }
+    return new Promise((resolve) => {
+      resolve();
+    });
+  }
+
+  // reset shortcuts & config
+  public async clean(steamerInstance: Steamer) {
+    // remove the shortcut file for each user
+    for (const steamUser of steamerInstance.steamUsers) {
+      try {
+        fs.removeSync(steamUser.shortcutsFilePath);
+      } catch (e) {
+
+        continue;
+      }
+    }
+
+    try {
+      fs.removeSync(configPath);
+    } catch (e) {
+      this.error(e);
+    }
+
+    this.log("=== Config and shortcuts cleaned ===");
+
+    return new Promise((resolve) => {
+      resolve();
+    });
   }
 
   private getCleanConfig() {

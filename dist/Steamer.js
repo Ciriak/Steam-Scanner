@@ -83,14 +83,17 @@ var Steamer = /** @class */ (function () {
                         return [4 /*yield*/, this.checkSteamInstallation()];
                     case 1:
                         _a.sent();
-                        return [4 /*yield*/, this.updateGames()];
+                        return [4 /*yield*/, helper.checkArgv(this)];
                     case 2:
                         _a.sent();
-                        return [4 /*yield*/, this.updateShortcuts()];
+                        return [4 /*yield*/, this.updateGames()];
                     case 3:
                         _a.sent();
-                        return [4 /*yield*/, this.binariesListener()];
+                        return [4 /*yield*/, this.updateShortcuts()];
                     case 4:
+                        _a.sent();
+                        return [4 /*yield*/, this.binariesListener()];
+                    case 5:
                         _a.sent();
                         timers_1.clearInterval(binariesCheckerInterval);
                         binariesCheckerInterval = setInterval(function () { return _this.binariesListener(); }, 10 * 1000); // every 10 sec - 10 times
@@ -281,18 +284,20 @@ var Steamer = /** @class */ (function () {
     };
     Steamer.prototype.updateShortcuts = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, steamUser;
+            var isFirstInstance, _i, _a, steamUser;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
+                        isFirstInstance = true;
                         _i = 0, _a = this.steamUsers;
                         _b.label = 1;
                     case 1:
                         if (!(_i < _a.length)) return [3 /*break*/, 4];
                         steamUser = _a[_i];
-                        return [4 /*yield*/, steamUser.updateShortcuts()];
+                        return [4 /*yield*/, steamUser.updateShortcuts(isFirstInstance)];
                     case 2:
                         _b.sent();
+                        isFirstInstance = false;
                         _b.label = 3;
                     case 3:
                         _i++;
