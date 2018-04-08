@@ -61,13 +61,12 @@ var SteamerHelpers = /** @class */ (function () {
     // retrieve a propertie into the config
     // key can be an object path
     SteamerHelpers.prototype.getConfig = function (key) {
-        console.log("GET CONFIG");
-        console.log(key);
         try {
             // be sure that the file exist
             fs.ensureFileSync(configPath);
             var configData = fs.readJsonSync(configPath);
-            var configDataTarget = objectPath.get(configData, key);
+            var parsedKey = key.split(".");
+            var configDataTarget = objectPath.get(configData, parsedKey);
             return configDataTarget;
         }
         catch (e) {
@@ -78,6 +77,7 @@ var SteamerHelpers = /** @class */ (function () {
     // save a propertie into the config
     SteamerHelpers.prototype.setConfig = function (key, value) {
         var configData;
+        var parsedKey = key.split(".");
         try {
             // be sure that the file exist
             fs.ensureFileSync(configPath);
@@ -87,8 +87,8 @@ var SteamerHelpers = /** @class */ (function () {
             // create a clean config file if don't exist or is corrupted
             configData = this.getCleanConfig();
         }
-        objectPath.ensureExists(configData, key, value);
-        objectPath.set(configData, key, value);
+        objectPath.ensureExists(configData, parsedKey, value);
+        objectPath.set(configData, parsedKey, value);
         try {
             fs.writeJsonSync(configPath, configData);
         }

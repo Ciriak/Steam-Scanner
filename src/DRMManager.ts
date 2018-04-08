@@ -69,6 +69,7 @@ export class DRMManager {
   public async setBinaryForGame(drmName: string, gameName: string, binaryPath: string) {
     // set the bninary
     helper.setConfig("drm." + drmName + ".games." + gameName + ".binary", binaryPath);
+    console.log("SETTING BINARY")
     // clean listenedBinaries prtopertie
     helper.setConfig("drm." + drmName + ".games." + gameName + ".listenedBinaries", null);
     return new Promise((resolve) => {

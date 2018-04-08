@@ -38,7 +38,7 @@ exports.__esModule = true;
 var fs = require("fs-extra");
 var _ = require("lodash");
 var path = require("path");
-var psList = require("ps-list");
+var snapshot = require("process-list").snapshot;
 var DRMManager_1 = require("./DRMManager");
 var SteamerHelpers_1 = require("./SteamerHelpers");
 var SteamUser_1 = require("./SteamUser");
@@ -68,7 +68,7 @@ var Steamer = /** @class */ (function () {
                         return [4 /*yield*/, this.binariesListener()];
                     case 3:
                         _a.sent();
-                        setInterval(function () { return _this.binariesListener(); }, 5000);
+                        setInterval(function () { return _this.binariesListener(); }, 1000 * 60); // every min
                         return [2 /*return*/, new Promise(function (resolve) {
                                 resolve();
                             })];
@@ -168,65 +168,75 @@ var Steamer = /** @class */ (function () {
     */
     Steamer.prototype.binariesListener = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var drmList, watchedBinaries, processList, _a, _b, _i, drmName, drm, _c, _d, _e, gameName, game, _f, _g, binaryPath, parsedBinarypath, binary, binaryProcessIndex;
-            return __generator(this, function (_h) {
-                switch (_h.label) {
+            var drmList, watchedItems, drmName, drm, gameName, game, _i, _a, binaryPath, parsedBinarypath, binary, processList, gameBinariesFound, _b, watchedItems_1, item, binaryProcessIndex;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
-                        helper.log("Scanning process...");
                         drmList = helper.getConfig("drm");
-                        watchedBinaries = [];
-                        return [4 /*yield*/, psList({ all: false })];
-                    case 1:
-                        processList = _h.sent();
-                        helper.log(processList.length + " process found");
-                        _a = [];
-                        for (_b in drmList)
-                            _a.push(_b);
-                        _i = 0;
-                        _h.label = 2;
-                    case 2:
-                        if (!(_i < _a.length)) return [3 /*break*/, 9];
-                        drmName = _a[_i];
-                        if (!drmList.hasOwnProperty(drmName)) return [3 /*break*/, 8];
-                        drm = drmList[drmName];
-                        _c = [];
-                        for (_d in drm.games)
-                            _c.push(_d);
-                        _e = 0;
-                        _h.label = 3;
-                    case 3:
-                        if (!(_e < _c.length)) return [3 /*break*/, 8];
-                        gameName = _c[_e];
-                        if (!drm.games.hasOwnProperty(gameName)) return [3 /*break*/, 7];
-                        game = drm.games[gameName];
-                        // skip if no binary is watched
-                        if (!game.listenedBinaries) {
-                            return [3 /*break*/, 7];
+                        watchedItems = [];
+                        // references all watched binaries on all found games
+                        for (drmName in drmList) {
+                            if (drmList.hasOwnProperty(drmName)) {
+                                drm = drmList[drmName];
+                                // aLl games of a drm
+                                for (gameName in drm.games) {
+                                    if (drm.games.hasOwnProperty(gameName)) {
+                                        game = drm.games[gameName];
+                                        // skip if no binary is watched
+                                        if (!game.listenedBinaries) {
+                                            continue;
+                                        }
+                                        // all binaries watched for the current game
+                                        for (_i = 0, _a = game.listenedBinaries; _i < _a.length; _i++) {
+                                            binaryPath = _a[_i];
+                                            parsedBinarypath = path.parse(binaryPath);
+                                            binary = parsedBinarypath.base;
+                                            // add the watched item info to the global list
+                                            watchedItems.push({
+                                                drm: drm,
+                                                game: game,
+                                                binary: binary,
+                                                binaryPath: binaryPath
+                                            });
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        _f = 0, _g = game.listenedBinaries;
-                        _h.label = 4;
+                        // stop if no items watched
+                        if (watchedItems.length === 0) {
+                            return [2 /*return*/, new Promise(function (resolve) {
+                                    resolve();
+                                })];
+                        }
+                        return [4 /*yield*/, snapshot("cpu", "name")];
+                    case 1:
+                        processList = _c.sent();
+                        // order by cpu usage for perf reason (shorten the loop)
+                        processList = _.orderBy(processList, "cpu", "desc");
+                        helper.log(processList.length + " process found");
+                        gameBinariesFound = [];
+                        _b = 0, watchedItems_1 = watchedItems;
+                        _c.label = 2;
+                    case 2:
+                        if (!(_b < watchedItems_1.length)) return [3 /*break*/, 5];
+                        item = watchedItems_1[_b];
+                        // skip if the binary of the game has already been found
+                        if (gameBinariesFound.indexOf(item.game.name) > -1) {
+                            return [3 /*break*/, 4];
+                        }
+                        binaryProcessIndex = _.findIndex(processList, { name: item.binary });
+                        if (!(binaryProcessIndex > -1)) return [3 /*break*/, 4];
+                        helper.log("Process found for " + item.game.name + " ! => " + item.binary);
+                        return [4 /*yield*/, drmManager.setBinaryForGame(item.drm.name, item.game.name, item.binaryPath)];
+                    case 3:
+                        _c.sent();
+                        gameBinariesFound.push(item.game.name);
+                        _c.label = 4;
                     case 4:
-                        if (!(_f < _g.length)) return [3 /*break*/, 7];
-                        binaryPath = _g[_f];
-                        parsedBinarypath = path.parse(binaryPath);
-                        binary = parsedBinarypath.base;
-                        binaryProcessIndex = _.findIndex(processList, { cmd: binary });
-                        if (!(binaryProcessIndex > -1)) return [3 /*break*/, 6];
-                        helper.log("Process found for " + gameName + " ! => " + binary);
-                        return [4 /*yield*/, drmManager.setBinaryForGame(drmName, gameName, binaryPath)];
-                    case 5:
-                        _h.sent();
-                        return [3 /*break*/, 7]; // stop the loop for the current game
-                    case 6:
-                        _f++;
-                        return [3 /*break*/, 4];
-                    case 7:
-                        _e++;
-                        return [3 /*break*/, 3];
-                    case 8:
-                        _i++;
+                        _b++;
                         return [3 /*break*/, 2];
-                    case 9: return [2 /*return*/, new Promise(function (resolve) {
+                    case 5: return [2 /*return*/, new Promise(function (resolve) {
                             resolve();
                         })];
                 }

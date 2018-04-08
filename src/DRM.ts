@@ -41,6 +41,7 @@ export class DRM {
         // try to list all the users in the userdata folder of steam
         if (fs.existsSync(loc)) {
           this.binaryLocation = loc;
+          helper.setConfig("drm." + this.name, this);
           break;
         }
       }
@@ -50,7 +51,6 @@ export class DRM {
 
     if (this.binaryLocation) {
       helper.log(this.name + " located at " + this.binaryLocation);
-      helper.setConfig("drm." + this.name, this);
     } else {
       helper.log(this.name + " not found");
     }

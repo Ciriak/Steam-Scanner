@@ -2,7 +2,7 @@ declare const Promise: any;
 import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as path from "path";
-import * as psList from "ps-list";
+const { snapshot } = require("process-list");
 
 import { DRMManager } from "./DRMManager";
 import { SteamerHelpers } from "./SteamerHelpers";
@@ -30,7 +30,7 @@ export class Steamer {
     await this.updateGames();
     helper.log("Init done !");
     await this.binariesListener();
-    setInterval(() => this.binariesListener(), 5000);
+    setInterval(() => this.binariesListener(), 1000 * 60);  // every min
     return new Promise((resolve) => {
       resolve();
     });
@@ -118,21 +118,16 @@ export class Steamer {
     When a active process correspond to one of the game binaries, then it is considered as the game main binarie
   */
   private async binariesListener() {
-    helper.log("Scanning process...");
     // we retrieve all waiting binaries
 
     //  heaven of for !
     const drmList: any = helper.getConfig("drm");
-    const watchedBinaries: string[] = [];
+    const watchedItems: any[] = [];
 
-    const processList = await psList({ all: false });
-    helper.log(processList.length + " process found");
-
-    // all DRM
+    // references all watched binaries on all found games
     for (const drmName in drmList) {
       if (drmList.hasOwnProperty(drmName)) {
         const drm = drmList[drmName];
-        gameLoop:
         // aLl games of a drm
         for (const gameName in drm.games) {
           if (drm.games.hasOwnProperty(gameName)) {
@@ -147,16 +142,53 @@ export class Steamer {
             for (const binaryPath of game.listenedBinaries) {
               const parsedBinarypath = path.parse(binaryPath);
               const binary = parsedBinarypath.base; // xx.exe
-              const binaryProcessIndex = _.findIndex(processList, { cmd: binary });
-              // A running process corresponding of a game exe has been found !
-              if (binaryProcessIndex > -1) {
-                helper.log("Process found for " + gameName + " ! => " + binary);
-                await drmManager.setBinaryForGame(drmName, gameName, binaryPath);
-                continue gameLoop; // stop the loop for the current game
-              }
+              // add the watched item info to the global list
+              watchedItems.push({
+                drm: drm,
+                game: game,
+                binary: binary,
+                binaryPath: binaryPath
+              });
+
             }
           }
         }
+      }
+    }
+
+    // stop if no items watched
+    if (watchedItems.length === 0) {
+      return new Promise((resolve) => {
+        resolve();
+      });
+    }
+
+    // retrieve the list of all current active process
+    let processList = await snapshot("cpu", "name");
+
+    // order by cpu usage for perf reason (shorten the loop)
+    processList = _.orderBy(processList, "cpu", "desc");
+    helper.log(processList.length + " process found");
+
+    // when a game binary is found, we add it to this array
+    // this allow to skip the loop if needed
+    const gameBinariesFound: string[] = [];
+
+    // for each item check if it exist in the current running process
+    for (const item of watchedItems) {
+
+      // skip if the binary of the game has already been found
+      if (gameBinariesFound.indexOf(item.game.name) > -1) {
+        continue;
+      }
+
+      const binaryProcessIndex = _.findIndex(processList, { name: item.binary });
+
+      // A running process corresponding of a game exe has been found !
+      if (binaryProcessIndex > -1) {
+        helper.log("Process found for " + item.game.name + " ! => " + item.binary);
+        await drmManager.setBinaryForGame(item.drm.name, item.game.name, item.binaryPath);
+        gameBinariesFound.push(item.game.name);
       }
     }
 

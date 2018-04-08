@@ -69,13 +69,12 @@ export class SteamerHelpers {
   // retrieve a propertie into the config
   // key can be an object path
   public getConfig(key: string) {
-    console.log("GET CONFIG");
-    console.log(key);
     try {
       // be sure that the file exist
       fs.ensureFileSync(configPath);
       const configData = fs.readJsonSync(configPath);
-      const configDataTarget = objectPath.get(configData, key);
+      const parsedKey = key.split(".");
+      const configDataTarget = objectPath.get(configData, parsedKey);
       return configDataTarget;
     } catch (e) {
       this.error(e);
@@ -86,6 +85,7 @@ export class SteamerHelpers {
   // save a propertie into the config
   public setConfig(key: string, value: any) {
     let configData: any;
+    const parsedKey = key.split(".");
     try {
       // be sure that the file exist
       fs.ensureFileSync(configPath);
@@ -95,8 +95,8 @@ export class SteamerHelpers {
       configData = this.getCleanConfig();
     }
 
-    objectPath.ensureExists(configData, key, value);
-    objectPath.set(configData, key, value);
+    objectPath.ensureExists(configData, parsedKey, value);
+    objectPath.set(configData, parsedKey, value);
 
     try {
       fs.writeJsonSync(configPath, configData);
