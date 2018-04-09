@@ -41,6 +41,7 @@ var objectPath = require("object-path");
 var path = require("path");
 var drivelist = require("drivelist");
 var configPath = path.normalize(path.join(electron_1.app.getPath("appData"), "Steamer", "config.json"));
+var cleanConfig = { steamDirectory: null, drm: {}, launchOnStartup: true };
 var SteamerHelpers = /** @class */ (function () {
     function SteamerHelpers() {
     }
@@ -181,8 +182,16 @@ var SteamerHelpers = /** @class */ (function () {
             });
         });
     };
+    SteamerHelpers.prototype.toggleLaunchOnStartup = function () {
+        var launch = this.getConfig("launchOnStartup");
+        this.setConfig("launchOnStartup", !launch);
+    };
+    // close the app
+    SteamerHelpers.prototype.quitApp = function () {
+        electron_1.app.quit();
+    };
     SteamerHelpers.prototype.getCleanConfig = function () {
-        return { steamDirectory: null, drm: {} };
+        return cleanConfig;
     };
     return SteamerHelpers;
 }());

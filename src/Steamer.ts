@@ -8,6 +8,7 @@ import { clearInterval } from "timers";
 import { DRMManager } from "./DRMManager";
 import { SteamerHelpers } from "./SteamerHelpers";
 import { SteamUser } from "./SteamUser";
+import { TrayManager } from "./TrayManager";
 
 const possibleSteamLocations = [
   "$drive\\Program Files (x86)\\Steam",
@@ -18,6 +19,7 @@ const shortcusConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
 const defaultCheckInterval: number = (5 * 60) * 1000; // 5min
 const helper: SteamerHelpers = new SteamerHelpers();
 const drmManager = new DRMManager();
+const tray = new TrayManager();
 let binariesCheckerInterval: any;
 let binaryCheckerCount: number = 0;
 const maxBinaryChecking: number = 10;

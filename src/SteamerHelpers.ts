@@ -10,6 +10,8 @@ const configPath = path.normalize(
   path.join(app.getPath("appData"), "Steamer", "config.json")
 );
 
+const cleanConfig = { steamDirectory: null, drm: {}, launchOnStartup: true };
+
 export class SteamerHelpers {
   /**
    * Report error
@@ -145,7 +147,17 @@ export class SteamerHelpers {
     });
   }
 
+  public toggleLaunchOnStartup() {
+    const launch = this.getConfig("launchOnStartup");
+    this.setConfig("launchOnStartup", !launch);
+  }
+
+  // close the app
+  public quitApp() {
+    app.quit();
+  }
+
   private getCleanConfig() {
-    return { steamDirectory: null, drm: {} };
+    return cleanConfig;
   }
 }

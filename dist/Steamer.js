@@ -43,6 +43,7 @@ var timers_1 = require("timers");
 var DRMManager_1 = require("./DRMManager");
 var SteamerHelpers_1 = require("./SteamerHelpers");
 var SteamUser_1 = require("./SteamUser");
+var TrayManager_1 = require("./TrayManager");
 var possibleSteamLocations = [
     "$drive\\Program Files (x86)\\Steam",
     "$drive\\Programmes\\Steam"
@@ -51,6 +52,7 @@ var shortcusConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
 var defaultCheckInterval = (5 * 60) * 1000; // 5min
 var helper = new SteamerHelpers_1.SteamerHelpers();
 var drmManager = new DRMManager_1.DRMManager();
+var tray = new TrayManager_1.TrayManager();
 var binariesCheckerInterval;
 var binaryCheckerCount = 0;
 var maxBinaryChecking = 10;
