@@ -4,7 +4,7 @@
   "description": "Electron app that automatically add your game to you Steam library",
   "main": "app.js",
   "scripts": {
-    "postinstall": "./node_modules/.bin/electron-rebuild && tsc ./src/app.ts --outDir ./dist/",
+    "postinstall": "./node_modules/.bin/electron-rebuild && cp -R ./src/assets ./dist/ && tsc ./src/app.ts --outDir ./dist/",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsc ./src/app.ts --outDir ./dist/ --watch",
     "build": "tsc ./src/app.ts --outDir ./dist/ && electron dist/app.js"
