@@ -7,21 +7,24 @@ gulp.task("copy-assets", function() {
   gulp.src("./src/assets/**/*").pipe(gulp.dest("./dist/assets"));
 });
 
+gulp.task("copy-pjson", function() {
+  gulp.src("./src/package.json").pipe(gulp.dest("./dist/"));
+});
+
 gulp.task(
   "prepare-dev-env",
   gulpsync.sync([
     // sync
-    "clean:dist",
-    ["copy-assets"]
+    ["copy-assets", "copy-pjson"]
   ])
 );
 
-gulp.task("clean:dist", function() {
-  return del(["./dist/**/*", "!./dist/node_modules"]);
-});
-
 gulp.task("clean:build", function() {
   return del("./build/**/*");
+});
+
+gulp.task("clean:dist", function() {
+  return del("./dist/**/*");
 });
 
 gulp.task(
