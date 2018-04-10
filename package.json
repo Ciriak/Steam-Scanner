@@ -1,10 +1,12 @@
 {
   "name": "steamer",
   "version": "1.0.0",
-  "description": "Electron app that automatically add your game to you Steam library",
+  "description":
+    "Electron app that automatically add your game to you Steam library",
   "main": "app.js",
   "scripts": {
-    "postinstall": "./node_modules/.bin/electron-rebuild && gulp clean:dist && gulp default && tsc ./src/app.ts --outDir ./dist/",
+    "postinstall":
+      "./node_modules/.bin/electron-rebuild && gulp clean:dist && gulp default && tsc ./src/app.ts --outDir ./dist/",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsc ./src/app.ts --outDir ./dist/ --watch",
     "build": "tsc ./src/app.ts --outDir ./dist/ && gulp build"
@@ -13,14 +15,7 @@
     "type": "git",
     "url": "git+https://github.com/nj-neer/steamer.git"
   },
-  "keywords": [
-    "steam",
-    "electron",
-    "game",
-    "sync",
-    "uplay",
-    "origin"
-  ],
+  "keywords": ["steam", "electron", "game", "sync", "uplay", "origin"],
   "author": "Cyriaque DELAUNAY",
   "license": "ISC",
   "bugs": {
@@ -66,18 +61,18 @@
     "win": {
       "target": "nsis",
       "publish": "github",
-      "icon": "dist/assets/steamer.png"
+      "icon": "dist/assets/steamer.ico"
     },
     "nsis": {
       "artifactName": "${productName}-setup-${version}.${ext}",
-      "installerIcon": "dist/assets/steamer.png",
+      "installerIcon": "dist/assets/steamer.ico",
       "differentialPackage": false
     },
     "asar": {
       "smartUnpack": false
     },
     "linux": {
-      "icon": "dist/assets/steamer.png",
+      "icon": "dist/assets/steamer.ico",
       "category": "Development"
     },
     "appImage": {
