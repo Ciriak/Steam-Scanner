@@ -10,6 +10,12 @@ Get all you games on Steam ! Steamer is an Electron app that grab games from oth
 npm run dev
 ```
 
+## Launching the app (dev mode)
+
+```
+electron dist/app.js
+```
+
 ## Building
 
 ```
