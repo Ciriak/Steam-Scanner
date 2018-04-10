@@ -39,6 +39,7 @@ var fs = require("fs-extra");
 var _ = require("lodash");
 var path = require("path");
 var snapshot = require("process-list").snapshot;
+var isDev = require("electron-is-dev");
 var timers_1 = require("timers");
 var DRMManager_1 = require("./DRMManager");
 var SteamerHelpers_1 = require("./SteamerHelpers");
@@ -49,7 +50,7 @@ var possibleSteamLocations = [
     "$drive\\Programmes\\Steam"
 ];
 var shortcusConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
-var defaultCheckInterval = (5 * 60) * 1000; // 5min
+var defaultCheckInterval = 5 * 60 * 1000; // 5min
 var helper = new SteamerHelpers_1.SteamerHelpers();
 var drmManager = new DRMManager_1.DRMManager();
 var tray = new TrayManager_1.TrayManager();
@@ -60,6 +61,9 @@ var Steamer = /** @class */ (function () {
     function Steamer() {
         var _this = this;
         this.steamUsers = [];
+        if (isDev) {
+            helper.log("=== Developement build ===");
+        }
         var checkInterval = helper.getConfig("checkInterval");
         // set default value for check interval and save it
         if (!checkInterval) {
@@ -246,7 +250,11 @@ var Steamer = /** @class */ (function () {
                                     resolve();
                                 })];
                         }
-                        helper.log("Scanning process... [" + binaryCheckerCount + "/" + maxBinaryChecking + "]");
+                        helper.log("Scanning process... [" +
+                            binaryCheckerCount +
+                            "/" +
+                            maxBinaryChecking +
+                            "]");
                         return [4 /*yield*/, snapshot("cpu", "name")];
                     case 1:
                         processList = _c.sent();
@@ -263,7 +271,9 @@ var Steamer = /** @class */ (function () {
                         if (gameBinariesFound.indexOf(item.game.name) > -1) {
                             return [3 /*break*/, 5];
                         }
-                        binaryProcessIndex = _.findIndex(processList, { name: item.binary });
+                        binaryProcessIndex = _.findIndex(processList, {
+                            name: item.binary
+                        });
                         if (!(binaryProcessIndex > -1)) return [3 /*break*/, 5];
                         helper.log("Process found for " + item.game.name + " ! => " + item.binary);
                         return [4 /*yield*/, drmManager.setBinaryForGame(item.drm.name, item.game.name, item.binaryPath)];

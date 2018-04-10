@@ -40,10 +40,18 @@ var fs = require("fs-extra");
 var objectPath = require("object-path");
 var path = require("path");
 var drivelist = require("drivelist");
+var isDev = require("electron-is-dev");
+var autoLaunch = require("auto-launch");
 var configPath = path.normalize(path.join(electron_1.app.getPath("appData"), "Steamer", "config.json"));
-var cleanConfig = { steamDirectory: null, drm: {}, launchOnStartup: true };
+var cleanConfig = {
+    steamDirectory: null,
+    drm: {},
+    launchOnStartup: true,
+    enableNotifications: true
+};
 var SteamerHelpers = /** @class */ (function () {
     function SteamerHelpers() {
+        this.isDev = isDev;
     }
     /**
      * Report error
@@ -183,8 +191,35 @@ var SteamerHelpers = /** @class */ (function () {
         });
     };
     SteamerHelpers.prototype.toggleLaunchOnStartup = function () {
+        var launcher = new autoLaunch({ name: "Steamer" });
         var launch = this.getConfig("launchOnStartup");
+        if (isDev) {
+            this.log("NOTICE : Dev build, launch on startup ignored");
+            return;
+        }
+        if (launch) {
+            launcher.disable();
+        }
+        else {
+            launcher.enable();
+        }
         this.setConfig("launchOnStartup", !launch);
+        if (!launch === true) {
+            this.log("Enabled launch on startup");
+        }
+        else {
+            this.log("Disabled launch on startup");
+        }
+    };
+    SteamerHelpers.prototype.toggleNotifications = function () {
+        var notif = this.getConfig("enableNotifications");
+        this.setConfig("enableNotifications", !notif);
+        if (!notif === true) {
+            this.log("Enabled notifications");
+        }
+        else {
+            this.log("Disabled notifications");
+        }
     };
     // close the app
     SteamerHelpers.prototype.quitApp = function () {

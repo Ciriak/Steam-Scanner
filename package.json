@@ -28,8 +28,10 @@
   },
   "homepage": "https://github.com/nj-neer/steamer#readme",
   "dependencies": {
+    "auto-launch": "^5.0.5",
     "drivelist": "^6.1.3",
     "electron": "^1.8.4",
+    "electron-is-dev": "^0.3.0",
     "fs-extra": "^5.0.0",
     "js-yaml": "^3.11.0",
     "lodash": "^4.17.5",

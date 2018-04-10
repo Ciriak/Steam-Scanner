@@ -4,15 +4,23 @@ import * as fs from "fs-extra";
 import * as objectPath from "object-path";
 import * as path from "path";
 const drivelist = require("drivelist");
+const isDev = require("electron-is-dev");
+import * as autoLaunch from "auto-launch";
 import { Steamer } from "./Steamer";
 import { SteamUser } from "./SteamUser";
 const configPath = path.normalize(
   path.join(app.getPath("appData"), "Steamer", "config.json")
 );
 
-const cleanConfig = { steamDirectory: null, drm: {}, launchOnStartup: true };
+const cleanConfig = {
+  steamDirectory: null,
+  drm: {},
+  launchOnStartup: true,
+  enableNotifications: true
+};
 
 export class SteamerHelpers {
+  public isDev = isDev;
   /**
    * Report error
    */
@@ -96,7 +104,9 @@ export class SteamerHelpers {
       configData = fs.readJsonSync(configPath);
     } catch (e) {
       // create a clean config file if don't exist or is corrupted
-      this.log("WARNING - corrupted or invalid config file - creating a clean config file...");
+      this.log(
+        "WARNING - corrupted or invalid config file - creating a clean config file..."
+      );
       configData = this.getCleanConfig();
     }
 
@@ -129,7 +139,6 @@ export class SteamerHelpers {
       try {
         fs.removeSync(steamUser.shortcutsFilePath);
       } catch (e) {
-
         continue;
       }
     }
@@ -148,8 +157,33 @@ export class SteamerHelpers {
   }
 
   public toggleLaunchOnStartup() {
+    const launcher = new autoLaunch({ name: "Steamer" });
     const launch = this.getConfig("launchOnStartup");
+    if (isDev) {
+      this.log("NOTICE : Dev build, launch on startup ignored");
+      return;
+    }
+    if (launch) {
+      launcher.disable();
+    } else {
+      launcher.enable();
+    }
     this.setConfig("launchOnStartup", !launch);
+    if (!launch === true) {
+      this.log("Enabled launch on startup");
+    } else {
+      this.log("Disabled launch on startup");
+    }
+  }
+
+  public toggleNotifications() {
+    const notif = this.getConfig("enableNotifications");
+    this.setConfig("enableNotifications", !notif);
+    if (!notif === true) {
+      this.log("Enabled notifications");
+    } else {
+      this.log("Disabled notifications");
+    }
   }
 
   // close the app

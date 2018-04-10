@@ -3,6 +3,7 @@ import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as path from "path";
 const { snapshot } = require("process-list");
+const isDev = require("electron-is-dev");
 
 import { clearInterval } from "timers";
 import { DRMManager } from "./DRMManager";
@@ -16,7 +17,7 @@ const possibleSteamLocations = [
 ];
 
 const shortcusConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
-const defaultCheckInterval: number = (5 * 60) * 1000; // 5min
+const defaultCheckInterval: number = 5 * 60 * 1000; // 5min
 const helper: SteamerHelpers = new SteamerHelpers();
 const drmManager = new DRMManager();
 const tray = new TrayManager();
@@ -30,9 +31,12 @@ export class Steamer {
   public steamUsers: any[] = [];
 
   constructor() {
+    if (isDev) {
+      helper.log("=== Developement build ===");
+    }
+
     let checkInterval: any = helper.getConfig("checkInterval");
     // set default value for check interval and save it
-
     if (!checkInterval) {
       checkInterval = defaultCheckInterval;
       helper.setConfig("checkInterval", checkInterval);
@@ -56,7 +60,10 @@ export class Steamer {
     await this.updateShortcuts();
     await this.binariesListener();
     clearInterval(binariesCheckerInterval);
-    binariesCheckerInterval = setInterval(() => this.binariesListener(), 10 * 1000);  // every 10 sec - 10 times
+    binariesCheckerInterval = setInterval(
+      () => this.binariesListener(),
+      10 * 1000
+    ); // every 10 sec - 10 times
     return new Promise((resolve) => {
       resolve();
     });
@@ -182,7 +189,6 @@ export class Steamer {
                 binary: binary,
                 binaryPath: binaryPath
               });
-
             }
           }
         }
@@ -196,7 +202,13 @@ export class Steamer {
       });
     }
 
-    helper.log("Scanning process... [" + binaryCheckerCount + "/" + maxBinaryChecking + "]");
+    helper.log(
+      "Scanning process... [" +
+        binaryCheckerCount +
+        "/" +
+        maxBinaryChecking +
+        "]"
+    );
 
     // retrieve the list of all current active process
     let processList = await snapshot("cpu", "name");
@@ -211,18 +223,25 @@ export class Steamer {
 
     // for each item check if it exist in the current running process
     for (const item of watchedItems) {
-
       // skip if the binary of the game has already been found
       if (gameBinariesFound.indexOf(item.game.name) > -1) {
         continue;
       }
 
-      const binaryProcessIndex = _.findIndex(processList, { name: item.binary });
+      const binaryProcessIndex = _.findIndex(processList, {
+        name: item.binary
+      });
 
       // A running process corresponding of a game exe has been found !
       if (binaryProcessIndex > -1) {
-        helper.log("Process found for " + item.game.name + " ! => " + item.binary);
-        await drmManager.setBinaryForGame(item.drm.name, item.game.name, item.binaryPath);
+        helper.log(
+          "Process found for " + item.game.name + " ! => " + item.binary
+        );
+        await drmManager.setBinaryForGame(
+          item.drm.name,
+          item.game.name,
+          item.binaryPath
+        );
         gameBinariesFound.push(item.game.name);
         await this.updateShortcuts();
       }

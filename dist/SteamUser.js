@@ -74,17 +74,22 @@ var SteamUser = /** @class */ (function () {
                                                 continue;
                                             }
                                             // check if the game is already in the steam shortcuts
-                                            var gameShortcutIndex = _.findIndex(shortcutData.shortcuts, { exe: game.binary });
+                                            var gameShortcutIndex = _.findIndex(shortcutData.shortcuts, {
+                                                exe: game.binary
+                                            });
                                             // skip this game
                                             if (gameShortcutIndex > -1) {
                                                 continue;
                                             }
                                             if (isFirstInstance) {
+                                                var enableNotifications = helper.getConfig("enableNotifications");
                                                 helper.log("Added a shortcut for " + game.name);
-                                                notifier.notify({
-                                                    title: game.name,
-                                                    message: "This game has been added to your game library, please restart Steam"
-                                                });
+                                                if (enableNotifications) {
+                                                    notifier.notify({
+                                                        title: game.name,
+                                                        message: "This game has been added to your game library, please restart Steam"
+                                                    });
+                                                }
                                             }
                                             shortcutData.shortcuts.push({
                                                 exe: game.binary,
