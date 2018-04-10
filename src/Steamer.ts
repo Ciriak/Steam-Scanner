@@ -204,10 +204,10 @@ export class Steamer {
 
     helper.log(
       "Scanning process... [" +
-        binaryCheckerCount +
-        "/" +
-        maxBinaryChecking +
-        "]"
+      binaryCheckerCount +
+      "/" +
+      maxBinaryChecking +
+      "]"
     );
 
     // retrieve the list of all current active process
