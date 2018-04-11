@@ -58,7 +58,9 @@
       "installerIcon": "dist/assets/steamer.ico",
       "differentialPackage": false
     },
-    "asar": false,
+    "asar": {
+      "smartUnpack": false
+    },
     "linux": {
       "icon": "dist/assets/steamer.ico",
       "category": "Development"
