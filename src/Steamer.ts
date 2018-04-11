@@ -2,7 +2,7 @@ declare const Promise: any;
 import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as path from "path";
-const { snapshot } = require("process-list");
+const { snapshot } = require("process-list"); // TODO seem to be buggy for the compilation
 const isDev = require("electron-is-dev");
 
 import { clearInterval } from "timers";
