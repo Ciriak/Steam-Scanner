@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "description": "",
   "main": "app.js",
-  "scripts": {
-    "install": "npm rebuild"
-  },
   "author": "",
   "license": "ISC",
+  "scripts": {
+    "postinstall": "electron-builder install-app-deps"
+  },
   "dependencies": {
     "auto-launch": "^5.0.5",
     "drivelist": "^6.1.3",
@@ -17,13 +17,10 @@
     "node-notifier": "^5.2.1",
     "node-steam-shortcuts": "^1.1.0",
     "object-path": "^0.11.4",
-    "process-list": "^1.2.2",
+    "ps-node": "^0.1.6",
     "recursive-readdir": "^2.2.2",
     "steam-shortcut-editor": "^3.1.1",
     "ts-object-path": "^0.1.2",
     "typescript": "^2.7.2"
-  },
-  "devDependencies": {
-    "electron-rebuild": "^1.7.3"
   }
 }
