@@ -4,8 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "postInstall": "./node_modules/.bin/electron-rebuild"
+    "install": "npm rebuild"
   },
   "author": "",
   "license": "ISC",
