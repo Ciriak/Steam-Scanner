@@ -4,10 +4,10 @@
   "description": "Electron app that automatically add your game to you Steam library",
   "main": "app.js",
   "scripts": {
-    "postinstall": "tsc ./src/app.ts --outDir ./dist/ && electron-builder install-app-deps",
+    "postinstall": "tsc ./src/app.ts --outDir ./dist/ && gulp",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsc ./src/app.ts --outDir ./dist/ --watch",
-    "build": "tsc ./src/app.ts --outDir ./dist/"
+    "build": "tsc ./src/app.ts --outDir ./dist/ && gulp build"
   },
   "repository": {
     "type": "git",
@@ -28,8 +28,6 @@
   },
   "homepage": "https://github.com/nj-neer/steamer#readme",
   "devDependencies": {
-    "@types/electron": "^1.6.10",
-    "@types/es6-promise": "^3.3.0",
     "@types/fs-extra": "^5.0.1",
     "@types/lodash": "^4.14.106",
     "@types/object-path": "^0.9.29",
