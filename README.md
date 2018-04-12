@@ -4,6 +4,12 @@ Get all you games on Steam ! Steamer is an Electron app that grab games from oth
 
 ## Prerequisites
 
+(as admin)
+
+```
+npm install --global --production windows-build-tools
+```
+
 ## Developping
 
 ```

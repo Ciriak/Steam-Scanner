@@ -1,7 +1,8 @@
 {
   "name": "steamer",
   "version": "1.0.0",
-  "description": "Electron app that automatically add your game to you Steam library",
+  "description":
+    "Electron app that automatically add your game to you Steam library",
   "main": "app.js",
   "scripts": {
     "postinstall": "tsc ./src/app.ts --outDir ./dist/ && gulp",
@@ -13,14 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/nj-neer/steamer.git"
   },
-  "keywords": [
-    "steam",
-    "electron",
-    "game",
-    "sync",
-    "uplay",
-    "origin"
-  ],
+  "keywords": ["steam", "electron", "game", "sync", "uplay", "origin"],
   "author": "Cyriaque DELAUNAY",
   "license": "ISC",
   "bugs": {
@@ -34,9 +28,7 @@
     "@types/xml2js": "^0.4.2",
     "del": "^3.0.0",
     "electron": "^1.8.4",
-    "electron-builder": "^20.8.1",
     "electron-packager": "^12.0.1",
-    "electron-rebuild": "^1.7.3",
     "gulp": "^3.9.1",
     "gulp-install": "^1.1.0",
     "gulp-sync": "^0.1.4"
@@ -58,9 +50,7 @@
       "installerIcon": "dist/assets/steamer.ico",
       "differentialPackage": false
     },
-    "asar": {
-      "smartUnpack": false
-    },
+    "asar": false,
     "linux": {
       "icon": "dist/assets/steamer.ico",
       "category": "Development"
