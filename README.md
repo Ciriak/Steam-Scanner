@@ -4,6 +4,8 @@ Get all you games on Steam ! Steamer is an Electron app that grab games from oth
 
 ## Prerequisites
 
+* Yarn
+
 (as admin)
 
 ```
@@ -13,7 +15,7 @@ npm install --global --production windows-build-tools
 ## Developping
 
 ```
-npm run dev
+yarn run dev
 ```
 
 ## Launching the app (dev mode)
@@ -25,7 +27,7 @@ electron dist/app.js
 ## Building
 
 ```
-npm run build
+yarn run build
 ```
 
 ## CLI
