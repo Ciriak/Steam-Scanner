@@ -36,8 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var DRM_1 = require("./DRM");
-var SteamerHelpers_1 = require("./SteamerHelpers");
-var helper = new SteamerHelpers_1.SteamerHelpers();
+var ScannerHelpers_1 = require("./ScannerHelpers");
+var helper = new ScannerHelpers_1.ScannerHelpers();
 // For the gamesProperties :
 // %pattern% :getPath method of Electron => https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
 // $this.xxx = a propertie of the current item (ex : name)

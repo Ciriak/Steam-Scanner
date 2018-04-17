@@ -1,7 +1,8 @@
 {
-  "name": "steamer",
+  "name": "steam-helper",
   "version": "0.0.1",
-  "description": "Lorem ipsum",
+  "description":
+    "Grab games from others launchers and automaticly add them to your Steam library",
   "main": "app.js",
   "author": "",
   "license": "ISC",

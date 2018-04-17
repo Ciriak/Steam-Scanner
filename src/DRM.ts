@@ -5,10 +5,10 @@ import * as objectPath from "object-path";
 import * as path from "path";
 import * as recursive from "recursive-readdir";
 
-import { SteamerHelpers } from "./SteamerHelpers";
+import { ScannerHelpers } from "./ScannerHelpers";
 const colors = require("colors");
 
-const helper: SteamerHelpers = new SteamerHelpers();
+const helper: ScannerHelpers = new ScannerHelpers();
 
 export class DRM {
   public name: any;
@@ -142,7 +142,7 @@ export class DRM {
 
           /*
           Here, we will listen for an active process to have the same name than a binarie found in the game files
-          add the game the the listener, things hapened in "Steamer.ts"
+          add the game the the listener, things hapened in "Scanner.ts"
         */
           helper.log("Trying to find the process for " + gameItem.name);
 

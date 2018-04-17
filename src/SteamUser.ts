@@ -4,7 +4,7 @@ import * as _ from "lodash";
 import * as notifier from "node-notifier";
 import * as path from "path";
 import * as shortcut from "steam-shortcut-editor";
-import { Steamer } from "./Steamer";
+import { Scanner } from "./Scanner";
 import { SteamerHelpers } from "./SteamerHelpers";
 const helper = new SteamerHelpers();
 const colors = require("colors");

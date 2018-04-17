@@ -2,17 +2,17 @@
 exports.__esModule = true;
 var path = require("path");
 var _a = require("electron"), app = _a.app, Menu = _a.Menu, MenuItem = _a.MenuItem, Tray = _a.Tray;
-var SteamerHelpers_1 = require("./SteamerHelpers");
-var helper = new SteamerHelpers_1.SteamerHelpers();
+var ScannerHelpers_1 = require("./ScannerHelpers");
+var helper = new ScannerHelpers_1.ScannerHelpers();
 var TrayManager = /** @class */ (function () {
-    function TrayManager(steamer) {
+    function TrayManager(scanner) {
         var tray = null;
         var launchOnStartup = helper.getConfig("launchOnStartup");
         var enableNotifications = helper.getConfig("enableNotifications");
-        tray = new Tray(path.join(__dirname, "assets/steamer.png"));
+        tray = new Tray(path.join(__dirname, "assets/scanner.png"));
         var contextMenu = Menu.buildFromTemplate([
             {
-                label: steamer.versionLabel,
+                label: scanner.versionLabel,
                 type: "normal",
                 enabled: false
             },
@@ -23,7 +23,7 @@ var TrayManager = /** @class */ (function () {
                 label: "Scan games now",
                 type: "normal",
                 click: function () {
-                    steamer.scan();
+                    scanner.scan();
                 }
             },
             {
@@ -50,7 +50,7 @@ var TrayManager = /** @class */ (function () {
                 }
             }
         ]);
-        tray.setToolTip(steamer.versionLabel);
+        tray.setToolTip(scanner.versionLabel);
         tray.setContextMenu(contextMenu);
     }
     return TrayManager;

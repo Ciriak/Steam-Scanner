@@ -1,8 +1,8 @@
 import { app, BrowserWindow } from "electron";
-import { Steamer } from "./Steamer";
-let steamer: any;
+import { Scanner } from "./Scanner";
+let scanner: any;
 app.on("ready", () => {
-  steamer = new Steamer();
-  steamer.scan();
-  setInterval(() => steamer.scan(), steamer.checkInterval);
+  scanner = new Scanner();
+  scanner.scan();
+  setInterval(() => scanner.scan(), scanner.checkInterval);
 });

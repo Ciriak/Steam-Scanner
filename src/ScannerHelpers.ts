@@ -7,10 +7,10 @@ const drivelist = require("drivelist");
 const isDev = require("electron-is-dev");
 const colors = require("colors");
 import * as autoLaunch from "auto-launch";
-import { Steamer } from "./Steamer";
+import { Scanner } from "./Scanner";
 import { SteamUser } from "./SteamUser";
 const configPath = path.normalize(
-  path.join(app.getPath("appData"), "Steamer", "config.json")
+  path.join(app.getPath("appData"), "Steam Scanner", "config.json")
 );
 
 const cleanConfig = {
@@ -20,7 +20,7 @@ const cleanConfig = {
   enableNotifications: true
 };
 
-export class SteamerHelpers {
+export class ScannerHelpers {
   public isDev = isDev;
   /**
    * Report error
@@ -125,10 +125,10 @@ export class SteamerHelpers {
     return value;
   }
 
-  public async checkArgv(steamerInstance: Steamer) {
+  public async checkArgv(scannerInstance: Scanner) {
     const argv = process.argv;
     if (argv.indexOf("--clean") > -1) {
-      await this.clean(steamerInstance);
+      await this.clean(scannerInstance);
     }
     return new Promise((resolve) => {
       resolve();
@@ -136,9 +136,9 @@ export class SteamerHelpers {
   }
 
   // reset shortcuts & config
-  public async clean(steamerInstance: Steamer) {
+  public async clean(scannerInstance: Scanner) {
     // remove the shortcut file for each user
-    for (const steamUser of steamerInstance.steamUsers) {
+    for (const steamUser of scannerInstance.steamUsers) {
       try {
         fs.removeSync(steamUser.shortcutsFilePath);
       } catch (e) {
@@ -160,7 +160,7 @@ export class SteamerHelpers {
   }
 
   public toggleLaunchOnStartup() {
-    const launcher = new autoLaunch({ name: "Steamer" });
+    const launcher = new autoLaunch({ name: "Steam Scanner" });
     const launch = this.getConfig("launchOnStartup");
     if (isDev) {
       this.log(colors.yellow("NOTICE : Dev build, launch on startup ignored"));

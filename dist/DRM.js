@@ -38,9 +38,9 @@ exports.__esModule = true;
 var fs = require("fs-extra");
 var path = require("path");
 var recursive = require("recursive-readdir");
-var SteamerHelpers_1 = require("./SteamerHelpers");
+var ScannerHelpers_1 = require("./ScannerHelpers");
 var colors = require("colors");
-var helper = new SteamerHelpers_1.SteamerHelpers();
+var helper = new ScannerHelpers_1.ScannerHelpers();
 var DRM = /** @class */ (function () {
     function DRM(drmItem) {
         this.binaryPossibleLocations = [];
@@ -185,7 +185,7 @@ var DRM = /** @class */ (function () {
                             helper.setConfig("drm." + this.name + ".games." + gameItem.name, gameItem);
                             /*
                             Here, we will listen for an active process to have the same name than a binarie found in the game files
-                            add the game the the listener, things hapened in "Steamer.ts"
+                            add the game the the listener, things hapened in "Scanner.ts"
                           */
                             helper.log("Trying to find the process for " + gameItem.name);
                             helper.setConfig("drm." +

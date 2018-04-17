@@ -2,8 +2,8 @@ declare const Promise: any;
 import * as fs from "fs-extra";
 import * as path from "path";
 import { DRM } from "./DRM";
-import { SteamerHelpers } from "./SteamerHelpers";
-const helper: SteamerHelpers = new SteamerHelpers();
+import { ScannerHelpers } from "./ScannerHelpers";
+const helper: ScannerHelpers = new ScannerHelpers();
 // For the gamesProperties :
 // %pattern% :getPath method of Electron => https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
 // $this.xxx = a propertie of the current item (ex : name)

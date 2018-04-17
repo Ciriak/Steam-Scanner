@@ -2,21 +2,21 @@ declare const Promise: any;
 import * as path from "path";
 const { app, Menu, MenuItem, Tray } = require("electron");
 
-import { Steamer } from "./Steamer";
-import { SteamerHelpers } from "./SteamerHelpers";
+import { Scanner } from "./Scanner";
+import { ScannerHelpers } from "./ScannerHelpers";
 
-const helper = new SteamerHelpers();
+const helper = new ScannerHelpers();
 
 export class TrayManager {
-  constructor(steamer: Steamer) {
+  constructor(scanner: Scanner) {
     let tray = null;
     const launchOnStartup: any = helper.getConfig("launchOnStartup");
     const enableNotifications: any = helper.getConfig("enableNotifications");
-    tray = new Tray(path.join(__dirname, "assets/steamer.png"));
+    tray = new Tray(path.join(__dirname, "assets/scanner.png"));
 
     const contextMenu = Menu.buildFromTemplate([
       {
-        label: steamer.versionLabel,
+        label: scanner.versionLabel,
         type: "normal",
         enabled: false
       },
@@ -27,7 +27,7 @@ export class TrayManager {
         label: "Scan games now",
         type: "normal",
         click() {
-          steamer.scan();
+          scanner.scan();
         }
       },
       {
@@ -54,7 +54,7 @@ export class TrayManager {
         }
       }
     ]);
-    tray.setToolTip(steamer.versionLabel);
+    tray.setToolTip(scanner.versionLabel);
     tray.setContextMenu(contextMenu);
   }
 }

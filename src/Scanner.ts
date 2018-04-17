@@ -9,7 +9,7 @@ const colors = require("colors");
 
 import { clearInterval } from "timers";
 import { DRMManager } from "./DRMManager";
-import { SteamerHelpers } from "./SteamerHelpers";
+import { ScannerHelpers } from "./ScannerHelpers";
 import { SteamUser } from "./SteamUser";
 import { TrayManager } from "./TrayManager";
 
@@ -20,18 +20,18 @@ const possibleSteamLocations = [
 
 const shortcusConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
 const defaultCheckInterval: number = 5 * 60 * 1000; // 5min
-const helper: SteamerHelpers = new SteamerHelpers();
+const helper: ScannerHelpers = new ScannerHelpers();
 const drmManager = new DRMManager();
 let binariesCheckerInterval: any;
 let binaryCheckerCount: number = 0;
 const maxBinaryChecking: number = 10;
 
-export class Steamer {
+export class Scanner {
   public steamDirectory: any;
   public externalGames: any;
   public steamUsers: any[] = [];
   public checkInterval: any;
-  public versionLabel: any = "Steamer V." + app.getVersion();
+  public versionLabel: any = "Steam Scanner V." + app.getVersion();
   private tray: TrayManager;
 
   constructor() {
