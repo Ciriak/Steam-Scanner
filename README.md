@@ -36,7 +36,7 @@ electron dist/app.js
 yarn run build
 ```
 
-**note :** Yarn doesn't show detailled error message, use the vanilla command (ex: electron-builder") to display the full error if the build fail
+**note :** Yarn doesn't show detailled error messages, use the vanilla command (ex: electron-builder") to display the full error if the build fail
 
 ## Available launch parameters
 
