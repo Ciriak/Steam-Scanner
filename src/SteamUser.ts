@@ -5,18 +5,18 @@ import * as notifier from "node-notifier";
 import * as path from "path";
 import * as shortcut from "steam-shortcut-editor";
 import { Scanner } from "./Scanner";
-import { SteamerHelpers } from "./SteamerHelpers";
-const helper = new SteamerHelpers();
+import { ScannerHelpers } from "./ScannerHelpers";
+const helper = new ScannerHelpers();
 const colors = require("colors");
 
 export class SteamUser {
   public userId: any;
   public directory: string;
   public shortcutsFilePath: string;
-  private steamerInstance: Steamer;
-  constructor(userId: string, steamer: Steamer) {
+  private scannerInstance: Scanner;
+  constructor(userId: string, scanner: Scanner) {
     this.userId = userId;
-    this.steamerInstance = steamer;
+    this.scannerInstance = scanner;
     this.initUser();
   }
 
@@ -106,7 +106,7 @@ export class SteamUser {
   // retrieve user files
   private initUser() {
     this.directory = path.join(
-      this.steamerInstance.steamDirectory,
+      this.scannerInstance.steamDirectory,
       "userdata",
       this.userId
     );

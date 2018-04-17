@@ -39,13 +39,13 @@ var _ = require("lodash");
 var notifier = require("node-notifier");
 var path = require("path");
 var shortcut = require("steam-shortcut-editor");
-var SteamerHelpers_1 = require("./SteamerHelpers");
-var helper = new SteamerHelpers_1.SteamerHelpers();
+var ScannerHelpers_1 = require("./ScannerHelpers");
+var helper = new ScannerHelpers_1.ScannerHelpers();
 var colors = require("colors");
 var SteamUser = /** @class */ (function () {
-    function SteamUser(userId, steamer) {
+    function SteamUser(userId, scanner) {
         this.userId = userId;
-        this.steamerInstance = steamer;
+        this.scannerInstance = scanner;
         this.initUser();
     }
     // isFirstInstance : used in case of multiple users, only the first instance send log and notifications
@@ -121,7 +121,7 @@ var SteamUser = /** @class */ (function () {
     };
     // retrieve user files
     SteamUser.prototype.initUser = function () {
-        this.directory = path.join(this.steamerInstance.steamDirectory, "userdata", this.userId);
+        this.directory = path.join(this.scannerInstance.steamDirectory, "userdata", this.userId);
         this.shortcutsFilePath = path.join(this.directory, "config", "shortcuts.vdf");
     };
     return SteamUser;
