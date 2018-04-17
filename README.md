@@ -1,10 +1,10 @@
 # Steam Scanner
 
-Get all you games on Steam ! Steam Scanner run as a background process, grab games from others launchers and automaticly add them to Steam.
+Get all you games on Steam ! Steam Scanner run as a background process, grab games from others launchers and automaticly add them to your Steam library.
 
 ## Prerequisites
 
-* Yarn (using npm cause issue with native dependencies building)
+* Yarn (using npm cause issues with native dependencies building)
 
 For windows, as admin
 
@@ -13,18 +13,16 @@ npm install --global --production windows-build-tools
 ```
 
 ## Developping
-
+Install the dependencies and generate the dist folder
 ```
 yarn
 ```
 
-Will install the dependencies and generate the dist folder
+Start the watcher 
 
 ```
 yarn run dev
 ```
-
-Will start the watcher
 
 ## Launching the app (dev mode)
 
