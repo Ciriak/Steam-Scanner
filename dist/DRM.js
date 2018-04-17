@@ -39,6 +39,7 @@ var fs = require("fs-extra");
 var path = require("path");
 var recursive = require("recursive-readdir");
 var SteamerHelpers_1 = require("./SteamerHelpers");
+var colors = require("colors");
 var helper = new SteamerHelpers_1.SteamerHelpers();
 var DRM = /** @class */ (function () {
     function DRM(drmItem) {
@@ -78,10 +79,10 @@ var DRM = /** @class */ (function () {
                         _a.label = 3;
                     case 3:
                         if (this.binaryLocation) {
-                            helper.log(this.name + " located at " + this.binaryLocation);
+                            helper.log(colors.cyan(this.name + " located at " + this.binaryLocation));
                         }
                         else {
-                            helper.log(this.name + " not found");
+                            helper.log(colors.yellow(this.name + " not found"));
                         }
                         return [2 /*return*/, new Promise(function (resolve) {
                                 resolve();
@@ -187,7 +188,11 @@ var DRM = /** @class */ (function () {
                             add the game the the listener, things hapened in "Steamer.ts"
                           */
                             helper.log("Trying to find the process for " + gameItem.name);
-                            helper.setConfig("drm." + this.name + ".games." + gameItem.name + ".listenedBinaries", binariesPathList);
+                            helper.setConfig("drm." +
+                                this.name +
+                                ".games." +
+                                gameItem.name +
+                                ".listenedBinaries", binariesPathList);
                         }
                         _d.label = 3;
                     case 3:

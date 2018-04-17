@@ -4,7 +4,6 @@ import * as path from "path";
 import { DRM } from "./DRM";
 import { SteamerHelpers } from "./SteamerHelpers";
 const helper: SteamerHelpers = new SteamerHelpers();
-
 // For the gamesProperties :
 // %pattern% :getPath method of Electron => https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
 // $this.xxx = a propertie of the current item (ex : name)
@@ -66,11 +65,21 @@ export class DRMManager {
   }
 
   // set the given binary the main one for the given game and save it
-  public async setBinaryForGame(drmName: string, gameName: string, binaryPath: string) {
+  public async setBinaryForGame(
+    drmName: string,
+    gameName: string,
+    binaryPath: string
+  ) {
     // set the bninary
-    helper.setConfig("drm." + drmName + ".games." + gameName + ".binary", binaryPath);
+    helper.setConfig(
+      "drm." + drmName + ".games." + gameName + ".binary",
+      binaryPath
+    );
     // clean listenedBinaries prtopertie
-    helper.setConfig("drm." + drmName + ".games." + gameName + ".listenedBinaries", null);
+    helper.setConfig(
+      "drm." + drmName + ".games." + gameName + ".listenedBinaries",
+      null
+    );
     return new Promise((resolve) => {
       resolve();
     });

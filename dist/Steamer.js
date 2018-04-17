@@ -35,6 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+var electron_1 = require("electron");
 var fs = require("fs-extra");
 var _ = require("lodash");
 var path = require("path");
@@ -60,8 +61,10 @@ var maxBinaryChecking = 10;
 var Steamer = /** @class */ (function () {
     function Steamer() {
         this.steamUsers = [];
+        this.versionLabel = "Steamer V." + electron_1.app.getVersion();
+        helper.log(colors.cyan.underline(this.versionLabel));
         if (isDev) {
-            helper.log(colors.red("=== Developement build ==="));
+            helper.log(colors.bgCyan("=== Developement build ==="));
         }
         this.checkInterval = helper.getConfig("checkInterval");
         // set default value for check interval and save it
@@ -155,12 +158,12 @@ var Steamer = /** @class */ (function () {
                             }
                         }
                         if (!this.steamDirectory) {
-                            helper.error("ERR_STEAM_NOT_FOUND");
+                            helper.error(colors.red("ERR_STEAM_NOT_FOUND"));
                             return [2 /*return*/];
                         }
                         _c.label = 2;
                     case 2:
-                        helper.log("Steam directory located at " + this.steamDirectory);
+                        helper.log(colors.green("Steam directory located at " + this.steamDirectory));
                         // save steam location
                         helper.setConfig("steamDirectory", this.steamDirectory);
                         helper.log("Looking for steam accounts...");
@@ -177,7 +180,7 @@ var Steamer = /** @class */ (function () {
                                 }
                             }
                             catch (e) {
-                                helper.error(e);
+                                helper.error(colors.red(e));
                                 continue;
                             }
                         }
@@ -273,7 +276,7 @@ var Steamer = /** @class */ (function () {
                             name: item.binary
                         });
                         if (!(binaryProcessIndex > -1)) return [3 /*break*/, 5];
-                        helper.log("Process found for " + item.game.name + " ! => " + item.binary);
+                        helper.log(colors.green("Process found for " + item.game.name + " ! => " + item.binary));
                         return [4 /*yield*/, drmManager.setBinaryForGame(item.drm.name, item.game.name, item.binaryPath)];
                     case 3:
                         _c.sent();

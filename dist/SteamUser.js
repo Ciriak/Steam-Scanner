@@ -41,6 +41,7 @@ var path = require("path");
 var shortcut = require("steam-shortcut-editor");
 var SteamerHelpers_1 = require("./SteamerHelpers");
 var helper = new SteamerHelpers_1.SteamerHelpers();
+var colors = require("colors");
 var SteamUser = /** @class */ (function () {
     function SteamUser(userId, steamer) {
         this.userId = userId;
@@ -83,7 +84,7 @@ var SteamUser = /** @class */ (function () {
                                             }
                                             if (isFirstInstance) {
                                                 var enableNotifications = helper.getConfig("enableNotifications");
-                                                helper.log("Added a shortcut for " + game.name);
+                                                helper.log(colors.green("Added a shortcut for " + game.name));
                                                 if (enableNotifications) {
                                                     notifier.notify({
                                                         title: game.name,
@@ -109,7 +110,7 @@ var SteamUser = /** @class */ (function () {
                                 }
                             });
                             if (addedShortcuts > 0 && isFirstInstance) {
-                                helper.log(addedShortcuts + " shortcut(s) added, Steam restart required !");
+                                helper.log(colors.cyan(addedShortcuts + " shortcut(s) added, Steam restart required !"));
                             }
                             return resolve();
                         });

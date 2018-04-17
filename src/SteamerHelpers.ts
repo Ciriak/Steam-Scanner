@@ -5,6 +5,7 @@ import * as objectPath from "object-path";
 import * as path from "path";
 const drivelist = require("drivelist");
 const isDev = require("electron-is-dev");
+const colors = require("colors");
 import * as autoLaunch from "auto-launch";
 import { Steamer } from "./Steamer";
 import { SteamUser } from "./SteamUser";
@@ -89,7 +90,7 @@ export class SteamerHelpers {
       const configDataTarget = objectPath.get(configData, parsedKey);
       return configDataTarget;
     } catch (e) {
-      this.error(e);
+      this.error(colors.red(e));
       return false;
     }
   }
@@ -105,7 +106,9 @@ export class SteamerHelpers {
     } catch (e) {
       // create a clean config file if don't exist or is corrupted
       this.log(
-        "WARNING - corrupted or invalid config file - creating a clean config file..."
+        colors.red(
+          "ERROR - corrupted or invalid config file - creating a clean config file..."
+        )
       );
       configData = this.getCleanConfig();
     }
@@ -116,7 +119,7 @@ export class SteamerHelpers {
     try {
       fs.writeJsonSync(configPath, configData);
     } catch (e) {
-      this.error(e);
+      this.error(colors.red(e));
       return false;
     }
     return value;
@@ -146,10 +149,10 @@ export class SteamerHelpers {
     try {
       fs.removeSync(configPath);
     } catch (e) {
-      this.error(e);
+      this.error(colors.red(e));
     }
 
-    this.log("=== Config and shortcuts cleaned ===");
+    this.log(colors.green("=== Config and shortcuts cleaned ==="));
 
     return new Promise((resolve) => {
       resolve();
@@ -160,7 +163,7 @@ export class SteamerHelpers {
     const launcher = new autoLaunch({ name: "Steamer" });
     const launch = this.getConfig("launchOnStartup");
     if (isDev) {
-      this.log("NOTICE : Dev build, launch on startup ignored");
+      this.log(colors.yellow("NOTICE : Dev build, launch on startup ignored"));
       return;
     }
     if (launch) {

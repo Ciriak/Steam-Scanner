@@ -41,6 +41,7 @@ var objectPath = require("object-path");
 var path = require("path");
 var drivelist = require("drivelist");
 var isDev = require("electron-is-dev");
+var colors = require("colors");
 var autoLaunch = require("auto-launch");
 var configPath = path.normalize(path.join(electron_1.app.getPath("appData"), "Steamer", "config.json"));
 var cleanConfig = {
@@ -114,7 +115,7 @@ var SteamerHelpers = /** @class */ (function () {
             return configDataTarget;
         }
         catch (e) {
-            this.error(e);
+            this.error(colors.red(e));
             return false;
         }
     };
@@ -129,7 +130,7 @@ var SteamerHelpers = /** @class */ (function () {
         }
         catch (e) {
             // create a clean config file if don't exist or is corrupted
-            this.log("WARNING - corrupted or invalid config file - creating a clean config file...");
+            this.log(colors.red("ERROR - corrupted or invalid config file - creating a clean config file..."));
             configData = this.getCleanConfig();
         }
         objectPath.ensureExists(configData, parsedKey, value);
@@ -138,7 +139,7 @@ var SteamerHelpers = /** @class */ (function () {
             fs.writeJsonSync(configPath, configData);
         }
         catch (e) {
-            this.error(e);
+            this.error(colors.red(e));
             return false;
         }
         return value;
@@ -181,9 +182,9 @@ var SteamerHelpers = /** @class */ (function () {
                     fs.removeSync(configPath);
                 }
                 catch (e) {
-                    this.error(e);
+                    this.error(colors.red(e));
                 }
-                this.log("=== Config and shortcuts cleaned ===");
+                this.log(colors.green("=== Config and shortcuts cleaned ==="));
                 return [2 /*return*/, new Promise(function (resolve) {
                         resolve();
                     })];
@@ -194,7 +195,7 @@ var SteamerHelpers = /** @class */ (function () {
         var launcher = new autoLaunch({ name: "Steamer" });
         var launch = this.getConfig("launchOnStartup");
         if (isDev) {
-            this.log("NOTICE : Dev build, launch on startup ignored");
+            this.log(colors.yellow("NOTICE : Dev build, launch on startup ignored"));
             return;
         }
         if (launch) {

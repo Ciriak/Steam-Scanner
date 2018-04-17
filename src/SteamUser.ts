@@ -7,6 +7,7 @@ import * as shortcut from "steam-shortcut-editor";
 import { Steamer } from "./Steamer";
 import { SteamerHelpers } from "./SteamerHelpers";
 const helper = new SteamerHelpers();
+const colors = require("colors");
 
 export class SteamUser {
   public userId: any;
@@ -58,7 +59,7 @@ export class SteamUser {
                   const enableNotifications: any = helper.getConfig(
                     "enableNotifications"
                   );
-                  helper.log("Added a shortcut for " + game.name);
+                  helper.log(colors.green("Added a shortcut for " + game.name));
                   if (enableNotifications) {
                     notifier.notify({
                       title: game.name,
@@ -89,7 +90,9 @@ export class SteamUser {
 
         if (addedShortcuts > 0 && isFirstInstance) {
           helper.log(
-            addedShortcuts + " shortcut(s) added, Steam restart required !"
+            colors.cyan(
+              addedShortcuts + " shortcut(s) added, Steam restart required !"
+            )
           );
         }
 

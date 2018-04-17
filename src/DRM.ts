@@ -6,6 +6,7 @@ import * as path from "path";
 import * as recursive from "recursive-readdir";
 
 import { SteamerHelpers } from "./SteamerHelpers";
+const colors = require("colors");
 
 const helper: SteamerHelpers = new SteamerHelpers();
 
@@ -50,9 +51,9 @@ export class DRM {
     }
 
     if (this.binaryLocation) {
-      helper.log(this.name + " located at " + this.binaryLocation);
+      helper.log(colors.cyan(this.name + " located at " + this.binaryLocation));
     } else {
-      helper.log(this.name + " not found");
+      helper.log(colors.yellow(this.name + " not found"));
     }
     return new Promise((resolve) => {
       resolve();
@@ -146,17 +147,19 @@ export class DRM {
           helper.log("Trying to find the process for " + gameItem.name);
 
           helper.setConfig(
-            "drm." + this.name + ".games." + gameItem.name + ".listenedBinaries",
+            "drm." +
+              this.name +
+              ".games." +
+              gameItem.name +
+              ".listenedBinaries",
             binariesPathList
           );
         }
       }
-
     }
 
     return new Promise((resolve) => {
       resolve();
     });
   }
-
 }

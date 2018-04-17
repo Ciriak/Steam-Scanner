@@ -1,4 +1,5 @@
 declare const Promise: any;
+import { app } from "electron";
 import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as path from "path";
@@ -30,11 +31,13 @@ export class Steamer {
   public externalGames: any;
   public steamUsers: any[] = [];
   public checkInterval: any;
+  public versionLabel: any = "Steamer V." + app.getVersion();
   private tray: TrayManager;
 
   constructor() {
+    helper.log(colors.cyan.underline(this.versionLabel));
     if (isDev) {
-      helper.log(colors.red("=== Developement build ==="));
+      helper.log(colors.bgCyan("=== Developement build ==="));
     }
 
     this.checkInterval = helper.getConfig("checkInterval");
@@ -108,12 +111,14 @@ export class Steamer {
         }
       }
       if (!this.steamDirectory) {
-        helper.error("ERR_STEAM_NOT_FOUND");
+        helper.error(colors.red("ERR_STEAM_NOT_FOUND"));
         return;
       }
     }
 
-    helper.log("Steam directory located at " + this.steamDirectory);
+    helper.log(
+      colors.green("Steam directory located at " + this.steamDirectory)
+    );
 
     // save steam location
     helper.setConfig("steamDirectory", this.steamDirectory);
@@ -132,7 +137,7 @@ export class Steamer {
           userDirectories.push(dirPath);
         }
       } catch (e) {
-        helper.error(e);
+        helper.error(colors.red(e));
         continue;
       }
     }
@@ -237,7 +242,9 @@ export class Steamer {
       // A running process corresponding of a game exe has been found !
       if (binaryProcessIndex > -1) {
         helper.log(
-          "Process found for " + item.game.name + " ! => " + item.binary
+          colors.green(
+            "Process found for " + item.game.name + " ! => " + item.binary
+          )
         );
         await drmManager.setBinaryForGame(
           item.drm.name,

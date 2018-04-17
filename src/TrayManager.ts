@@ -13,13 +13,10 @@ export class TrayManager {
     const launchOnStartup: any = helper.getConfig("launchOnStartup");
     const enableNotifications: any = helper.getConfig("enableNotifications");
     tray = new Tray(path.join(__dirname, "assets/steamer.png"));
-    let versionLabel = "Steamer V." + app.getVersion();
-    if (helper.isDev) {
-      versionLabel = versionLabel + " (Dev build)";
-    }
+
     const contextMenu = Menu.buildFromTemplate([
       {
-        label: versionLabel,
+        label: steamer.versionLabel,
         type: "normal",
         enabled: false
       },
@@ -57,7 +54,7 @@ export class TrayManager {
         }
       }
     ]);
-    tray.setToolTip(versionLabel);
+    tray.setToolTip(steamer.versionLabel);
     tray.setContextMenu(contextMenu);
   }
 }
