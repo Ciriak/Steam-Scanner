@@ -1,6 +1,6 @@
 # Steamer
 
-Get all you games on Steam ! Steamer is an Electron app that grab games from others launchers and automaticly add them to Steam.
+Get all you games on Steam ! Steamer is an Electron app that run as a background process, grab games from others launchers and automaticly add them to Steam.
 
 ## Prerequisites
 
