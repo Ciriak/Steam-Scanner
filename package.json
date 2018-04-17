@@ -1,8 +1,7 @@
 {
   "name": "steam-scanner",
   "version": "0.0.1",
-  "description":
-    "Electron app that automatically add your game to you Steam library",
+  "description": "Electron app that automatically add your game to you Steam library",
   "main": "app.js",
   "scripts": {
     "postinstall": "gulp",
@@ -14,7 +13,14 @@
     "type": "git",
     "url": "git+https://github.com/nj-neer/Steam-Scanner.git"
   },
-  "keywords": ["steam", "electron", "game", "sync", "uplay", "origin"],
+  "keywords": [
+    "steam",
+    "electron",
+    "game",
+    "sync",
+    "uplay",
+    "origin"
+  ],
   "author": "Cyriaque DELAUNAY",
   "license": "ISC",
   "bugs": {
@@ -38,7 +44,7 @@
   },
   "build": {
     "appId": "com.cyriaque.steam-scanner",
-    "productName": "Steamer",
+    "productName": "Steam Scanner",
     "directories": {
       "app": "dist",
       "output": "build",
