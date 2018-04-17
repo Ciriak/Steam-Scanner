@@ -40,6 +40,7 @@ var _ = require("lodash");
 var path = require("path");
 var snapshot = require("process-list").snapshot; // TODO seem to be buggy for the compilation
 var isDev = require("electron-is-dev");
+var colors = require("colors");
 var timers_1 = require("timers");
 var DRMManager_1 = require("./DRMManager");
 var SteamerHelpers_1 = require("./SteamerHelpers");
@@ -53,27 +54,24 @@ var shortcusConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
 var defaultCheckInterval = 5 * 60 * 1000; // 5min
 var helper = new SteamerHelpers_1.SteamerHelpers();
 var drmManager = new DRMManager_1.DRMManager();
-var tray = new TrayManager_1.TrayManager();
 var binariesCheckerInterval;
 var binaryCheckerCount = 0;
 var maxBinaryChecking = 10;
 var Steamer = /** @class */ (function () {
     function Steamer() {
-        var _this = this;
         this.steamUsers = [];
         if (isDev) {
-            helper.log("=== Developement build ===");
+            helper.log(colors.red("=== Developement build ==="));
         }
-        var checkInterval = helper.getConfig("checkInterval");
+        this.checkInterval = helper.getConfig("checkInterval");
         // set default value for check interval and save it
-        if (!checkInterval) {
-            checkInterval = defaultCheckInterval;
-            helper.setConfig("checkInterval", checkInterval);
+        if (!this.checkInterval) {
+            this.checkInterval = defaultCheckInterval;
+            helper.setConfig("checkInterval", this.checkInterval);
         }
-        this.init();
-        setInterval(function () { return _this.init(); }, checkInterval);
+        this.tray = new TrayManager_1.TrayManager(this);
     }
-    Steamer.prototype.init = function () {
+    Steamer.prototype.scan = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             var checkInterval;

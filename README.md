@@ -30,6 +30,8 @@ electron dist/app.js
 yarn run build
 ```
 
+**note :** Yarn doesn't show detailled error message, use the vanilla command (ex: electron-builder") to display the full error when the build fail
+
 ## CLI
 
 _--clean_ Clear the saved config and all shortcuts saved on Steam

@@ -4,6 +4,7 @@ import * as _ from "lodash";
 import * as path from "path";
 const { snapshot } = require("process-list"); // TODO seem to be buggy for the compilation
 const isDev = require("electron-is-dev");
+const colors = require("colors");
 
 import { clearInterval } from "timers";
 import { DRMManager } from "./DRMManager";
@@ -20,7 +21,6 @@ const shortcusConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
 const defaultCheckInterval: number = 5 * 60 * 1000; // 5min
 const helper: SteamerHelpers = new SteamerHelpers();
 const drmManager = new DRMManager();
-const tray = new TrayManager();
 let binariesCheckerInterval: any;
 let binaryCheckerCount: number = 0;
 const maxBinaryChecking: number = 10;
@@ -29,23 +29,25 @@ export class Steamer {
   public steamDirectory: any;
   public externalGames: any;
   public steamUsers: any[] = [];
+  public checkInterval: any;
+  private tray: TrayManager;
 
   constructor() {
     if (isDev) {
-      helper.log("=== Developement build ===");
+      helper.log(colors.red("=== Developement build ==="));
     }
 
-    let checkInterval: any = helper.getConfig("checkInterval");
+    this.checkInterval = helper.getConfig("checkInterval");
     // set default value for check interval and save it
-    if (!checkInterval) {
-      checkInterval = defaultCheckInterval;
-      helper.setConfig("checkInterval", checkInterval);
+    if (!this.checkInterval) {
+      this.checkInterval = defaultCheckInterval;
+      helper.setConfig("checkInterval", this.checkInterval);
     }
-    this.init();
-    setInterval(() => this.init(), checkInterval);
+
+    this.tray = new TrayManager(this);
   }
 
-  public async init() {
+  public async scan() {
     let checkInterval: any = helper.getConfig("checkInterval");
     // set default value for check interval and save it
 
@@ -204,10 +206,10 @@ export class Steamer {
 
     helper.log(
       "Scanning process... [" +
-      binaryCheckerCount +
-      "/" +
-      maxBinaryChecking +
-      "]"
+        binaryCheckerCount +
+        "/" +
+        maxBinaryChecking +
+        "]"
     );
 
     // retrieve the list of all current active process
