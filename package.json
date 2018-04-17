@@ -54,7 +54,9 @@
       "installerIcon": "dist/assets/scanner.ico",
       "differentialPackage": false
     },
-    "asar": false,
+    "asar": {
+      "smartUnpack": false
+    },
     "linux": {
       "icon": "dist/assets/scanner.ico",
       "category": "Development"
