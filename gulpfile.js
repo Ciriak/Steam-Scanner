@@ -50,11 +50,11 @@ gulp.task(
   "prepare-dev-env",
   gulpsync.sync([
     // sync
-    ["compile"],
     ["copy-assets", "copy-json"],
     ["update-json"],
     ["install-dependencies"],
-    ["copy-dependencies"]
+    ["copy-dependencies"],
+    ["compile"]
   ])
 );
 
