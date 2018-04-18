@@ -6,6 +6,8 @@ import * as path from "path";
 const { snapshot } = require("process-list"); // TODO seem to be buggy for the compilation
 const isDev = require("electron-is-dev");
 const colors = require("colors");
+const Spinner = require("cli-spinner").Spinner;
+const spinner = new Spinner();
 
 import { clearInterval } from "timers";
 import { DRMManager } from "./DRMManager";
@@ -164,6 +166,7 @@ export class Scanner {
     if (binaryCheckerCount > maxBinaryChecking) {
       clearInterval(binariesCheckerInterval);
       binaryCheckerCount = 0;
+      spinner.stop(true);
     }
     // we retrieve all waiting binaries
 
@@ -209,20 +212,27 @@ export class Scanner {
       });
     }
 
-    helper.log(
-      "Scanning process... [" +
-        binaryCheckerCount +
-        "/" +
-        maxBinaryChecking +
-        "]"
-    );
-
     // retrieve the list of all current active process
     let processList = await snapshot("cpu", "name");
 
     // order by cpu usage for perf reason (shorten the loop)
     processList = _.orderBy(processList, "cpu", "desc");
-    helper.log(processList.length + " process found, looking for games...");
+    // helper.log(processList.length + " process found, looking for games...");
+
+    if (spinner.isSpinning()) {
+      spinner.stop(true);
+    }
+    spinner.setSpinnerTitle(
+      "%s Scanning running process... | Try [" +
+        binaryCheckerCount +
+        "/" +
+        maxBinaryChecking +
+        "] " +
+        " | " +
+        processList.length +
+        " process active"
+    );
+    spinner.start();
 
     // when a game binary is found, we add it to this array
     // this allow to skip the loop if needed
@@ -241,6 +251,7 @@ export class Scanner {
 
       // A running process corresponding of a game exe has been found !
       if (binaryProcessIndex > -1) {
+        spinner.stop(true);
         helper.log(
           colors.green(
             "Process found for " + item.game.name + " ! => " + item.binary
