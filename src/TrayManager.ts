@@ -51,7 +51,7 @@ export class TrayManager {
         type: "checkbox",
         checked: enableNotifications,
         click() {
-          helper.toggleNotifications();
+          helper.updateNotifications();
         }
       },
       {
@@ -59,7 +59,7 @@ export class TrayManager {
         type: "checkbox",
         checked: launchOnStartup,
         click() {
-          helper.toggleLaunchOnStartup();
+          helper.updateLaunchOnStartup();
         }
       },
       {
