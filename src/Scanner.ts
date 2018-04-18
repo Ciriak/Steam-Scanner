@@ -21,7 +21,7 @@ const possibleSteamLocations = [
 ];
 
 const shortcusConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
-const defaultCheckInterval: number = 5 * 60 * 1000; // 5min
+const defaultCheckInterval: number = 2 * 60 * 1000; // 2min
 const helper: ScannerHelpers = new ScannerHelpers();
 const drmManager = new DRMManager();
 let binariesCheckerInterval: any;
@@ -69,7 +69,7 @@ export class Scanner {
     clearInterval(binariesCheckerInterval);
     binariesCheckerInterval = setInterval(
       () => this.binariesListener(),
-      10 * 1000
+      1 * 1000
     ); // every 10 sec - 10 times
     return new Promise((resolve) => {
       resolve();
@@ -166,7 +166,12 @@ export class Scanner {
     if (binaryCheckerCount > maxBinaryChecking) {
       clearInterval(binariesCheckerInterval);
       binaryCheckerCount = 0;
-      spinner.stop(true);
+      if (spinner.isSpinning()) {
+        spinner.stop(true);
+      }
+      return new Promise((resolve) => {
+        resolve();
+      });
     }
     // we retrieve all waiting binaries
 
@@ -218,10 +223,6 @@ export class Scanner {
     // order by cpu usage for perf reason (shorten the loop)
     processList = _.orderBy(processList, "cpu", "desc");
     // helper.log(processList.length + " process found, looking for games...");
-
-    if (spinner.isSpinning()) {
-      spinner.stop(true);
-    }
     spinner.setSpinnerTitle(
       "%s Scanning running process... | Try [" +
         binaryCheckerCount +
@@ -232,7 +233,10 @@ export class Scanner {
         processList.length +
         " process active"
     );
-    spinner.start();
+
+    if (!spinner.isSpinning()) {
+      spinner.start();
+    }
 
     // when a game binary is found, we add it to this array
     // this allow to skip the loop if needed
