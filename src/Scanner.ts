@@ -2,11 +2,18 @@ declare const Promise: any;
 import { app } from "electron";
 import * as fs from "fs-extra";
 import * as _ from "lodash";
+import * as notifier from "node-notifier";
 import * as path from "path";
 const { snapshot } = require("process-list"); // TODO seem to be buggy for the compilation
-const isDev = require("electron-is-dev");
+let isDev = require("electron-is-dev");
 const colors = require("colors");
+const Spinner = require("cli-spinner").Spinner;
+import { autoUpdater } from "electron-updater";
+const spinner = new Spinner();
 
+if (process.argv.indexOf("--debug") > -1) {
+  isDev = true;
+}
 import { clearInterval } from "timers";
 import { DRMManager } from "./DRMManager";
 import { ScannerHelpers } from "./ScannerHelpers";
@@ -19,25 +26,26 @@ const possibleSteamLocations = [
 ];
 
 const shortcusConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
-const defaultCheckInterval: number = 5 * 60 * 1000; // 5min
+const defaultCheckInterval: number = 2 * 60 * 1000; // 2min
 const helper: ScannerHelpers = new ScannerHelpers();
 const drmManager = new DRMManager();
 let binariesCheckerInterval: any;
 let binaryCheckerCount: number = 0;
-const maxBinaryChecking: number = 10;
+const maxBinaryChecking: number = 20;
 
 export class Scanner {
   public steamDirectory: any;
   public externalGames: any;
   public steamUsers: any[] = [];
   public checkInterval: any;
+  public isScanning: boolean = false;
   public versionLabel: any = "Steam Scanner V." + app.getVersion();
   private tray: TrayManager;
 
   constructor() {
     helper.log(colors.cyan.underline(this.versionLabel));
     if (isDev) {
-      helper.log(colors.bgCyan("=== Developement build ==="));
+      helper.log(colors.bgCyan("=== Debug Mode ==="));
     }
 
     this.checkInterval = helper.getConfig("checkInterval");
@@ -48,9 +56,25 @@ export class Scanner {
     }
 
     this.tray = new TrayManager(this);
+
+    const launched = helper.getConfig("launched");
+    if (!launched) {
+      // notify the user that Steam Scanner run in background
+      notifier.notify({
+        title: "Steam Scanner is running",
+        message: "Click on the tray icon for more options",
+        icon: path.join(__dirname, "assets/scanner.png")
+      });
+      helper.setConfig("launched", true);
+    }
+
+    // check updates and repeat every hours
+    this.checkUpdates();
+    setInterval(() => this.checkUpdates(), 1 * 60 * 60 * 1000); // every hours
   }
 
   public async scan() {
+    this.isScanning = true;
     let checkInterval: any = helper.getConfig("checkInterval");
     // set default value for check interval and save it
 
@@ -67,7 +91,7 @@ export class Scanner {
     clearInterval(binariesCheckerInterval);
     binariesCheckerInterval = setInterval(
       () => this.binariesListener(),
-      10 * 1000
+      5 * 1000
     ); // every 10 sec - 10 times
     return new Promise((resolve) => {
       resolve();
@@ -164,7 +188,19 @@ export class Scanner {
     if (binaryCheckerCount > maxBinaryChecking) {
       clearInterval(binariesCheckerInterval);
       binaryCheckerCount = 0;
+      if (spinner.isSpinning()) {
+        spinner.stop(true);
+      }
+      this.isScanning = false;
+      this.tray.update(this);
+      helper.log("Stopping scan");
+      return new Promise((resolve) => {
+        resolve();
+      });
     }
+
+    this.tray.update(this);
+
     // we retrieve all waiting binaries
 
     //  heaven of for !
@@ -209,20 +245,26 @@ export class Scanner {
       });
     }
 
-    helper.log(
-      "Scanning process... [" +
-        binaryCheckerCount +
-        "/" +
-        maxBinaryChecking +
-        "]"
-    );
-
     // retrieve the list of all current active process
     let processList = await snapshot("cpu", "name");
 
     // order by cpu usage for perf reason (shorten the loop)
     processList = _.orderBy(processList, "cpu", "desc");
-    helper.log(processList.length + " process found, looking for games...");
+    // helper.log(processList.length + " process found, looking for games...");
+    spinner.setSpinnerTitle(
+      "%s Scanning running process... | Try [" +
+        binaryCheckerCount +
+        "/" +
+        maxBinaryChecking +
+        "] " +
+        " | " +
+        processList.length +
+        " process active"
+    );
+
+    if (!spinner.isSpinning()) {
+      spinner.start();
+    }
 
     // when a game binary is found, we add it to this array
     // this allow to skip the loop if needed
@@ -241,6 +283,7 @@ export class Scanner {
 
       // A running process corresponding of a game exe has been found !
       if (binaryProcessIndex > -1) {
+        spinner.stop(true);
         helper.log(
           colors.green(
             "Process found for " + item.game.name + " ! => " + item.binary
@@ -270,6 +313,51 @@ export class Scanner {
     }
     return new Promise((resolve) => {
       resolve();
+    });
+  }
+
+  private checkUpdates() {
+    if (isDev) {
+      helper.log(colors.cyan("Updater logs enabled"));
+    }
+    autoUpdater.checkForUpdatesAndNotify();
+
+    autoUpdater.on("checking-for-update", function() {
+      if (isDev) {
+        helper.log("Checking for updates...");
+      }
+    });
+
+    autoUpdater.on("error", function(error) {
+      if (isDev) {
+        helper.log("Update error");
+      }
+    });
+
+    autoUpdater.on("update-available", function() {
+      if (isDev) {
+        helper.log("Update available");
+      }
+    });
+
+    autoUpdater.on("update-not-available", function() {
+      if (isDev) {
+        helper.log("No update available");
+      }
+    });
+
+    autoUpdater.on("update-downloaded", function() {
+      if (isDev) {
+        helper.log("Update downloaded");
+      }
+      autoUpdater.quitAndInstall(true, true);
+    });
+
+    autoUpdater.on("download-progress", function(progress) {
+      if (isDev) {
+        progress.percent = Math.round(progress.percent);
+        helper.log("Downloading update : " + progress.percent + "%");
+      }
     });
   }
 }

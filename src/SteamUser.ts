@@ -64,7 +64,8 @@ export class SteamUser {
                     notifier.notify({
                       title: game.name,
                       message:
-                        "This game has been added to your game library, please restart Steam"
+                        "This game has been added to your game library, please restart Steam",
+                      icon: path.join(__dirname, "assets/scanner.png")
                     });
                   }
                 }
