@@ -7,7 +7,11 @@ var typescript = require("gulp-tsc");
 var pjson = require("./package.json");
 var request = require("request");
 var async = require("async");
+var path = require("path");
+var mime = require("mime-types");
+var archiver = require("gulp-archiver");
 var gulpsync = require("gulp-sync")(gulp);
+var ghToken = fs.readFileSync("./.gh-token", "utf8");
 
 gulp.task("copy-assets", function() {
   console.log("Copying assets...");
@@ -96,7 +100,7 @@ gulp.task(
 );
 
 var releaseParams = {
-  token: process.env.GH_TOKEN,
+  token: ghToken,
   owner: "nj-neer",
   repo: "Steam-Scanner",
   tag: "v" + pjson.version,
@@ -106,8 +110,11 @@ var releaseParams = {
 
 gulp.task("github:release", function(callback) {
   console.log("Creating the new release...");
+
   if (!releaseParams.token) {
-    throw "ERROR, Please set GH_TOKEN env variable with the github release token !";
+    console.error(
+      "ERROR, Please set GH_TOKEN env variable with the github release token !"
+    );
     return false;
   }
 
@@ -129,17 +136,17 @@ gulp.task("github:release", function(callback) {
     },
     function(error, response, body) {
       if (error) {
-        throw error;
+        console.error(error);
       }
 
       if (response.statusCode !== 201) {
-        throw "ERR_STATUSCODE_" + response.statusCode + " => " + body;
+        console.error("ERR_STATUSCODE_" + response.statusCode + " => " + body);
       }
 
       body = JSON.parse(body);
 
       if (!body.id || !body.upload_url) {
-        throw "ERR_MISSING_RELEASE_ID";
+        console.error("ERR_MISSING_RELEASE_ID");
       }
       // release doesn't exist (201) , can continue
       releaseParams.id = body.id;
@@ -166,11 +173,11 @@ function deleteRelease(id, callback) {
     function(error, response) {
       // release doesn't exist , can continue
       if (error) {
-        throw error;
+        console.error(error);
       }
 
       if (response.statusCode !== 204) {
-        throw "ERR_STATUSCODE_" + response.statusCode;
+        console.error("ERR_STATUSCODE_" + response.statusCode);
       }
 
       callback();
@@ -185,7 +192,7 @@ gulp.task("github:assets", function(callback) {
   //list all files and their mime types
   fs.readdir("./build", function(err, files) {
     if (err) {
-      throw err;
+      console.error(err);
     }
 
     for (var i = 0; i < files.length; i++) {
@@ -201,7 +208,7 @@ gulp.task("github:assets", function(callback) {
         parsedFiles.push(file);
       } catch (err) {
         deleteRelease(releaseParams.id, function() {
-          throw err;
+          console.error(err);
         });
       }
     }
@@ -213,11 +220,11 @@ gulp.task("github:assets", function(callback) {
         fs.readFile("./build/" + file.name, function(err, data) {
           if (err) {
             deleteRelease(releaseParams.id, function() {
-              throw err;
+              console.error(err);
             });
           } else {
             if (!data) {
-              throw "ERR_FILE_NOT_FOUND";
+              console.error("ERR_FILE_NOT_FOUND");
             }
 
             fileBinary = new Buffer(data, "binary");
@@ -272,7 +279,7 @@ gulp.task("github:assets", function(callback) {
       function(err) {
         if (err) {
           deleteRelease(releaseParams.id, function() {
-            throw err;
+            console.error(err);
           });
         }
 
@@ -312,7 +319,7 @@ gulp.task("check-release-tag", function(callback) {
             return callback();
           });
         } else {
-          throw "Check release error";
+          console.error("Check release error");
         }
       }
     }

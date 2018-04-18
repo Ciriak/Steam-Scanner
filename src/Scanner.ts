@@ -5,11 +5,15 @@ import * as _ from "lodash";
 import * as notifier from "node-notifier";
 import * as path from "path";
 const { snapshot } = require("process-list"); // TODO seem to be buggy for the compilation
-const isDev = require("electron-is-dev");
+let isDev = require("electron-is-dev");
 const colors = require("colors");
 const Spinner = require("cli-spinner").Spinner;
+import { autoUpdater } from "electron-updater";
 const spinner = new Spinner();
 
+if (process.argv.indexOf("--debug") > -1) {
+  isDev = true;
+}
 import { clearInterval } from "timers";
 import { DRMManager } from "./DRMManager";
 import { ScannerHelpers } from "./ScannerHelpers";
@@ -27,7 +31,7 @@ const helper: ScannerHelpers = new ScannerHelpers();
 const drmManager = new DRMManager();
 let binariesCheckerInterval: any;
 let binaryCheckerCount: number = 0;
-const maxBinaryChecking: number = 10;
+const maxBinaryChecking: number = 20;
 
 export class Scanner {
   public steamDirectory: any;
@@ -41,7 +45,7 @@ export class Scanner {
   constructor() {
     helper.log(colors.cyan.underline(this.versionLabel));
     if (isDev) {
-      helper.log(colors.bgCyan("=== Developement build ==="));
+      helper.log(colors.bgCyan("=== Debug Mode ==="));
     }
 
     this.checkInterval = helper.getConfig("checkInterval");
@@ -63,6 +67,10 @@ export class Scanner {
       });
       helper.setConfig("launched", true);
     }
+
+    // check updates and repeat every hours
+    this.checkUpdates();
+    setInterval(() => this.checkUpdates(), 1 * 60 * 60 * 1000); // every hours
   }
 
   public async scan() {
@@ -185,6 +193,7 @@ export class Scanner {
       }
       this.isScanning = false;
       this.tray.update(this);
+      helper.log("Stopping scan");
       return new Promise((resolve) => {
         resolve();
       });
@@ -304,6 +313,51 @@ export class Scanner {
     }
     return new Promise((resolve) => {
       resolve();
+    });
+  }
+
+  private checkUpdates() {
+    if (isDev) {
+      helper.log(colors.cyan("Updater logs enabled"));
+    }
+    autoUpdater.checkForUpdatesAndNotify();
+
+    autoUpdater.on("checking-for-update", function() {
+      if (isDev) {
+        helper.log("Checking for updates...");
+      }
+    });
+
+    autoUpdater.on("error", function(error) {
+      if (isDev) {
+        helper.log("Update error");
+      }
+    });
+
+    autoUpdater.on("update-available", function() {
+      if (isDev) {
+        helper.log("Update available");
+      }
+    });
+
+    autoUpdater.on("update-not-available", function() {
+      if (isDev) {
+        helper.log("No update available");
+      }
+    });
+
+    autoUpdater.on("update-downloaded", function() {
+      if (isDev) {
+        helper.log("Update downloaded");
+      }
+      autoUpdater.quitAndInstall(true, true);
+    });
+
+    autoUpdater.on("download-progress", function(progress) {
+      if (isDev) {
+        progress.percent = Math.round(progress.percent);
+        helper.log("Downloading update : " + progress.percent + "%");
+      }
     });
   }
 }

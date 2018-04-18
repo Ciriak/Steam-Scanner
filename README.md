@@ -13,12 +13,14 @@ npm install --global --production windows-build-tools
 ```
 
 ## Developping
+
 Install the dependencies and generate the dist folder
+
 ```
 yarn
 ```
 
-Start the watcher 
+Start the watcher
 
 ```
 yarn run dev
@@ -38,6 +40,16 @@ yarn run build
 
 **note :** Yarn doesn't show detailled error message, use the vanilla command (ex: electron-builder") to display the full error if the build fail
 
+## Deploy a release
+
+**note** You need to create a file named **.gh-token** with the Github release token in it
+
+```
+yarn run deploy
+```
+
 ## Available launch parameters
 
 _--clean_ Clear the saved config and all shortcuts saved on Steam
+
+_--debug_ Show additionnal outputs in the console (like updater logs)
