@@ -8,7 +8,8 @@
     "postinstall": "gulp",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsc ./src/app.ts --outDir ./dist/ --watch",
-    "build": "gulp build"
+    "build": "gulp build",
+    "deploy": "gulp deploy"
   },
   "repository": {
     "type": "git",
@@ -38,7 +39,7 @@
   },
   "build": {
     "appId": "com.cyriaque.steam-scanner",
-    "productName": "Steam Scanner",
+    "productName": "steam-scanner",
     "directories": {
       "app": "dist",
       "output": "build",
@@ -68,5 +69,8 @@
       "artifactName": "${productName}-${version}.${ext}"
     }
   },
-  "dependencies": {}
+  "dependencies": {
+    "async": "^2.6.0",
+    "request": "^2.85.0"
+  }
 }
