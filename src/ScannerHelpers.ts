@@ -22,6 +22,10 @@ const cleanConfig = {
 
 export class ScannerHelpers {
   public isDev = isDev;
+  constructor() {
+    this.checkConfigFile();
+  }
+
   /**
    * Report error
    */
@@ -34,6 +38,26 @@ export class ScannerHelpers {
    */
   public log(msg: string) {
     console.log(msg);
+  }
+
+  // check if the configFile is valid or corrupted, and create a clean one if needed
+  public checkConfigFile() {
+    let data;
+    try {
+      // be sure that the file exist
+      fs.ensureFileSync(configPath);
+      data = fs.readJsonSync(configPath);
+    } catch (e) {
+      // create a clean config file if don't exist or is corrupted
+      // this also happend for the first launch, so we add a notification
+      this.log(
+        colors.yellow(
+          "WARNING - corrupted or invalid config file - creating a clean config file..."
+        )
+      );
+      data = this.getCleanConfig();
+      fs.writeJsonSync(configPath, data);
+    }
   }
 
   /**
@@ -97,21 +121,9 @@ export class ScannerHelpers {
 
   // save a propertie into the config
   public setConfig(key: string, value: any) {
-    let configData: any;
+    this.checkConfigFile();
+    const configData = fs.readJsonSync(configPath);
     const parsedKey = key.split(".");
-    try {
-      // be sure that the file exist
-      fs.ensureFileSync(configPath);
-      configData = fs.readJsonSync(configPath);
-    } catch (e) {
-      // create a clean config file if don't exist or is corrupted
-      this.log(
-        colors.red(
-          "ERROR - corrupted or invalid config file - creating a clean config file..."
-        )
-      );
-      configData = this.getCleanConfig();
-    }
 
     objectPath.ensureExists(configData, parsedKey, value);
     objectPath.set(configData, parsedKey, value);

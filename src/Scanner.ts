@@ -2,6 +2,7 @@ declare const Promise: any;
 import { app } from "electron";
 import * as fs from "fs-extra";
 import * as _ from "lodash";
+import * as notifier from "node-notifier";
 import * as path from "path";
 const { snapshot } = require("process-list"); // TODO seem to be buggy for the compilation
 const isDev = require("electron-is-dev");
@@ -33,6 +34,7 @@ export class Scanner {
   public externalGames: any;
   public steamUsers: any[] = [];
   public checkInterval: any;
+  public isScanning: boolean = false;
   public versionLabel: any = "Steam Scanner V." + app.getVersion();
   private tray: TrayManager;
 
@@ -50,9 +52,21 @@ export class Scanner {
     }
 
     this.tray = new TrayManager(this);
+
+    const launched = helper.getConfig("launched");
+    if (!launched) {
+      // notify the user that Steam Scanner run in background
+      notifier.notify({
+        title: "Steam Scanner is running",
+        message: "Click on the tray icon for more options",
+        icon: path.join(__dirname, "assets/scanner.png")
+      });
+      helper.setConfig("launched", true);
+    }
   }
 
   public async scan() {
+    this.isScanning = true;
     let checkInterval: any = helper.getConfig("checkInterval");
     // set default value for check interval and save it
 
@@ -169,10 +183,15 @@ export class Scanner {
       if (spinner.isSpinning()) {
         spinner.stop(true);
       }
+      this.isScanning = false;
+      this.tray.update(this);
       return new Promise((resolve) => {
         resolve();
       });
     }
+
+    this.tray.update(this);
+
     // we retrieve all waiting binaries
 
     //  heaven of for !
