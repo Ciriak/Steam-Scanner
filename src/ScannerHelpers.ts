@@ -10,7 +10,7 @@ import * as autoLaunch from "auto-launch";
 import { Scanner } from "./Scanner";
 import { SteamUser } from "./SteamUser";
 const configPath = path.normalize(
-  path.join(app.getPath("appData"), "Steam Scanner", "config.json")
+  path.join(app.getPath("appData"), "steam-scanner", "config.json")
 );
 
 const cleanConfig = {
@@ -24,6 +24,9 @@ export class ScannerHelpers {
   public isDev = isDev;
   constructor() {
     this.checkConfigFile();
+    // ensure default  config for notifications and los
+    this.updateLaunchOnStartup();
+    this.updateNotifications();
   }
 
   /**
@@ -171,7 +174,7 @@ export class ScannerHelpers {
     });
   }
 
-  public toggleLaunchOnStartup() {
+  public updateLaunchOnStartup() {
     const launcher = new autoLaunch({ name: "Steam Scanner" });
     const launch = this.getConfig("launchOnStartup");
     if (isDev) {
@@ -191,7 +194,7 @@ export class ScannerHelpers {
     }
   }
 
-  public toggleNotifications() {
+  public updateNotifications() {
     const notif = this.getConfig("enableNotifications");
     this.setConfig("enableNotifications", !notif);
     if (!notif === true) {
