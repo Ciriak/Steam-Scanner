@@ -69,7 +69,7 @@ export class Scanner {
     clearInterval(binariesCheckerInterval);
     binariesCheckerInterval = setInterval(
       () => this.binariesListener(),
-      1 * 1000
+      5 * 1000
     ); // every 10 sec - 10 times
     return new Promise((resolve) => {
       resolve();

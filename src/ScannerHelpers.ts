@@ -152,7 +152,7 @@ export class ScannerHelpers {
       this.error(colors.red(e));
     }
 
-    this.log(colors.green("=== Config and shortcuts cleaned ==="));
+    this.log(colors.yellow("=== Config and shortcuts cleaned ==="));
 
     return new Promise((resolve) => {
       resolve();

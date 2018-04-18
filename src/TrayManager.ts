@@ -6,13 +6,12 @@ import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
 
 const helper = new ScannerHelpers();
-
+let tray = null;
 export class TrayManager {
   constructor(scanner: Scanner) {
-    let tray = null;
     const launchOnStartup: any = helper.getConfig("launchOnStartup");
     const enableNotifications: any = helper.getConfig("enableNotifications");
-    tray = new Tray(path.join(__dirname, "assets/scanner.png"));
+    tray = new Tray(path.join(__dirname, "assets/scanner.ico"));
 
     const contextMenu = Menu.buildFromTemplate([
       {
