@@ -38,7 +38,7 @@
   },
   "build": {
     "appId": "com.cyriaque.steam-scanner",
-    "productName": "Steamer",
+    "productName": "Steam Scanner",
     "directories": {
       "app": "dist",
       "output": "build",
