@@ -11,7 +11,13 @@ var path = require("path");
 var mime = require("mime-types");
 var archiver = require("gulp-archiver");
 var gulpsync = require("gulp-sync")(gulp);
-var ghToken = fs.readFileSync("./.gh-token", "utf8");
+var ghToken;
+
+try {
+  ghToken = fs.readFileSync("./.gh-token", "utf8");
+} catch (e) {
+  console.log("Warning - no gh-token provided, you won't be able to deploy !");
+}
 
 gulp.task("copy-assets", function() {
   console.log("Copying assets...");
