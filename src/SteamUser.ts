@@ -48,23 +48,35 @@ export class SteamUser {
 
                 // check if the game is already in the steam shortcuts
                 const gameShortcutIndex = _.findIndex(shortcutData.shortcuts, {
-                  exe: game.binary
+                  appName: gameName
                 });
-                // skip this game
+
+                //// the game shortcut already exist, check if the binary is the same too
                 if (gameShortcutIndex > -1) {
-                  continue;
+                  const gameShorcut = shortcutData.shortcuts[gameShortcutIndex];
+                  // same game but different binary, update the binary
+                  if (gameShorcut.exe !== game.binary) {
+                    // remove the old entry, the new one will be added instead
+                    shortcutData.shortcuts.splice(gameShortcutIndex, 1);
+                  } else {
+                    // name and exe are the same, no change
+                    continue;
+                  }
                 }
 
                 if (isFirstInstance) {
                   const enableNotifications: any = helper.getConfig(
                     "enableNotifications"
                   );
-                  helper.log(colors.green("Added a shortcut for " + game.name));
+                  helper.log(
+                    colors.green("Added a shortcut for " + game.name + " =>")
+                  );
+                  helper.log(game.binary);
                   if (enableNotifications) {
                     notifier.notify({
                       title: game.name,
                       message:
-                        "This game has been added to your game library, please restart Steam",
+                        "This game has been added to your library, please restart Steam",
                       icon: path.join(__dirname, "assets/scanner.png")
                     });
                   }

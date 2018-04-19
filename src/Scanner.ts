@@ -112,6 +112,19 @@ export class Scanner {
     });
   }
 
+  // update the steamShortcuts (send the query to each Steam user found)
+  public async updateShortcuts() {
+    // update the shortcuts for all found user
+    let isFirstInstance: boolean = true;
+    for (const steamUser of this.steamUsers) {
+      await steamUser.updateShortcuts(isFirstInstance);
+      isFirstInstance = false;
+    }
+    return new Promise((resolve) => {
+      resolve();
+    });
+  }
+
   /**
    * Check if steam is installed
    */
@@ -305,18 +318,6 @@ export class Scanner {
       }
     }
 
-    return new Promise((resolve) => {
-      resolve();
-    });
-  }
-
-  private async updateShortcuts() {
-    // update the shortcuts for all found user
-    let isFirstInstance: boolean = true;
-    for (const steamUser of this.steamUsers) {
-      await steamUser.updateShortcuts(isFirstInstance);
-      isFirstInstance = false;
-    }
     return new Promise((resolve) => {
       resolve();
     });
