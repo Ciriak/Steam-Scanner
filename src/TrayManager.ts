@@ -20,7 +20,7 @@ export class TrayManager {
     const enableNotifications: any = helper.getConfig("enableNotifications");
 
     let scanTemplate;
-    if (scanner.isScanning) {
+    if (scanner.isScanning === true) {
       scanTemplate = {
         label: "Scanning games ...",
         type: "normal",

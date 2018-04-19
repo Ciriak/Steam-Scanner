@@ -56,6 +56,7 @@ export class Scanner {
     }
 
     this.tray = new TrayManager(this);
+    this.tray.update(this);
 
     const launched = helper.getConfig("launched");
     if (!launched) {
@@ -78,10 +79,13 @@ export class Scanner {
     let checkInterval: any = helper.getConfig("checkInterval");
     // set default value for check interval and save it
 
+    this.tray.update(this);
+
     if (!checkInterval) {
       checkInterval = defaultCheckInterval;
       helper.setConfig("checkInterval", checkInterval);
     }
+    this.tray.update(this);
 
     await this.checkSteamInstallation();
     await helper.checkArgv(this);
@@ -240,6 +244,8 @@ export class Scanner {
 
     // stop if no items watched
     if (watchedItems.length === 0) {
+      this.isScanning = false;
+      this.tray.update(this);
       return new Promise((resolve) => {
         resolve();
       });
