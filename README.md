@@ -34,6 +34,7 @@ For now only **Windows** is supported, but Linux on Mac version is planned !
 | <img src="https://i.imgur.com/ffu3VTv.png" width="18px" height="18px"> Blizzard Launcher | 🔁 WIP |
 | <img src="https://i.imgur.com/ES8Pr1w.png" width="18px" height="18px"> GOG Galaxy | ❌ |
 | <img src="https://i.imgur.com/zN8Cdvs.png" width="18px" height="18px"> Twitch DA | ❌ |
+| <img src="https://i.imgur.com/KUhFAXu.png"  width="18px" height="18px"> MS Store | ❌ |
 
 
 ## Dev Prerequisites
