@@ -86,10 +86,14 @@ gulp.task("clean:dist", function() {
   return del("./dist/**/*");
 });
 
+gulp.task("clean:src-modules", function() {
+  return del("./src/node_modules/**/*");
+});
+
 gulp.task(
   "build",
   gulpsync.sync([
-    ["clean:build", "clean:dist"],
+    ["clean:build", "clean:dist", "clean:src-modules"],
     ["prepare-dev-env"],
     ["package-app"]
   ])
