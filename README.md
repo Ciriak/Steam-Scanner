@@ -2,7 +2,8 @@
 
 
 # Steam Scanner
-![Steam scanner](https://i.imgur.com/TQwOYJC.png =150x)
+
+<img src="https://i.imgur.com/TQwOYJC.png" width="150px" height="150px">
 
 Get all you games on Steam ! Steam Scanner run as a background process, grab games from others launchers and add them to your Steam library.
 
@@ -28,11 +29,11 @@ For now only **Windows** is supported, but Linux on Mac version is planned !
 
 |DRM|Supported  |
 |--|--|
-| ![](https://i.imgur.com/C0PYnQH.png =18x) Uplay | ✔️ |
-| ![](https://i.imgur.com/0iLlyMK.png =18x) Origin | ✔️ |
-| ![](https://i.imgur.com/ffu3VTv.png =18x) Blizzard Launcher | 🔁 WIP |
-| ![](https://i.imgur.com/ES8Pr1w.png =18x) GOG Galaxy | ❌ |
-| ![](https://i.imgur.com/zN8Cdvs.png =18x) Twitch DA | ❌ |
+| <img src="https://i.imgur.com/C0PYnQH.png" width="18px" height="18px"> Uplay | ✔️ |
+| <img src="https://i.imgur.com/0iLlyMK.png" width="18px" height="18px"> Origin | ✔️ |
+| <img src="https://i.imgur.com/ffu3VTv.png" width="18px" height="18px"> Blizzard Launcher | 🔁 WIP |
+| <img src="https://i.imgur.com/ES8Pr1w.png" width="18px" height="18px"> GOG Galaxy | ❌ |
+| <img src="https://i.imgur.com/zN8Cdvs.png" width="18px" height="18px"> Twitch DA | ❌ |
 
 
 ## Dev Prerequisites
