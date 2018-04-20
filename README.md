@@ -7,14 +7,14 @@
 
 Get all you games on Steam ! Steam Scanner run as a background process, grab games from others launchers and add them to your Steam library.
 
-|  |
+| Table of contents |
 |--|
-| Downloads |
-| Supported OS |
-| Supported DRM |
-| Dev prequesites |
-| Developping |
-| Launch parameters |
+| [Downloads](#downloads) |
+| [Supported OS](#supported-os) |
+| [Supported DRM](#supported-drm) |
+| [Dev prerequisites](#dev-prerequisites) |
+| [Developping](#developping) |
+| [Launch parameters](#launch-parameters) |
 
 
 ## Downloads
