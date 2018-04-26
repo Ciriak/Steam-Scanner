@@ -17,7 +17,8 @@ const cleanConfig = {
   steamDirectory: null,
   drm: {},
   launchOnStartup: true,
-  enableNotifications: true
+  enableNotifications: true,
+  minCPUFilter: 15
 };
 
 export class ScannerHelpers {
@@ -50,6 +51,14 @@ export class ScannerHelpers {
       // be sure that the file exist
       fs.ensureFileSync(configPath);
       data = fs.readJsonSync(configPath);
+
+      // if there is a missing propertie in the saved config, reset it
+      for (const propertie in cleanConfig) {
+        if (!data[propertie]) {
+          data[propertie] = cleanConfig[propertie];
+        }
+      }
+
     } catch (e) {
       // create a clean config file if don't exist or is corrupted
       // this also happend for the first launch, so we add a notification
@@ -59,8 +68,9 @@ export class ScannerHelpers {
         )
       );
       data = this.getCleanConfig();
-      fs.writeJsonSync(configPath, data);
     }
+    // write a parsed and validated config file
+    fs.writeJsonSync(configPath, data);
   }
 
   /**
