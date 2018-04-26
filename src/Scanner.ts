@@ -311,6 +311,7 @@ export class Scanner {
         if (processObj.cpu < this.minCPUFilter) {
           continue;
         }
+        // TODO check if the file exist
         spinner.stop(true);
         helper.log(
           colors.green(
