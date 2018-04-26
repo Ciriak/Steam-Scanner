@@ -38,6 +38,7 @@ export class Scanner {
   public externalGames: any;
   public steamUsers: any[] = [];
   public checkInterval: any;
+  public minCPUFilter: any;
   public isScanning: boolean = false;
   public versionLabel: any = "Steam Scanner V." + app.getVersion();
   private tray: TrayManager;
@@ -48,7 +49,10 @@ export class Scanner {
       helper.log(colors.bgCyan("=== Debug Mode ==="));
     }
 
-    this.checkInterval = helper.getConfig("checkInterval");
+    this.checkInterval = helper.getConfig("checkInterval"); // ms between 2 check
+    // if the cpu usage a a found process is below, it will be ignored
+    // it prevent that the setup are added instead of the game exe itself
+    this.minCPUFilter = helper.getConfig("minCPUFilter");
     // set default value for check interval and save it
     if (!this.checkInterval) {
       this.checkInterval = defaultCheckInterval;
@@ -272,13 +276,13 @@ export class Scanner {
     // helper.log(processList.length + " process found, looking for games...");
     spinner.setSpinnerTitle(
       "%s Scanning running process... | Try [" +
-        binaryCheckerCount +
-        "/" +
-        maxBinaryChecking +
-        "] " +
-        " | " +
-        processList.length +
-        " process active"
+      binaryCheckerCount +
+      "/" +
+      maxBinaryChecking +
+      "] " +
+      " | " +
+      processList.length +
+      " process active"
     );
 
     if (!spinner.isSpinning()) {
@@ -289,7 +293,7 @@ export class Scanner {
     // this allow to skip the loop if needed
     const gameBinariesFound: string[] = [];
 
-    // for each item check if it exist in the current running process
+    // for each item check if it exist in the currents active process
     for (const item of watchedItems) {
       // skip if the binary of the game has already been found
       if (gameBinariesFound.indexOf(item.game.name) > -1) {
@@ -302,6 +306,11 @@ export class Scanner {
 
       // A running process corresponding of a game exe has been found !
       if (binaryProcessIndex > -1) {
+        const processObj = processList[binaryProcessIndex];
+        // skip if the item is too low in cpu usage ([minCPUFilter]%)
+        if (processObj.cpu < this.minCPUFilter) {
+          continue;
+        }
         spinner.stop(true);
         helper.log(
           colors.green(
@@ -329,38 +338,38 @@ export class Scanner {
     }
     autoUpdater.checkForUpdatesAndNotify();
 
-    autoUpdater.on("checking-for-update", function() {
+    autoUpdater.on("checking-for-update", function () {
       if (isDev) {
         helper.log("Checking for updates...");
       }
     });
 
-    autoUpdater.on("error", function(error) {
+    autoUpdater.on("error", function (error) {
       if (isDev) {
         helper.log("Update error");
       }
     });
 
-    autoUpdater.on("update-available", function() {
+    autoUpdater.on("update-available", function () {
       if (isDev) {
         helper.log("Update available");
       }
     });
 
-    autoUpdater.on("update-not-available", function() {
+    autoUpdater.on("update-not-available", function () {
       if (isDev) {
         helper.log("No update available");
       }
     });
 
-    autoUpdater.on("update-downloaded", function() {
+    autoUpdater.on("update-downloaded", function () {
       if (isDev) {
         helper.log("Update downloaded");
       }
       autoUpdater.quitAndInstall(true, true);
     });
 
-    autoUpdater.on("download-progress", function(progress) {
+    autoUpdater.on("download-progress", function (progress) {
       if (isDev) {
         progress.percent = Math.round(progress.percent);
         helper.log("Downloading update : " + progress.percent + "%");
