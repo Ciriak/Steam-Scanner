@@ -11,6 +11,8 @@ const Spinner = require("cli-spinner").Spinner;
 import { autoUpdater } from "electron-updater";
 const spinner = new Spinner();
 
+//TODO Find why it add the same shortcut multiple time
+
 if (process.argv.indexOf("--debug") > -1) {
   isDev = true;
 }
