@@ -56,6 +56,8 @@ export class SteamUser {
                   const gameShorcut = shortcutData.shortcuts[gameShortcutIndex];
                   // same game but different binary, update the binary
                   if (gameShorcut.exe !== game.binary) {
+                    helper.log("Updating binary for "+gameName+" :");
+                    helper.log(gameShorcut.exe+" => "+game.binary);
                     // remove the old entry, the new one will be added instead
                     shortcutData.shortcuts.splice(gameShortcutIndex, 1);
                   } else {
