@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/nj-neer/Steam-Scanner#readme",
   "devDependencies": {
-     "@types/fs-extra": "^5.0.1",
+    "@types/fs-extra": "^5.0.1",
     "@types/lodash": "^4.14.106",
     "@types/object-path": "^0.9.29",
     "del": "^3.0.0",
@@ -76,6 +76,7 @@
     "fs-extra": "^5.0.0",
     "gulp-archiver": "^1.0.0",
     "mime-types": "^2.1.18",
+    "prebuild-install": "^2.5.3",
     "request": "^2.85.0",
     "typescript": "^2.8.3"
   }
