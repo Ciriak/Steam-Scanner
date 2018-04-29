@@ -4,7 +4,7 @@ import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as notifier from "node-notifier";
 import * as path from "path";
-const { snapshot } = require("process-list"); // TODO seem to be buggy for the compilation
+const { snapshot } = require("process-list");
 let isDev = require("electron-is-dev");
 const colors = require("colors");
 const Spinner = require("cli-spinner").Spinner;
@@ -313,7 +313,13 @@ export class Scanner {
         if (processObj.cpu < this.minCPUFilter) {
           continue;
         }
-        // TODO check if the file exist
+        
+        //the binary has been found but don't exist anymore, skip
+        let binaryExist = fs.existsSync(item.binaryPath);
+        if(!binaryExist){
+          continue;
+        }
+
         spinner.stop(true);
         helper.log(
           colors.green(
