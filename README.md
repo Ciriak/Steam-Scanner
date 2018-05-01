@@ -38,6 +38,7 @@ For now only **Windows** is supported, but Linux and Mac version is planned !
 
 * [Gulp](https://gulpjs.com/)
 * [Electron](https://electronjs.org/)
+* [Python 2.7](https://www.python.org/downloads/)
 
 _For windows, as admin_
 
