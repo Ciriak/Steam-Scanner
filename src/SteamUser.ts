@@ -6,8 +6,13 @@ import * as path from "path";
 import * as shortcut from "steam-shortcut-editor";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
+let isDev = require("electron-is-dev");
 const helper = new ScannerHelpers();
 const colors = require("colors");
+
+if (process.argv.indexOf("--debug") > -1) {
+  isDev = true;
+}
 
 export class SteamUser {
   public userId: any;
@@ -23,6 +28,10 @@ export class SteamUser {
   // isFirstInstance : used in case of multiple users, only the first instance send log and notifications
   // this prevent spam (ex : 6 notification because there is 6 steam accounts)
   public async updateShortcuts(isFirstInstance: boolean) {
+    if (isDev) {
+      helper.log("Updating shortcuts...");
+    }
+
     return new Promise((resolve) => {
       let addedShortcuts: number = 0;
 
@@ -32,7 +41,13 @@ export class SteamUser {
           shortcutData = {
             shortcuts: []
           };
+          helper.log(
+            colors.yellow(
+              "WARNING , unable to parse the steam shortcuts file, it will be cleaned"
+            )
+          );
         }
+
         const drmList = helper.getConfig("drm");
         for (const drmName in drmList) {
           if (drmList.hasOwnProperty(drmName)) {
@@ -53,19 +68,43 @@ export class SteamUser {
 
                 //// the game shortcut already exist, check if the binary is the same too
                 if (gameShortcutIndex > -1) {
+                  if (isDev) {
+                    helper.log(
+                      "[" +
+                        gameName +
+                        "] Game shortcut already exist, checking if the exe should be updated..."
+                    );
+                  }
+
                   const gameShorcut = shortcutData.shortcuts[gameShortcutIndex];
                   // same game but different binary, update the binary
                   if (gameShorcut.exe !== game.binary) {
-                    helper.log("Updating binary for "+gameName+" :");
-                    helper.log(gameShorcut.exe+" => "+game.binary);
+                    helper.log("Updating binary for " + gameName + " :");
+                    helper.log(gameShorcut.exe + " => " + game.binary);
                     // remove the old entry, the new one will be added instead
                     shortcutData.shortcuts.splice(gameShortcutIndex, 1);
+                    if (isDev) {
+                      helper.log("Old entry removed");
+                    }
                   } else {
+                    if (isDev) {
+                      helper.log("... no need");
+                    }
                     // name and exe are the same, no change
                     continue;
                   }
                 }
 
+                // add the new shortcut
+                shortcutData.shortcuts.push({
+                  exe: game.binary,
+                  tags: [drm.name],
+                  appName: game.name,
+                  StartDir: game.directory
+                });
+                addedShortcuts++;
+
+                //notify if this is the first instance (and notification are enabled)
                 if (isFirstInstance) {
                   const enableNotifications: any = helper.getConfig(
                     "enableNotifications"
@@ -83,14 +122,6 @@ export class SteamUser {
                     });
                   }
                 }
-
-                shortcutData.shortcuts.push({
-                  exe: game.binary,
-                  tags: [drm.name],
-                  appName: game.name,
-                  StartDir: game.directory
-                });
-                addedShortcuts++;
               }
             }
           }

@@ -26,7 +26,7 @@ gulp.task("copy-assets", function() {
 
 gulp.task("copy-json", function() {
   console.log("Copying package.json...");
-  return gulp.src("./src/package.json").pipe(gulp.dest("./dist/"));
+  return gulp.src("./src/*.json").pipe(gulp.dest("./dist/"));
 });
 
 gulp.task("update-json", function() {

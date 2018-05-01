@@ -58,7 +58,6 @@ export class ScannerHelpers {
           data[propertie] = cleanConfig[propertie];
         }
       }
-
     } catch (e) {
       // create a clean config file if don't exist or is corrupted
       // this also happend for the first launch, so we add a notification
@@ -217,6 +216,7 @@ export class ScannerHelpers {
   // close the app
   public quitApp() {
     app.quit();
+    process.exit(0);
   }
 
   private getCleanConfig() {

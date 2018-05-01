@@ -6,7 +6,7 @@ import * as path from "path";
 import * as recursive from "recursive-readdir";
 
 import { ScannerHelpers } from "./ScannerHelpers";
-const colors = require("colors");
+import * as colors from "colors";
 
 const helper: ScannerHelpers = new ScannerHelpers();
 

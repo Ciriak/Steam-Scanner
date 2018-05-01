@@ -1,0 +1,40 @@
+{
+  "drm": [
+    {
+      "name": "Uplay",
+      "binaryName": "UbisoftGameLauncher.exe",
+      "binaryPossibleLocations": [
+        "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher",
+        "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher"
+      ],
+      "gamesPossibleLocations": [
+        "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\games",
+        "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\games"
+      ]
+    },
+    {
+      "name": "Origin",
+      "binaryName": "Origin.exe",
+      "binaryPossibleLocations": [
+        "$drive\\Program Files (x86)\\Origin",
+        "$drive\\Programmes\\Origin"
+      ],
+      "gamesPossibleLocations": [
+        "$drive\\Program Files (x86)\\Origin Games",
+        "$drive\\Programmes\\Origin Games"
+      ]
+    },
+    {
+      "name": "Battle.net",
+      "binaryName": "Battle.net Launcher.exe",
+      "binaryPossibleLocations": [
+        "$drive\\Program Files (x86)\\Battle.net",
+        "$drive\\Programmes\\Battle.net"
+      ],
+      "gamesPossibleLocations": [
+        "$drive\\Program Files (x86)\\Overwatch",
+        "$drive\\Programmes\\Overwatch"
+      ]
+    }
+  ]
+}

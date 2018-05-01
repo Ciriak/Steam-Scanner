@@ -1,38 +1,26 @@
 declare const Promise: any;
+import { app } from "electron";
 import * as fs from "fs-extra";
 import * as path from "path";
+import * as colors from "colors";
 import { DRM } from "./DRM";
 import { ScannerHelpers } from "./ScannerHelpers";
 const helper: ScannerHelpers = new ScannerHelpers();
+
+let drmList;
+try {
+  let drmConfigFile = require("./drm.json");
+  drmList = drmConfigFile.drm;
+} catch (e) {
+  helper.error(colors.red("FATAL ERROR ! Unable to read DRM config"));
+  helper.error(e);
+  helper.quitApp();
+}
+
+// ===== Pattern for the config file =======
 // For the gamesProperties :
 // %pattern% :getPath method of Electron => https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
 // $this.xxx = a propertie of the current item (ex : name)
-const drmList = [
-  {
-    name: "Uplay",
-    binaryName: "UbisoftGameLauncher.exe",
-    binaryPossibleLocations: [
-      "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher",
-      "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher"
-    ],
-    gamesPossibleLocations: [
-      "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\games",
-      "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\games"
-    ]
-  },
-  {
-    name: "Origin",
-    binaryName: "Origin.exe",
-    binaryPossibleLocations: [
-      "$drive\\Program Files (x86)\\Origin",
-      "$drive\\Programmes\\Origin"
-    ],
-    gamesPossibleLocations: [
-      "$drive\\Program Files (x86)\\Origin Games",
-      "$drive\\Programmes\\Origin Games"
-    ]
-  }
-];
 
 export class DRMManager {
   public detectedDrm: DRM[] = [];

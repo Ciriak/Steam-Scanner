@@ -4,9 +4,10 @@ import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as notifier from "node-notifier";
 import * as path from "path";
+import * as colors from "colors";
 const { snapshot } = require("process-list");
 let isDev = require("electron-is-dev");
-const colors = require("colors");
+
 const Spinner = require("cli-spinner").Spinner;
 import { autoUpdater } from "electron-updater";
 const spinner = new Spinner();
@@ -278,13 +279,13 @@ export class Scanner {
     // helper.log(processList.length + " process found, looking for games...");
     spinner.setSpinnerTitle(
       "%s Scanning running process... | Try [" +
-      binaryCheckerCount +
-      "/" +
-      maxBinaryChecking +
-      "] " +
-      " | " +
-      processList.length +
-      " process active"
+        binaryCheckerCount +
+        "/" +
+        maxBinaryChecking +
+        "] " +
+        " | " +
+        processList.length +
+        " process active"
     );
 
     if (!spinner.isSpinning()) {
@@ -313,10 +314,10 @@ export class Scanner {
         if (processObj.cpu < this.minCPUFilter) {
           continue;
         }
-        
+
         //the binary has been found but don't exist anymore, skip
         let binaryExist = fs.existsSync(item.binaryPath);
-        if(!binaryExist){
+        if (!binaryExist) {
           continue;
         }
 
@@ -347,38 +348,38 @@ export class Scanner {
     }
     autoUpdater.checkForUpdatesAndNotify();
 
-    autoUpdater.on("checking-for-update", function () {
+    autoUpdater.on("checking-for-update", function() {
       if (isDev) {
         helper.log("Checking for updates...");
       }
     });
 
-    autoUpdater.on("error", function (error) {
+    autoUpdater.on("error", function(error) {
       if (isDev) {
         helper.log("Update error");
       }
     });
 
-    autoUpdater.on("update-available", function () {
+    autoUpdater.on("update-available", function() {
       if (isDev) {
         helper.log("Update available");
       }
     });
 
-    autoUpdater.on("update-not-available", function () {
+    autoUpdater.on("update-not-available", function() {
       if (isDev) {
         helper.log("No update available");
       }
     });
 
-    autoUpdater.on("update-downloaded", function () {
+    autoUpdater.on("update-downloaded", function() {
       if (isDev) {
         helper.log("Update downloaded");
       }
       autoUpdater.quitAndInstall(true, true);
     });
 
-    autoUpdater.on("download-progress", function (progress) {
+    autoUpdater.on("download-progress", function(progress) {
       if (isDev) {
         progress.percent = Math.round(progress.percent);
         helper.log("Downloading update : " + progress.percent + "%");

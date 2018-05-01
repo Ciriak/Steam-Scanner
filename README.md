@@ -1,21 +1,17 @@
-
-
-
 # Steam Scanner
 
 <img src="https://i.imgur.com/TQwOYJC.png" width="150px" height="150px">
 
 Get all you games on Steam ! Steam Scanner run as a background process, grab games from others launchers and add them to your Steam library.
 
-| Table of contents |
-|--|
-| [Downloads](#downloads) |
-| [Supported OS](#supported-os) |
-| [Supported DRM](#supported-drm) |
+| Table of contents                       |
+| --------------------------------------- |
+| [Downloads](#downloads)                 |
+| [Supported OS](#supported-os)           |
+| [Supported DRM](#supported-drm)         |
 | [Dev prerequisites](#dev-prerequisites) |
-| [Developping](#developping) |
+| [Developping](#developping)             |
 | [Launch parameters](#launch-parameters) |
-
 
 ## Downloads
 
@@ -27,24 +23,24 @@ For now only **Windows** is supported, but Linux and Mac version is planned !
 
 ## Supported DRM
 
-|DRM|Supported  |
-|--|--|
-| <img src="https://i.imgur.com/C0PYnQH.png" width="18px" height="18px"> Uplay | ✔️ |
-| <img src="https://i.imgur.com/0iLlyMK.png" width="18px" height="18px"> Origin | ✔️ |
-| <img src="https://i.imgur.com/ffu3VTv.png" width="18px" height="18px"> Blizzard Launcher | 🔁 WIP |
-| <img src="https://i.imgur.com/ES8Pr1w.png" width="18px" height="18px"> GOG Galaxy | ❌ |
-| <img src="https://i.imgur.com/zN8Cdvs.png" width="18px" height="18px"> Twitch DA | ❌ |
-| <img src="https://i.imgur.com/KUhFAXu.png"  width="18px" height="18px"> MS Store | ❌ |
-
+| DRM                                                                               | Supported |
+| --------------------------------------------------------------------------------- | --------- |
+| <img src="https://i.imgur.com/C0PYnQH.png" width="18px" height="18px"> Uplay      | ✔️        |
+| <img src="https://i.imgur.com/0iLlyMK.png" width="18px" height="18px"> Origin     | ✔️        |
+| <img src="https://i.imgur.com/ffu3VTv.png" width="18px" height="18px"> BattleNet  | 🔁 WIP    |
+| <img src="https://i.imgur.com/ES8Pr1w.png" width="18px" height="18px"> GOG Galaxy | ❌        |
+| <img src="https://i.imgur.com/zN8Cdvs.png" width="18px" height="18px"> Twitch DA  | ❌        |
+| <img src="https://i.imgur.com/KUhFAXu.png"  width="18px" height="18px"> MS Store  | ❌        |
 
 ## Dev Prerequisites
 
-* [Yarn](https://yarnpkg.com/lang/en/docs/install)  (using npm cause issues with native dependencies building)
+* [Yarn](https://yarnpkg.com/lang/en/docs/install) (using npm cause issues with native dependencies building)
 
 * [Gulp](https://gulpjs.com/)
 * [Electron](https://electronjs.org/)
 
-*For windows, as admin*
+_For windows, as admin_
+
 ```
 npm install --global --production windows-build-tools
 ```
@@ -89,7 +85,7 @@ yarn run deploy
 
 The following launch parameters are available :
 
-|  |  |
-|--|--|
-| - - clean | Clear the saved config and all shortcuts saved on Steam |
+|           |                                                             |
+| --------- | ----------------------------------------------------------- |
+| - - clean | Clear the saved config and all shortcuts saved on Steam     |
 | - - debug | Show additionnal outputs in the console (like updater logs) |
