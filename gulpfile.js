@@ -211,6 +211,11 @@ gulp.task("github:assets", function(callback) {
           continue;
         }
 
+        //exclude .yaml files
+        if (path.extname(files[i]) === ".yaml") {
+          continue;
+        }
+
         var file = {
           name: files[i],
           contentType: mime.lookup(path.join("./build/", files[i]))
