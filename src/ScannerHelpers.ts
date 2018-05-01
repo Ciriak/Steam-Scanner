@@ -186,16 +186,14 @@ export class ScannerHelpers {
       this.log(colors.yellow("NOTICE : Dev build, launch on startup ignored"));
       return;
     }
-    if (launch) {
+    if (launch === false) {
       launcher.disable();
+      this.setConfig("launchOnStartup", false);
+      this.log("Disabled launch on startup");
     } else {
       launcher.enable();
-    }
-    this.setConfig("launchOnStartup", !launch);
-    if (!launch === true) {
+      this.setConfig("launchOnStartup", true);
       this.log("Enabled launch on startup");
-    } else {
-      this.log("Disabled launch on startup");
     }
   }
 
