@@ -87,6 +87,9 @@ export class ScannerHelpers {
 
         for (const mountPoint of mountPoints) {
           for (const loc of possibleLocations) {
+            if (typeof loc !== "string") {
+              continue;
+            }
             parsedPossibleLocations.push(
               path.normalize(loc.replace("$drive", mountPoint))
             );
