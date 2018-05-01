@@ -61,11 +61,7 @@ export class ScannerHelpers {
     } catch (e) {
       // create a clean config file if don't exist or is corrupted
       // this also happend for the first launch, so we add a notification
-      this.log(
-        colors.yellow(
-          "WARNING - corrupted or invalid config file - creating a clean config file..."
-        )
-      );
+      this.log(colors.yellow("NOTICE - creating a clean config file..."));
       data = this.getCleanConfig();
     }
     // write a parsed and validated config file

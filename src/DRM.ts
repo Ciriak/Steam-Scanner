@@ -18,7 +18,7 @@ export class DRM {
   public gamesInstallDirectory;
   public games: any;
   private binaryPossibleLocations: string[] = [];
-  private gamesPossibleLocations: string[] = [];
+  private gamesPossibleLocations: any[] = [];
 
   constructor(drmItem: any) {
     this.name = drmItem.name;
@@ -72,25 +72,46 @@ export class DRM {
 
   // use the found games directories
   private async getGamesDirectories() {
-    const parsedGamesPossibleLocations = await helper.addDrivesToPossibleLocations(
-      this.gamesPossibleLocations
-    );
+    for (const possibleLocation of this.gamesPossibleLocations) {
+      possibleLocation.path = await helper.addDrivesToPossibleLocations([
+        possibleLocation.path
+      ]);
 
-    for (const gamesPossibleLocation of parsedGamesPossibleLocations) {
-      try {
-        const items = fs.readdirSync(gamesPossibleLocation);
-        // only keep the directories
-        for (const dir of items) {
-          const currentGameDir = path.normalize(
-            path.join(gamesPossibleLocation, dir)
-          );
-          if (fs.lstatSync(currentGameDir).isDirectory()) {
-            this.games[dir] = { directory: currentGameDir };
+      for (const locationPath of possibleLocation.path) {
+        /*
+        two case possible here
+        if uniqueGameFolder === true, scan exe, else scan folders
+      */
+
+        if (possibleLocation.uniqueGameFolder) {
+          //game directory
+          try {
+            let dir = path.basename(locationPath);
+            if (fs.pathExistsSync(locationPath)) {
+              this.games[dir] = { directory: locationPath };
+            }
+          } catch (e) {
+            // skip if the possible game folder don't exist
+            continue;
+          }
+        } else {
+          //Directory of games
+          try {
+            const items = fs.readdirSync(locationPath);
+            // only keep the directories
+            for (const dir of items) {
+              const currentGameDir = path.normalize(
+                path.join(locationPath, dir)
+              );
+              if (fs.lstatSync(currentGameDir).isDirectory()) {
+                this.games[dir] = { directory: currentGameDir };
+              }
+            }
+            // skip if the possible game folder don't exist
+          } catch (e) {
+            continue;
           }
         }
-        // skip if the possible game folder don't exist
-      } catch (e) {
-        continue;
       }
     }
 

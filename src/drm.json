@@ -8,8 +8,15 @@
         "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher"
       ],
       "gamesPossibleLocations": [
-        "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\games",
-        "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\games"
+        {
+          "path":
+            "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\games",
+          "uniqueGameFolder": false
+        },
+        {
+          "path": "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\games",
+          "uniqueGameFolder": false
+        }
       ]
     },
     {
@@ -20,20 +27,32 @@
         "$drive\\Programmes\\Origin"
       ],
       "gamesPossibleLocations": [
-        "$drive\\Program Files (x86)\\Origin Games",
-        "$drive\\Programmes\\Origin Games"
+        {
+          "path": "$drive\\Program Files (x86)\\Origin Games",
+          "uniqueGameFolder": false
+        },
+        {
+          "path": "$drive\\Programmes\\Origin Games",
+          "uniqueGameFolder": false
+        }
       ]
     },
     {
-      "name": "Battle.net",
+      "name": "BattleNet",
       "binaryName": "Battle.net Launcher.exe",
       "binaryPossibleLocations": [
         "$drive\\Program Files (x86)\\Battle.net",
         "$drive\\Programmes\\Battle.net"
       ],
       "gamesPossibleLocations": [
-        "$drive\\Program Files (x86)\\Overwatch",
-        "$drive\\Programmes\\Overwatch"
+        {
+          "path": "$drive\\Program Files (x86)\\Overwatch",
+          "uniqueGameFolder": true
+        },
+        {
+          "path": "$drive\\Programmes\\Overwatch",
+          "uniqueGameFolder": true
+        }
       ]
     }
   ]
