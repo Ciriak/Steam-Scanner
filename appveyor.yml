@@ -15,7 +15,7 @@ install:
   - ps: Install-Product node $env:nodejs_version
   - npm install --global --production windows-build-tools prebuild-install electron electron-builder typescript gulp 
   - yarn
-  - electron-builder
+  - yarn run build
 
 # Don't actually build.
 build: off
