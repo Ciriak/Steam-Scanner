@@ -350,6 +350,7 @@ gulp.task("package-app", function(callback) {
       callback();
     })
     .catch(function(err) {
+      console.error(err);
       callback(err);
     });
 });
