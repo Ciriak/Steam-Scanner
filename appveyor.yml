@@ -13,9 +13,9 @@ platform:
 install:
   # Get the latest stable version of Node.js or io.js
   - ps: Install-Product node $env:nodejs_version
-  - npm install --global --production windows-build-tools prebuild-install electron typescript gulp 
+  - npm install --global --production windows-build-tools prebuild-install electron electron-builder typescript gulp 
   - yarn
-  - yarn run build
+  - electron-builder
 
 # Don't actually build.
 build: off
