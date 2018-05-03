@@ -41,11 +41,17 @@ export class SteamUser {
           shortcutData = {
             shortcuts: []
           };
-          helper.log(
+          helper.warn(
             colors.yellow(
               "WARNING , unable to parse the steam shortcuts file, it will be cleaned"
             )
           );
+        }
+
+        if (isDev) {
+          helper.log(colors.cyan("---- Content of the shortcuts file ----"));
+          helper.log(shortcutData);
+          helper.log(colors.cyan("_________________END_________________"));
         }
 
         const drmList = helper.getConfig("drm");
