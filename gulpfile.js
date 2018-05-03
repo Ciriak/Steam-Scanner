@@ -212,9 +212,9 @@ gulp.task("github:assets", function(callback) {
         }
 
         //exclude .yaml files
-        if (path.extname(files[i]) === ".yaml") {
-          continue;
-        }
+        // if (path.extname(files[i]) === ".yaml") {
+        //   continue;
+        // }
 
         var file = {
           name: files[i],
