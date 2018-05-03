@@ -3,9 +3,10 @@ import { app } from "electron";
 import * as fs from "fs-extra";
 import * as objectPath from "object-path";
 import * as path from "path";
-const drivelist = require("drivelist");
-const isDev = require("electron-is-dev");
-const colors = require("colors");
+import * as drivelist from "drivelist";
+import * as isDev from "electron-is-dev";
+import * as colors from "colors";
+import * as electronLog from "electron-log";
 import * as autoLaunch from "auto-launch";
 import { Scanner } from "./Scanner";
 import { SteamUser } from "./SteamUser";
@@ -34,14 +35,21 @@ export class ScannerHelpers {
    * Report error
    */
   public error(err: string) {
-    console.error(err);
+    electronLog.error(err);
+  }
+
+  /**
+   * Report warning
+   */
+  public warn(msg: string) {
+    electronLog.warn(msg);
   }
 
   /**
    * Report log
    */
   public log(msg: string) {
-    console.log(msg);
+    electronLog.info(msg);
   }
 
   // check if the configFile is valid or corrupted, and create a clean one if needed
