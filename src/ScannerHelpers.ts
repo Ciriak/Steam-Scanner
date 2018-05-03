@@ -202,11 +202,11 @@ export class ScannerHelpers {
 
   public updateNotifications() {
     const notif = this.getConfig("enableNotifications");
-    this.setConfig("enableNotifications", !notif);
-    if (!notif === true) {
-      this.log("Enabled notifications");
+    this.setConfig("enableNotifications", notif);
+    if (notif === true) {
+      this.log("Notifications enabled");
     } else {
-      this.log("Disabled notifications");
+      this.log("Notifications disabled");
     }
   }
 
