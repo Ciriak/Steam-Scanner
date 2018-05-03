@@ -127,6 +127,7 @@ export class Scanner {
       await steamUser.updateShortcuts(isFirstInstance);
       isFirstInstance = false;
     }
+    isFirstInstance = null;
     return new Promise((resolve) => {
       resolve();
     });
