@@ -58,7 +58,7 @@
       "category": "Development"
     },
     "appImage": {
-      "publish": false,
+      "publish": ["github"],
       "systemIntegration": "doNotAsk",
       "category": "Development",
       "artifactName": "${productName}-${version}.${ext}"
