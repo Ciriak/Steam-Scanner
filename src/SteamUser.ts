@@ -66,33 +66,9 @@ export class SteamUser {
                   appName: gameName
                 });
 
-                //// the game shortcut already exist, check if the binary is the same too
+                //// the game shortcut already exist, skip
                 if (gameShortcutIndex > -1) {
-                  if (isDev) {
-                    helper.log(
-                      "[" +
-                        gameName +
-                        "] Game shortcut already exist, checking if the exe should be updated..."
-                    );
-                  }
-
-                  const gameShorcut = shortcutData.shortcuts[gameShortcutIndex];
-                  // same game but different binary, update the binary
-                  if (gameShorcut.exe !== game.binary) {
-                    helper.log("Updating binary for " + gameName + " :");
-                    helper.log(gameShorcut.exe + " => " + game.binary);
-                    // remove the old entry, the new one will be added instead
-                    shortcutData.shortcuts.splice(gameShortcutIndex, 1);
-                    if (isDev) {
-                      helper.log("Old entry removed");
-                    }
-                  } else {
-                    if (isDev) {
-                      helper.log("... no need");
-                    }
-                    // name and exe are the same, no change
-                    continue;
-                  }
+                  continue;
                 }
 
                 // add the new shortcut
