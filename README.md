@@ -2,6 +2,10 @@
 
 <img src="https://i.imgur.com/TQwOYJC.png" width="150px" height="150px">
 
+[![Build status](https://ci.appveyor.com/api/projects/status/la08lmcifr0q6r9q?svg=true)](https://ci.appveyor.com/project/Cyriaqu3/steam-scanner)
+
+[![GitHub version](https://badge.fury.io/gh/nj-neer%2FSteam-Scanner.svg)](https://github.com/nj-neer/Steam-Scanner)
+
 Get all you games on Steam ! Steam Scanner run as a background process, grab games from others launchers and add them to your Steam library.
 
 | Table of contents                       |
