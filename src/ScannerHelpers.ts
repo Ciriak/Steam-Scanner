@@ -10,6 +10,10 @@ import * as electronLog from "electron-log";
 import * as autoLaunch from "auto-launch";
 import { Scanner } from "./Scanner";
 import { SteamUser } from "./SteamUser";
+
+//log config
+electronLog.transports.file.level = "info";
+
 const configPath = path.normalize(
   path.join(app.getPath("appData"), "steam-scanner", "config.json")
 );
