@@ -15,7 +15,7 @@ Get all you games on Steam ! Steam Scanner run as a background process, grab gam
 | [Dev prerequisites](#dev-prerequisites) |
 | [Developping](#developping)             |
 | [Launch parameters](#launch-parameters) |
-| [DRM config file](#launch-parameters)   |
+| [DRM config file](#drm-config-file)   |
 
 ## Downloads
 
