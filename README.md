@@ -15,6 +15,7 @@ Get all you games on Steam ! Steam Scanner run as a background process, grab gam
 | [Dev prerequisites](#dev-prerequisites) |
 | [Developping](#developping)             |
 | [Launch parameters](#launch-parameters) |
+| [DRM config file](#launch-parameters)   |
 
 ## Downloads
 
@@ -93,3 +94,27 @@ The following launch parameters are available :
 | --------- | ----------------------------------------------------------- |
 | - - clean | Clear the saved config and all shortcuts saved on Steam     |
 | - - debug | Show additionnal outputs in the console (like updater logs) |
+
+## DRM config file
+
+_/src/drm.json_
+
+**drm.json** contain the configuration used to find the DRM and to overrides some default behaviour (like choosing a game executable by default)
+
+It contain an array of **Drm Object**
+
+#### DRM Object
+
+|        property         |         type         | default | required | notes                                                                                                                  |
+| :---------------------: | :------------------: | :-----: | :------: | ---------------------------------------------------------------------------------------------------------------------- |
+|          name           |        string        |         |   true   | Name of the DRM                                                                                                        |
+|       binaryName        |  string (fileName)   |         |   true   | Name of the executable of the DRM                                                                                      |
+| binaryPossibleLocations |    string(path)[]    |         |   true   | Array of path where **binaryName** may be found, use the **$drive** string to tell the scanner to search on each drive |
+| gamesPossibleLocations  | gameLocationObject[] |         |   true   | See **GameLocationObject** below                                                                                       |
+
+#### GameLocationObject
+
+|     property     |     type     | default | required | notes                                                                                                     |
+| :--------------: | :----------: | :-----: | :------: | --------------------------------------------------------------------------------------------------------- |
+|       path       | string(path) |         |   true   | Path where the folder may be found, use the **$drive** string to tell the scanner to search on each drive |
+| uniqueGameFolder |   boolean    |  false  |  false   | If **true**, the folder will be treated as a game folder (and not a list of game folders)                 |

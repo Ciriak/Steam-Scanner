@@ -47,6 +47,7 @@
       "gamesPossibleLocations": [
         {
           "path": "$drive\\Program Files (x86)\\Overwatch",
+          "defaultBinary": "Overwatch Launcher.exe",
           "uniqueGameFolder": true
         },
         {
