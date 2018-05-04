@@ -42,7 +42,7 @@
     },
     "win": {
       "target": "nsis",
-      "publish": null,
+      "publish": "github",
       "icon": "dist/assets/scanner.ico"
     },
     "nsis": {
@@ -58,7 +58,7 @@
       "category": "Development"
     },
     "appImage": {
-      "publish": ["github"],
+      "publish": false,
       "systemIntegration": "doNotAsk",
       "category": "Development",
       "artifactName": "${productName}-${version}.${ext}"
