@@ -14,7 +14,14 @@
     "type": "git",
     "url": "git+https://github.com/nj-neer/Steam-Scanner.git"
   },
-  "keywords": ["steam", "electron", "game", "sync", "uplay", "origin"],
+  "keywords": [
+    "steam",
+    "electron",
+    "game",
+    "sync",
+    "uplay",
+    "origin"
+  ],
   "author": "Cyriaque DELAUNAY",
   "license": "ISC",
   "bugs": {
@@ -26,6 +33,7 @@
     "@types/lodash": "^4.14.106",
     "@types/object-path": "^0.9.29",
     "del": "^3.0.0",
+    "electron": "^2.0.0",
     "electron-builder": "^20.8.1",
     "gulp": "^3.9.1",
     "gulp-sync": "^0.1.4",

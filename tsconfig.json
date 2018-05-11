@@ -3,13 +3,10 @@
     "module": "commonjs",
     "baseUrl": ".",
     "target": "es6",
-    "lib": [
-      "es2015"
-    ],
+    "sourceMap": true,
+    "lib": ["es2015"],
     "paths": {
-      "*": [
-        "node_modules/*"
-      ]
+      "*": ["node_modules/*"]
     }
   }
 }
