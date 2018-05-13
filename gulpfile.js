@@ -74,11 +74,9 @@ gulp.task("compile", function() {
   console.log("Compiling scripts...");
   return gulp
     .src(["src/app.ts"])
-    .pipe(
-      typescript({
+    .pipe(typescript(/*{
         sourceMap: true
-      })
-    )
+      }*/))
     .pipe(gulp.dest("./dist/"));
 });
 
