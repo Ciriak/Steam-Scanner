@@ -56,7 +56,8 @@ export class DRMManager {
   public async setBinaryForGame(
     drmName: string,
     gameName: string,
-    binaryPath: string
+    binaryPath: string,
+    userSet: boolean // manually set by the user, wont apply the other rules
   ) {
     // set the bninary
     helper.setConfig(

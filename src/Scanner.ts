@@ -331,7 +331,8 @@ export class Scanner {
         await drmManager.setBinaryForGame(
           item.drm.name,
           item.game.name,
-          item.binaryPath
+          item.binaryPath,
+          false
         );
         gameBinariesFound.push(item.game.name);
         await this.updateShortcuts();

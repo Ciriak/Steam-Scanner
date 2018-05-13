@@ -74,6 +74,11 @@ export class SteamUser {
 
                 //// the game shortcut already exist, skip
                 if (gameShortcutIndex > -1) {
+                  if (isDev) {
+                    helper.log(
+                      "Shortcut already exist for " + gameName + ", skipping."
+                    );
+                  }
                   continue;
                 }
 

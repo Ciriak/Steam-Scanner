@@ -103,7 +103,8 @@ export class TrayManager {
                         drmManager.setBinaryForGame(
                           drmName,
                           gameName,
-                          filePath[0]
+                          filePath[0],
+                          true
                         );
                         scanner.updateShortcuts();
                         helper.log(
