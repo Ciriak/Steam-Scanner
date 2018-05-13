@@ -39,7 +39,7 @@ const maxBinaryChecking: number = 20;
 export class Scanner {
   public steamDirectory: any;
   public externalGames: any;
-  public steamUsers: any[] = [];
+  public steamUsers: SteamUser[] = [];
   public checkInterval: any;
   public minCPUFilter: any;
   public isScanning: boolean = false;
@@ -246,7 +246,7 @@ export class Scanner {
               continue;
             }
 
-            // all binaries watched for the current game
+            // loop on all binaries watched for the current game
             for (const binaryPath of game.listenedBinaries) {
               const parsedBinarypath = path.parse(binaryPath);
               const binary = parsedBinarypath.base; // xx.exe

@@ -7,6 +7,7 @@ import { DRM } from "./DRM";
 import { ScannerHelpers } from "./ScannerHelpers";
 const helper: ScannerHelpers = new ScannerHelpers();
 
+//retrieve drms list
 let drmList;
 try {
   let drmConfigFile = require("./drm.json");
@@ -59,11 +60,20 @@ export class DRMManager {
     binaryPath: string,
     userSet: boolean // manually set by the user, wont apply the other rules
   ) {
-    // set the bninary
+    // set the binary
     helper.setConfig(
       "drm." + drmName + ".games." + gameName + ".binary",
       binaryPath
     );
+
+    //set the userSet propertie if given
+    if (userSet) {
+      helper.setConfig(
+        "drm." + drmName + ".games." + gameName + ".userSet",
+        true
+      );
+    }
+
     // clean listenedBinaries prtopertie
     helper.setConfig(
       "drm." + drmName + ".games." + gameName + ".listenedBinaries",

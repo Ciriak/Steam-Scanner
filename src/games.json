@@ -1,5 +1,5 @@
 {
   "Overwatch": {
-    "binary": ["Overwatch Launcher.exe"]
+    "binaries": ["Overwatch Launcher.exe"]
   }
 }

@@ -10,6 +10,16 @@ import * as colors from "colors";
 
 const helper: ScannerHelpers = new ScannerHelpers();
 
+//retrieve the known binaries list
+let knownGamesList;
+try {
+  knownGamesList = require("./games.json");
+} catch (e) {
+  helper.error(colors.red("ERROR ! Unable to read the known games list"));
+  helper.error(e);
+  helper.quitApp();
+}
+
 export class DRM {
   public name: any;
   public binaryName: string;
@@ -121,6 +131,8 @@ export class DRM {
   }
 
   private async getGamesBinaries() {
+    let isKnownGame = false;
+    const binariesPathList = [];
     for (const gameName in this.games) {
       if (this.games.hasOwnProperty(gameName)) {
         const gameItem = this.games[gameName];
@@ -137,16 +149,44 @@ export class DRM {
           continue;
         }
 
+        //check if the game is a "known" game :
+        if (knownGamesList[gameItem.name]) {
+          helper.log(
+            colors.cyan(
+              gameItem.name +
+                " is a known game, trying to find one of the known executable..."
+            )
+          );
+          //game is a known game, generate a list of possible binary location
+          isKnownGame = true;
+        }
+
         // ignore files named "foo.cs" or files that end in ".html".
         const filesList = await recursive(gameItem.directory);
-        const binariesPathList = [];
-        for (const fileName of filesList) {
+        filesListLoop: for (const fileName of filesList) {
+          if (isKnownGame) {
+            if (!knownGamesList[gameItem.name].binaries) {
+              break;
+            }
+            //only search in known locations (from games.json)
+            for (const binary of knownGamesList[gameItem.name].binaries) {
+              //ex : c//program/overwatch/Overwatch.exe => Overwatch.exe
+              if (fileName.search(binary) > -1) {
+                binariesPathList.push(fileName);
+                helper.log(colors.green(fileName + " FOUND !"));
+                break filesListLoop; //stop everything, we found what we want, a known game executable
+              }
+            }
+            helper.log("... not found");
+          }
+
+          //reference all executables
           if (fileName.search(".exe") > -1) {
             binariesPathList.push(fileName);
           }
         }
 
-        // if there is only one binaries then its the game binary (will never happend lol)
+        // if there is only one binaries, set it by default
         if (binariesPathList.length === 1) {
           this.games[gameName].binary = binariesPathList[0];
           helper.setConfig(
