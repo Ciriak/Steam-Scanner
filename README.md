@@ -118,4 +118,4 @@ It contain an array of **Drm Object**
 | :--------------: | :----------: | :-----: | :------: | --------------------------------------------------------------------------------------------------------- |
 |       path       | string(path) |         |   true   | Path where the folder may be found, use the **$drive** string to tell the scanner to search on each drive |
 | uniqueGameFolder |   boolean    |  false  |  false   | If **true**, the folder will be treated as a game folder (and not a list of game folders)                 |
-|     userSet      |   boolean    |         |  false   | If true, the shortcut has been set manually by the user and all other rules are ignored                   |
+|     userSet      |   boolean    |  false  |  false   | If true, the shortcut has been set manually by the user and all other rules are ignored                   |
