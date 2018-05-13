@@ -15,7 +15,7 @@ import { SteamUser } from "./SteamUser";
 electronLog.transports.file.level = "info";
 
 const configPath = path.normalize(
-  path.join(app.getPath("appData"), "steam-scanner", "config.json")
+  path.join(app.getPath("appData"), "Steam Scanner", "config.json")
 );
 
 const cleanConfig = {
