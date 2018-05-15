@@ -72,7 +72,6 @@ export class DRM {
 
   public async getGames() {
     await this.getGamesDirectories();
-
     await this.getGamesBinaries();
 
     return new Promise((resolve) => {
@@ -161,6 +160,12 @@ export class DRM {
           isKnownGame = true;
         }
 
+        //clean the list of listened binaries
+        helper.setConfig(
+          "drm." + this.name + ".games." + gameItem.name + ".listenedBinaries",
+          null
+        );
+
         // ignore files named "foo.cs" or files that end in ".html".
         const filesList = await recursive(gameItem.directory);
         filesListLoop: for (const fileName of filesList) {
@@ -195,6 +200,8 @@ export class DRM {
           );
           continue;
         }
+
+        //if there is more than one binary, add the list the the listenners
         if (binariesPathList.length > 1) {
           helper.setConfig(
             "drm." + this.name + ".games." + gameItem.name,
@@ -203,7 +210,7 @@ export class DRM {
 
           /*
           Here, we will listen for an active process to have the same name than a binarie found in the game files
-          add the game the the listener, things hapened in "Scanner.ts"
+          add the game the the listener, things happend in "Scanner.ts"
         */
           helper.log("Trying to find the process for " + gameItem.name);
 
