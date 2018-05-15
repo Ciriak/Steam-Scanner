@@ -30,6 +30,7 @@ export class DRMManager {
    * Return a list of all found game (other than steam)
    */
   public async getAllGames() {
+    //list installed DRMS
     for (const drmName in drmList) {
       if (drmList.hasOwnProperty(drmName)) {
         const drm = new DRM(drmList[drmName]);
@@ -40,6 +41,7 @@ export class DRMManager {
       }
     }
 
+    //get games from all installed DRM
     for (const drmName in this.detectedDrm) {
       if (drmList.hasOwnProperty(drmName)) {
         const drm = this.detectedDrm[drmName];

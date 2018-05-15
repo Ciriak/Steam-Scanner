@@ -94,8 +94,8 @@ export class Scanner {
     }
     this.tray.update(this);
 
-    await this.checkSteamInstallation();
     await helper.checkArgv(this);
+    await this.checkSteamInstallation();
     await this.updateGames();
     await this.updateShortcuts();
     await this.binariesListener();
