@@ -16,6 +16,7 @@ Get all you games on Steam ! Steam Scanner run as a background process, grab gam
 | [Developping](#developping)             |
 | [Launch parameters](#launch-parameters) |
 | [DRM config file](#drm-config-file)     |
+| [Known bugs](#known-bugs)     |
 
 ## Downloads
 
@@ -119,3 +120,6 @@ It contain an array of **Drm Object**
 |       path       | string(path) |         |   true   | Path where the folder may be found, use the **$drive** string to tell the scanner to search on each drive |
 | uniqueGameFolder |   boolean    |  false  |  false   | If **true**, the folder will be treated as a game folder (and not a list of game folders)                 |
 |     userSet      |   boolean    |  false  |  false   | If true, the shortcut has been set manually by the user and all other rules are ignored                   |
+
+## Known bugs
+- Games are added multiple times
