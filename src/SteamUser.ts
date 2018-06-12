@@ -113,15 +113,17 @@ export class SteamUser {
             }
           }
         }
-        shortcut.writeFile(this.shortcutsFilePath, shortcutData, (errW) => {
-          if (errW) {
-            helper.error(errW);
-
-            return resolve();
-          }
-        });
 
         if (addedShortcuts > 0 && isFirstInstance) {
+          shortcut.writeFile(this.shortcutsFilePath, shortcutData, (errW) => {
+            helper.log("Writing into shortcuts file...");
+            if (errW) {
+              helper.error(errW);
+
+              return resolve();
+            }
+          });
+
           helper.log(
             colors.cyan(
               addedShortcuts + " shortcut(s) added, Steam restart required !"
