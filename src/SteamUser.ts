@@ -79,34 +79,35 @@ export class SteamUser {
                       "Shortcut already exist for " + gameName + ", skipping."
                     );
                   }
-                  continue;
                 }
+                // shortcut don't already exist, add it
+                else {
+                  // add the new shortcut
+                  shortcutData.shortcuts.push({
+                    exe: game.binary,
+                    tags: [drm.name],
+                    appName: game.name,
+                    StartDir: game.directory
+                  });
+                  addedShortcuts++;
 
-                // add the new shortcut
-                shortcutData.shortcuts.push({
-                  exe: game.binary,
-                  tags: [drm.name],
-                  appName: game.name,
-                  StartDir: game.directory
-                });
-                addedShortcuts++;
-
-                //notify if this is the first instance (and notification are enabled)
-                if (isFirstInstance) {
-                  const enableNotifications: any = helper.getConfig(
-                    "enableNotifications"
-                  );
-                  helper.log(
-                    colors.green("Added a shortcut for " + game.name + " =>")
-                  );
-                  helper.log(game.binary);
-                  if (enableNotifications) {
-                    notifier.notify({
-                      title: game.name,
-                      message:
-                        "This game has been added to your library, please restart Steam",
-                      icon: path.join(__dirname, "assets/scanner.png")
-                    });
+                  //notify if this is the first instance (and notification are enabled)
+                  if (isFirstInstance) {
+                    const enableNotifications: any = helper.getConfig(
+                      "enableNotifications"
+                    );
+                    helper.log(
+                      colors.green("Added a shortcut for " + game.name + " =>")
+                    );
+                    helper.log(game.binary);
+                    if (enableNotifications) {
+                      notifier.notify({
+                        title: game.name,
+                        message:
+                          "This game has been added to your library, please restart Steam",
+                        icon: path.join(__dirname, "assets/scanner.png")
+                      });
+                    }
                   }
                 }
               }
