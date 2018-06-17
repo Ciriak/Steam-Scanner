@@ -42,7 +42,7 @@
   },
   "build": {
     "appId": "com.cyriaque.steam-scanner",
-    "productName": "steam-scanner",
+    "productName": "Steam Scanner",
     "directories": {
       "app": "dist",
       "output": "build",
@@ -54,7 +54,7 @@
       "icon": "dist/assets/scanner.ico"
     },
     "nsis": {
-      "artifactName": "${productName}-setup-${version}.${ext}",
+      "artifactName": "steam-scanner-setup-${version}.${ext}",
       "installerIcon": "dist/assets/scanner.ico",
       "differentialPackage": false
     },
