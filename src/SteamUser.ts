@@ -1,5 +1,4 @@
 declare const Promise: any;
-import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as notifier from "node-notifier";
 import * as path from "path";
@@ -67,10 +66,14 @@ export class SteamUser {
                   continue;
                 }
 
+                helper.log("Finding index of the game in shortcuts file...");
+
                 // check if the game is already in the steam shortcuts
                 const gameShortcutIndex = _.findIndex(shortcutData.shortcuts, {
                   appName: gameName
                 });
+
+                helper.log("Result : " + gameShortcutIndex);
 
                 //// the game shortcut already exist, skip
                 if (gameShortcutIndex > -1) {

@@ -9,7 +9,6 @@ import * as colors from "colors";
 import * as electronLog from "electron-log";
 import * as autoLaunch from "auto-launch";
 import { Scanner } from "./Scanner";
-import { SteamUser } from "./SteamUser";
 
 //log config
 electronLog.transports.file.level = "info";
