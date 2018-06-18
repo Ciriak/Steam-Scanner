@@ -66,17 +66,24 @@ export class SteamUser {
                   continue;
                 }
 
-                helper.log("Finding index of the game in shortcuts file...");
+                helper.log(
+                  "Looking the " + gameName + " in the shortcut file..."
+                );
 
                 // check if the game is already in the steam shortcuts
-                const gameShortcutIndex = _.findIndex(shortcutData.shortcuts, {
-                  appName: gameName
-                });
-
-                helper.log("Result : " + gameShortcutIndex);
+                let gameExist = false;
+                for (let i = 0; i < shortcutData.shortcuts.length; i++) {
+                  const shortcut = shortcutData.shortcuts[i];
+                  if (
+                    shortcut.appname === gameName ||
+                    shortcut.appName === gameName
+                  ) {
+                    gameExist = true;
+                  }
+                }
 
                 //// the game shortcut already exist, skip
-                if (gameShortcutIndex > -1) {
+                if (gameExist) {
                   if (isDev) {
                     helper.log(
                       "Shortcut already exist for " + gameName + ", skipping."
