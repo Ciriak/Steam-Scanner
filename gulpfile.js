@@ -9,9 +9,19 @@ var request = require("request");
 var async = require("async");
 var path = require("path");
 var mime = require("mime-types");
+var colors = require("colors");
 var archiver = require("gulp-archiver");
 var gulpsync = require("gulp-sync")(gulp);
+var isNpmNotYarn = require("is-npm-not-yarn");
 var ghToken;
+
+if (isNpmNotYarn) {
+  console.error(
+    "STOP ! | Seriously, use Yarn not NPM, you wont be able to build anyway".red
+  );
+  process.exit(1);
+  return false;
+}
 
 try {
   ghToken = fs.readFileSync("./.gh-token", "utf8");
