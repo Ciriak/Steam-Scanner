@@ -73,7 +73,7 @@ export class DRM {
   public async getGames() {
     await this.getGamesDirectories();
     await this.getGamesBinaries();
-
+    //TODO get game icons here await this.getGamesIcons();
     return new Promise((resolve) => {
       resolve();
     });

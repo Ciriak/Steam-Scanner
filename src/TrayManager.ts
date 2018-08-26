@@ -1,7 +1,8 @@
 declare const Promise: any;
 import * as path from "path";
 const colors = require("colors");
-const { app, Menu, MenuItem, Tray, dialog } = require("electron");
+
+const { Menu, Tray, dialog } = require("electron");
 import { DRMManager } from "./DRMManager";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
@@ -85,6 +86,7 @@ export class TrayManager {
             }
             gamesCount++;
             gamesListTemplate.push({
+              icon: game.icon,
               label: gameName,
               submenu: [
                 {
