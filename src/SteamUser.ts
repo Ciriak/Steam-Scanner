@@ -32,6 +32,7 @@ export class SteamUser {
     }
 
     return new Promise((resolve) => {
+      let updatedShortcuts: boolean = false;
       let addedShortcuts: number = 0;
 
       shortcut.parseFile(this.shortcutsFilePath, (err, shortcutData) => {
@@ -42,7 +43,7 @@ export class SteamUser {
           };
           helper.warn(
             colors.yellow(
-              "WARNING , unable to parse the steam shortcuts file, it will be cleaned"
+              "WARNING - unable to parse the steam shortcuts file, it will be cleaned"
             )
           );
         }
@@ -71,23 +72,49 @@ export class SteamUser {
                 );
 
                 // check if the game is already in the steam shortcuts
-                let gameExist = false;
+                let gameCount: number = 0;
+                let unwantedIndexList: number[] = [];
                 for (let i = 0; i < shortcutData.shortcuts.length; i++) {
                   const shortcut = shortcutData.shortcuts[i];
                   if (
                     shortcut.appname === gameName ||
                     shortcut.appName === gameName
                   ) {
-                    gameExist = true;
+                    gameCount++;
+
+                    // if the game is already found, add the unwanted copy to the index list
+                    if (gameCount > 1) {
+                      unwantedIndexList.push(i);
+                    }
                   }
                 }
 
                 //// the game shortcut already exist, skip
-                if (gameExist) {
+                if (gameCount > 0) {
                   if (isDev) {
+                    helper.log("Shortcut already exist for " + gameName);
+                  }
+                  //if the game has been added twice or more for some reason
+                  if (gameCount > 1) {
                     helper.log(
-                      "Shortcut already exist for " + gameName + ", skipping."
+                      colors.yellow(
+                        "WARNING - " +
+                          gameName +
+                          " has been added more than once, cleaning..."
+                      )
                     );
+
+                    //remove all unwanted , by their index
+                    unwantedIndexList.reverse(); //reverse the array before => don't fucked up the index list
+                    for (const unwantedIndex of unwantedIndexList) {
+                      shortcutData.shortcuts.splice(unwantedIndex, 1);
+                    }
+                    helper.log(
+                      "Removed " +
+                        unwantedIndexList.length +
+                        " unwanted shortcuts"
+                    );
+                    updatedShortcuts = true;
                   }
                 }
                 // shortcut don't already exist, add it
@@ -99,6 +126,7 @@ export class SteamUser {
                     appName: game.name,
                     StartDir: game.directory
                   });
+                  updatedShortcuts = true;
                   addedShortcuts++;
 
                   //notify if this is the first instance (and notification are enabled)
@@ -125,7 +153,7 @@ export class SteamUser {
           }
         }
 
-        if (addedShortcuts > 0 && isFirstInstance) {
+        if (updatedShortcuts && isFirstInstance) {
           shortcut.writeFile(this.shortcutsFilePath, shortcutData, (errW) => {
             helper.log("Writing into shortcuts file...");
             if (errW) {
