@@ -9,8 +9,6 @@ var request = require("request");
 var async = require("async");
 var path = require("path");
 var mime = require("mime-types");
-var colors = require("colors");
-var archiver = require("gulp-archiver");
 var gulpsync = require("gulp-sync")(gulp);
 var isNpmNotYarn = require("is-npm-not-yarn");
 var ghToken;
@@ -84,9 +82,11 @@ gulp.task("compile", function() {
   console.log("Compiling scripts...");
   return gulp
     .src(["src/app.ts"])
-    .pipe(typescript(/*{
+    .pipe(
+      typescript({
         sourceMap: true
-      }*/))
+      })
+    )
     .pipe(gulp.dest("./dist/"));
 });
 

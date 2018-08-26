@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "gulp",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc ./src/app.ts --outDir ./dist/ --watch",
+    "dev": "tsc ./src/app.ts --outDir ./dist/ --watch --sourcemap",
     "build": "gulp build",
     "deploy": "gulp deploy"
   },
