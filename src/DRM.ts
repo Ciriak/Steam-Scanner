@@ -1,7 +1,7 @@
 declare const Promise: any;
 import * as fs from "fs-extra";
 import * as _ from "lodash";
-import * as objectPath from "object-path";
+import AssociatedIcon from "associated-icon";
 import * as path from "path";
 import * as recursive from "recursive-readdir";
 
@@ -73,7 +73,7 @@ export class DRM {
   public async getGames() {
     await this.getGamesDirectories();
     await this.getGamesBinaries();
-    //TODO get game icons here await this.getGamesIcons();
+    await this.getGamesIcons();
     return new Promise((resolve) => {
       resolve();
     });
@@ -129,6 +129,9 @@ export class DRM {
     });
   }
 
+  /**
+   * Find the games binary
+   */
   private async getGamesBinaries() {
     let isKnownGame = false;
     const binariesPathList = [];
@@ -226,6 +229,29 @@ export class DRM {
       }
     }
 
+    return new Promise((resolve) => {
+      resolve();
+    });
+  }
+
+  /**
+   * Try to retrieve the game icon from his found binaries
+   */
+  private async getGamesIcons() {
+    for (const gameName in this.games) {
+      //skip if binary in unknown
+      if (!this.games[gameName].binary) {
+        continue;
+      }
+
+      // find associate icon
+      let associatedIcon = new AssociatedIcon(); // or new AssociatedIcon(true); (this will use execFile instead of spawn, so this will work in electron)
+      let response = await associatedIcon.getBase64Icon(
+        this.games[gameName].binary
+      );
+      //set the icon to the game object
+      this.games[gameName].icon = response.Base64Image;
+    }
     return new Promise((resolve) => {
       resolve();
     });

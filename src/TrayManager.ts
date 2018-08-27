@@ -1,4 +1,3 @@
-declare const Promise: any;
 import * as path from "path";
 const colors = require("colors");
 
