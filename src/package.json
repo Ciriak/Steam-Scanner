@@ -18,6 +18,7 @@
     "electron-log": "^2.2.14",
     "electron-updater": "^2.21.8",
     "fs-extra": "^5.0.0",
+    "jimp": "^0.3.7",
     "lodash": "^4.17.5",
     "node-notifier": "^5.2.1",
     "object-path": "^0.11.4",

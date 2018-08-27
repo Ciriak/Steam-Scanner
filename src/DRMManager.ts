@@ -1,7 +1,12 @@
 declare const Promise: any;
+import { app } from "electron";
 import * as colors from "colors";
+import * as fs from "fs-extra";
+import * as path from "path";
+let Jimp = require("jimp");
 import { DRM } from "./DRM";
 import { ScannerHelpers } from "./ScannerHelpers";
+import AssociatedIcon from "associated-icon";
 const helper: ScannerHelpers = new ScannerHelpers();
 
 //retrieve drms list
@@ -78,6 +83,50 @@ export class DRMManager {
       "drm." + drmName + ".games." + gameName + ".listenedBinaries",
       null
     );
+
+    const iconFilePath = path.normalize(
+      path.join(
+        app.getPath("appData"),
+        "Steam Scanner",
+        "icons",
+        gameName + ".png"
+      )
+    );
+
+    //retrieve the icon and generate a file
+    await this.generateGameIcon(binaryPath, iconFilePath);
+
+    //save it into the config
+    helper.setConfig(
+      "drm." + drmName + ".games." + gameName + ".icon",
+      iconFilePath
+    );
+
+    return new Promise((resolve) => {
+      resolve();
+    });
+  }
+
+  /**
+   * Try to retrieve the game icon from his found binaries
+   */
+  private async generateGameIcon(binaryPath: string, iconFilePath: string) {
+    // find associate icon
+    let associatedIcon = new AssociatedIcon(); // or new AssociatedIcon(true); (this will use execFile instead of spawn, so this will work in electron)
+    let response = await associatedIcon.getBase64Icon(binaryPath);
+    fs.ensureFileSync(iconFilePath);
+    const buff = Buffer.from(response.Base64Image, "base64");
+    //resize and write image
+    Jimp.read(buff)
+      .then((icon) => {
+        return icon
+          .resize(16, 16) // resize
+          .write(iconFilePath); // save
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+
     return new Promise((resolve) => {
       resolve();
     });

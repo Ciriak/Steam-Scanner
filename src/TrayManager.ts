@@ -62,6 +62,7 @@ export class TrayManager {
   }
 
   private generateGamesListTemplate(scanner: Scanner) {
+    let accessor = this;
     const gamesListTemplate: any = [];
     const drmManager = new DRMManager();
     let gamesCount = 0;
@@ -112,6 +113,7 @@ export class TrayManager {
                           colors.cyan("Binary updated for " + gameName + " =>")
                         );
                         helper.log(filePath[0]);
+                        accessor.update(accessor.scanner);
                       }
                     );
                   }
