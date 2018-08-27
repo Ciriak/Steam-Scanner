@@ -26,7 +26,6 @@ const possibleSteamLocations = [
   "$drive\\Programmes\\Steam"
 ];
 
-const shortcusConfigPath = "userdata\\%user%\\config\\shortcuts.vdf";
 const defaultCheckInterval: number = 2 * 60 * 1000; // 2min
 const helper: ScannerHelpers = new ScannerHelpers();
 const drmManager = new DRMManager();
@@ -69,7 +68,7 @@ export class Scanner {
       notifier.notify({
         title: "Steam Scanner is running",
         message: "Click on the tray icon for more options",
-        icon: path.join(__dirname, "assets/scanner.png")
+        icon: path.join(__dirname, "/assets/scanner.png")
       });
       helper.setConfig("launched", true);
     }
@@ -125,7 +124,6 @@ export class Scanner {
       await steamUser.updateShortcuts(isFirstInstance);
       isFirstInstance = false;
     }
-    isFirstInstance = null;
     return new Promise((resolve) => {
       resolve();
     });
