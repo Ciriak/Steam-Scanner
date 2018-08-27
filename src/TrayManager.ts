@@ -13,7 +13,7 @@ export class TrayManager {
   private scanner: Scanner;
   constructor(scanner: Scanner) {
     this.scanner = scanner;
-    this.tray = new Tray(path.join(__dirname, "assets/scanner.png"));
+    this.tray = new Tray(path.join(__dirname, "assets/tray.png"));
     this.update(scanner);
   }
 
