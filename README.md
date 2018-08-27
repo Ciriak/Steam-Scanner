@@ -1,11 +1,17 @@
-# Steam Scanner
-
-<img src="https://i.imgur.com/TQwOYJC.png" width="150px" height="150px">
+<center>
+    <h1>Steam Scanner</h1>
+    <img src="https://i.imgur.com/TQwOYJC.png" width="150px" height="150px">
 
 [![GitHub version](https://badge.fury.io/gh/nj-neer%2FSteam-Scanner.svg)](https://github.com/nj-neer/Steam-Scanner/releases/latest)
 [![Build status](https://ci.appveyor.com/api/projects/status/la08lmcifr0q6r9q?svg=true)](https://ci.appveyor.com/project/Cyriaqu3/steam-scanner)
 
+</center>
+
 Get all you games on Steam ! Steam Scanner run as a background process, grab games from others launchers and add them to your Steam library.
+
+|          In system tray           |          Result in Steam           |
+| :-------------------------------: | :--------------------------------: |
+| ![](./src/assets/screen-tray.png) | ![](./src/assets/screen-steam.png) |
 
 | Table of contents                       |
 | --------------------------------------- |
@@ -16,7 +22,7 @@ Get all you games on Steam ! Steam Scanner run as a background process, grab gam
 | [Developping](#developping)             |
 | [Launch parameters](#launch-parameters) |
 | [DRM config file](#drm-config-file)     |
-| [Known bugs](#known-bugs)     |
+| [Known bugs](#known-bugs)               |
 
 ## Downloads
 
@@ -39,11 +45,11 @@ For now only **Windows** is supported, but Linux and Mac version is planned !
 
 ## Dev Prerequisites
 
-* [Yarn](https://yarnpkg.com/lang/en/docs/install) (using npm cause issues with native dependencies building)
+- [Yarn](https://yarnpkg.com/lang/en/docs/install) (using npm cause [issues with native dependencies building](https://github.com/electron-userland/electron-builder/issues/1147#issuecomment-276284477))
 
-* [Gulp](https://gulpjs.com/)
-* [Electron](https://electronjs.org/)
-* [Python 2.7](https://www.python.org/downloads/)
+- [Gulp](https://gulpjs.com/)
+- [Electron](https://electronjs.org/)
+- [Python 2.7](https://www.python.org/downloads/)
 
 _For windows, as admin_
 
@@ -122,4 +128,5 @@ It contain an array of **Drm Object**
 |     userSet      |   boolean    |  false  |  false   | If true, the shortcut has been set manually by the user and all other rules are ignored                   |
 
 ## Known bugs
+
 - Games are added multiple times
