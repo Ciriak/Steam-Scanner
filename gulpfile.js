@@ -9,6 +9,8 @@ var request = require("request");
 var async = require("async");
 var path = require("path");
 var mime = require("mime-types");
+var uglify = require("gulp-uglify");
+var pump = require("pump");
 var gulpsync = require("gulp-sync")(gulp);
 var isNpmNotYarn = require("is-npm-not-yarn");
 var ghToken;
@@ -78,13 +80,26 @@ gulp.task(
   ])
 );
 
+gulp.task("prepare-build", function(callback) {
+  pump(
+    [
+      gulp.src("./dist/*.js"),
+      uglify({
+        compress: true
+      }),
+      gulp.dest("dist")
+    ],
+    callback
+  );
+});
+
 gulp.task("compile", function() {
   console.log("Compiling scripts...");
   return gulp
     .src(["src/app.ts"])
     .pipe(
       typescript({
-        sourceMap: true
+        sourceMap: false
       })
     )
     .pipe(gulp.dest("./dist/"));
@@ -107,6 +122,7 @@ gulp.task(
   gulpsync.sync([
     ["clean:build", "clean:dist", "clean:src-modules"],
     ["prepare-dev-env"],
+    ["prepare-build"],
     ["package-app"]
   ])
 );
