@@ -6,7 +6,7 @@ import * as path from "path";
 let Jimp = require("jimp");
 import { DRM } from "./DRM";
 import { ScannerHelpers } from "./ScannerHelpers";
-import AssociatedIcon from "associated-icon";
+import { getIconForPath, ICON_SIZE_EXTRA_SMALL } from "system-icon";
 const helper: ScannerHelpers = new ScannerHelpers();
 
 //retrieve drms list
@@ -112,21 +112,14 @@ export class DRMManager {
    */
   private async generateGameIcon(binaryPath: string, iconFilePath: string) {
     // find associate icon
-    let associatedIcon = new AssociatedIcon(); // or new AssociatedIcon(true); (this will use execFile instead of spawn, so this will work in electron)
-    let response = await associatedIcon.getBase64Icon(binaryPath);
     fs.ensureFileSync(iconFilePath);
-    const buff = Buffer.from(response.Base64Image, "base64");
-    //resize and write image
-    Jimp.read(buff)
-      .then((icon) => {
-        return icon
-          .resize(16, 16) // resize
-          .write(iconFilePath); // save
-      })
-      .catch((err) => {
+    getIconForPath(binaryPath, ICON_SIZE_EXTRA_SMALL, (err, iconData) => {
+      if (err) {
         console.error(err);
-      });
-
+      } else {
+        fs.writeFileSync(iconFilePath, iconData);
+      }
+    });
     return new Promise((resolve) => {
       resolve();
     });
