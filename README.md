@@ -30,7 +30,7 @@ Get all you games on Steam ! Steam Scanner run as a background process, grab gam
 
 ## Supported OS
 
-For now only **Windows** is supported, but Linux and Mac version is planned !
+For now only **Windows** is supported
 
 ## Supported DRM
 
