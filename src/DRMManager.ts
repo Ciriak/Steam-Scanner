@@ -3,7 +3,6 @@ import { app } from "electron";
 import * as colors from "colors";
 import * as fs from "fs-extra";
 import * as path from "path";
-let Jimp = require("jimp");
 import { DRM } from "./DRM";
 import { ScannerHelpers } from "./ScannerHelpers";
 import { getIconForPath, ICON_SIZE_EXTRA_SMALL } from "system-icon";
