@@ -159,6 +159,7 @@ export class ScannerHelpers {
   public async checkArgv(scannerInstance: Scanner) {
     const argv = process.argv;
     if (argv.indexOf("--clean") > -1) {
+      scannerInstance.cleanning = true;
       await this.clean(scannerInstance);
     }
     return new Promise((resolve) => {

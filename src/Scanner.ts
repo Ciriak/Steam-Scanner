@@ -39,6 +39,7 @@ export class Scanner {
   public steamUsers: SteamUser[] = [];
   public checkInterval: any;
   public minCPUFilter: any;
+  public cleanning: boolean = false;
   public isScanning: boolean = false;
   public versionLabel: any = "Steam Scanner V." + app.getVersion();
   private tray: TrayManager;
@@ -107,6 +108,10 @@ export class Scanner {
       () => this.binariesListener(),
       5 * 1000
     ); // every 10 sec - 10 times
+
+    //if cleanning has been asked, it has been done
+    this.cleanning = false;
+
     return new Promise((resolve) => {
       resolve();
     });
@@ -127,7 +132,7 @@ export class Scanner {
     // update the shortcuts for all found user
     let isFirstInstance: boolean = true;
     for (const steamUser of this.steamUsers) {
-      await steamUser.updateShortcuts(isFirstInstance);
+      await steamUser.updateShortcuts(isFirstInstance, this.cleanning);
       isFirstInstance = false;
     }
     return new Promise((resolve) => {
@@ -205,10 +210,11 @@ export class Scanner {
     });
   }
 
-  /* A listener that try to find missing binaries for detected games
-    We have a list of binaries found in the games directories
-    When a active process correspond to one of the game binaries, then it is considered as the game main binarie
-  */
+  /**
+   * A listener that try to find missing binaries for detected games
+   * We have a list of binaries found in the games directories
+   * When a active process correspond to one of the game binaries, then it is considered as the game main binarie
+   */
   private async binariesListener() {
     binaryCheckerCount++;
     // clear the scan interval if this the 10th time

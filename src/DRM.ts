@@ -16,7 +16,7 @@ try {
   knownGamesList = require("./games.json");
 } catch (e) {
   helper.error(colors.red("ERROR ! Unable to read the known games list"));
-  helper.error(e);
+  helper.error(colors.red(e));
   helper.quitApp();
 }
 

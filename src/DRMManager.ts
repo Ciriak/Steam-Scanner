@@ -15,7 +15,7 @@ try {
   drmList = drmConfigFile.drm;
 } catch (e) {
   helper.error(colors.red("FATAL ERROR ! Unable to read DRM config"));
-  helper.error(e);
+  helper.error(colors.red(e));
   helper.quitApp();
 }
 

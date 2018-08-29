@@ -2,6 +2,7 @@ declare const Promise: any;
 import * as _ from "lodash";
 import * as notifier from "node-notifier";
 import * as path from "path";
+import * as fs from "fs-extra";
 import * as shortcut from "steam-shortcut-editor";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
@@ -26,9 +27,20 @@ export class SteamUser {
 
   // isFirstInstance : used in case of multiple users, only the first instance send log and notifications
   // this prevent spam (ex : 6 notification because there is 6 steam accounts)
-  public async updateShortcuts(isFirstInstance: boolean) {
-    if (isDev) {
-      helper.log("Updating shortcuts...");
+  public async updateShortcuts(isFirstInstance: boolean, clean: boolean) {
+    helper.log("Updating shortcuts...");
+
+    //if clean mode, only remove the short
+    if (clean) {
+      helper.warn(colors.yellow("Removing the shortcut file"));
+      try {
+        fs.unlinkSync(this.shortcutsFilePath);
+      } catch (err) {
+        helper.error(colors.red(err));
+      }
+      return new Promise((resolve) => {
+        resolve();
+      });
     }
 
     return new Promise((resolve) => {
@@ -157,7 +169,7 @@ export class SteamUser {
           shortcut.writeFile(this.shortcutsFilePath, shortcutData, (errW) => {
             helper.log("Writing into shortcuts file...");
             if (errW) {
-              helper.error(errW);
+              helper.error(colors.red(errW));
 
               return resolve();
             }
