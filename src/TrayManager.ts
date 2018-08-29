@@ -116,7 +116,7 @@ export class TrayManager {
                         accessor.update(accessor.scanner);
                       }
                     );
-                  }
+                  } /* <== lol */
                 }
               ]
             });
