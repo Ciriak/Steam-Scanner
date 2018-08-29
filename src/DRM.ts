@@ -133,8 +133,8 @@ export class DRM {
    */
   private async getGamesBinaries() {
     let isKnownGame = false;
-    const binariesPathList = [];
     for (const gameName in this.games) {
+      const binariesPathList = [];
       if (this.games.hasOwnProperty(gameName)) {
         const gameItem = this.games[gameName];
         // set the game name based on his folder
@@ -184,7 +184,6 @@ export class DRM {
                 break filesListLoop; //stop everything, we found what we want, a known game executable
               }
             }
-            helper.log("... not found");
           }
 
           //reference all executables
