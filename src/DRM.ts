@@ -7,6 +7,7 @@ import * as recursive from "recursive-readdir";
 
 import { ScannerHelpers } from "./ScannerHelpers";
 import * as colors from "colors";
+import { DRMManager } from "./DRMManager";
 
 const helper: ScannerHelpers = new ScannerHelpers();
 
@@ -194,11 +195,21 @@ export class DRM {
 
         // if there is only one binaries, set it by default
         if (binariesPathList.length === 1) {
-          this.games[gameName].binary = binariesPathList[0];
+          let dm = new DRMManager();
+
           helper.setConfig(
             "drm." + this.name + ".games." + gameItem.name,
             gameItem
           );
+
+          await dm.setBinaryForGame(
+            this.name,
+            gameItem.name,
+            binariesPathList[0],
+            false
+          );
+          this.games[gameName].binary = binariesPathList[0];
+
           continue;
         }
 

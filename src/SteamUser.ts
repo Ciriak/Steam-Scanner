@@ -150,12 +150,17 @@ export class SteamUser {
                       colors.green("Added a shortcut for " + game.name + " =>")
                     );
                     helper.log(game.binary);
+                    let icon = path.join(__dirname, "assets/scanner.png");
+
+                    if (game.icon) {
+                      icon = path.normalize(game.icon["32"]);
+                    }
                     if (enableNotifications) {
                       notifier.notify({
                         title: game.name,
                         message:
                           "This game has been added to your library, please restart Steam",
-                        icon: path.join(__dirname, "assets/scanner.png")
+                        icon: icon
                       });
                     }
                   }

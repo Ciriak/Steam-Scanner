@@ -75,7 +75,9 @@ export class TrayManager {
         for (const gameName in drm.games) {
           if (drm.games.hasOwnProperty(gameName)) {
             const game = drm.games[gameName];
-            let gameMenuLabel, startPath;
+            let gameMenuLabel,
+              startPath,
+              icon = null;
 
             if (game.binary) {
               gameMenuLabel = "Change the executable of ";
@@ -85,8 +87,11 @@ export class TrayManager {
               startPath = game.directory;
             }
             gamesCount++;
+            if (game.icon && game.icon["16"]) {
+              icon = game.icon["16"];
+            }
             gamesListTemplate.push({
-              icon: game.icon,
+              icon: icon,
               label: gameName,
               submenu: [
                 {

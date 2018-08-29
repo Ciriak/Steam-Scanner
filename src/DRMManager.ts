@@ -5,7 +5,11 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import { DRM } from "./DRM";
 import { ScannerHelpers } from "./ScannerHelpers";
-import { getIconForPath, ICON_SIZE_EXTRA_SMALL } from "system-icon";
+import {
+  getIconForPath,
+  ICON_SIZE_EXTRA_SMALL,
+  ICON_SIZE_SMALL
+} from "system-icon";
 const helper: ScannerHelpers = new ScannerHelpers();
 
 //retrieve drms list
@@ -83,23 +87,8 @@ export class DRMManager {
       null
     );
 
-    const iconFilePath = path.normalize(
-      path.join(
-        app.getPath("appData"),
-        "Steam Scanner",
-        "icons",
-        gameName + ".png"
-      )
-    );
-
     //retrieve the icon and generate a file
-    await this.generateGameIcon(binaryPath, iconFilePath);
-
-    //save it into the config
-    helper.setConfig(
-      "drm." + drmName + ".games." + gameName + ".icon",
-      iconFilePath
-    );
+    await this.generateGameIcon(binaryPath, drmName, gameName);
 
     return new Promise((resolve) => {
       resolve();
@@ -109,16 +98,60 @@ export class DRMManager {
   /**
    * Try to retrieve the game icon from his found binaries
    */
-  private async generateGameIcon(binaryPath: string, iconFilePath: string) {
+  private async generateGameIcon(
+    binaryPath: string,
+    drmName: string,
+    gameName: string
+  ) {
+    const iconBasePath = path.join(
+      app.getPath("appData"),
+      "Steam Scanner",
+      "icons"
+    );
+
+    const smallIconFilePath = path.join(iconBasePath, gameName, "16X16.png");
+    const mediumIconFilePath = path.join(iconBasePath, gameName, "32X32.png");
+
     // find associate icon
-    fs.ensureFileSync(iconFilePath);
-    getIconForPath(binaryPath, ICON_SIZE_EXTRA_SMALL, (err, iconData) => {
-      if (err) {
-        console.error(err);
-      } else {
-        fs.writeFileSync(iconFilePath, iconData);
-      }
+
+    try {
+      //small icon
+      fs.ensureFileSync(smallIconFilePath);
+
+      fs.ensureFileSync(mediumIconFilePath);
+
+      //dirty af :(
+      getIconForPath(binaryPath, ICON_SIZE_EXTRA_SMALL, function(
+        err,
+        smallIconData
+      ) {
+        if (err) {
+          helper.error(err);
+        }
+        fs.writeFileSync(smallIconFilePath, smallIconData);
+        getIconForPath(binaryPath, ICON_SIZE_SMALL, function(
+          err,
+          mediumIconData
+        ) {
+          if (err) {
+            helper.error(err);
+          }
+          fs.writeFileSync(mediumIconFilePath, mediumIconData);
+        });
+      });
+    } catch (err) {
+      helper.error(err);
+      return new Promise((resolve) => {
+        resolve();
+      });
+    }
+
+    //save it into the config
+    helper.setConfig("drm." + drmName + ".games." + gameName + ".icon", {
+      "16": smallIconFilePath,
+      "32": mediumIconFilePath
     });
+
     return new Promise((resolve) => {
       resolve();
     });
