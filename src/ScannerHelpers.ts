@@ -29,9 +29,6 @@ export class ScannerHelpers {
   public isDev = isDev;
   constructor() {
     this.checkConfigFile();
-    // ensure default  config for notifications and los
-    this.updateLaunchOnStartup();
-    this.updateNotifications();
   }
 
   /**

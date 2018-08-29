@@ -27,7 +27,7 @@ const possibleSteamLocations = [
 ];
 
 const defaultCheckInterval: number = 2 * 60 * 1000; // 2min
-const helper: ScannerHelpers = new ScannerHelpers();
+let helper: ScannerHelpers;
 const drmManager = new DRMManager();
 let binariesCheckerInterval: any;
 let binaryCheckerCount: number = 0;
@@ -44,6 +44,10 @@ export class Scanner {
   private tray: TrayManager;
 
   constructor() {
+    helper = new ScannerHelpers();
+    // ensure default  config for notifications and los
+    helper.updateLaunchOnStartup();
+    helper.updateNotifications();
     helper.log(colors.cyan.underline(this.versionLabel));
     if (isDev) {
       helper.log(colors.bgCyan("=== Debug Mode ==="));
@@ -62,6 +66,20 @@ export class Scanner {
     this.tray = new TrayManager(this);
     this.tray.update(this);
 
+    // check updates and repeat every hours
+    this.checkUpdates();
+    setInterval(() => this.checkUpdates(), 1 * 60 * 60 * 1000); // every hours
+  }
+
+  public async scan() {
+    // check and appy argv first
+    await helper.checkArgv(this);
+
+    this.isScanning = true;
+    let checkInterval: any = helper.getConfig("checkInterval");
+    // set default value for check interval and save it
+
+    //check if this is th first scan ever
     const launched = helper.getConfig("launched");
     if (!launched) {
       // notify the user that Steam Scanner run in background
@@ -73,16 +91,6 @@ export class Scanner {
       helper.setConfig("launched", true);
     }
 
-    // check updates and repeat every hours
-    this.checkUpdates();
-    setInterval(() => this.checkUpdates(), 1 * 60 * 60 * 1000); // every hours
-  }
-
-  public async scan() {
-    this.isScanning = true;
-    let checkInterval: any = helper.getConfig("checkInterval");
-    // set default value for check interval and save it
-
     this.tray.update(this);
 
     if (!checkInterval) {
@@ -90,8 +98,6 @@ export class Scanner {
       helper.setConfig("checkInterval", checkInterval);
     }
     this.tray.update(this);
-
-    await helper.checkArgv(this);
     await this.checkSteamInstallation();
     await this.updateGames();
     await this.updateShortcuts();
