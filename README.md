@@ -129,4 +129,5 @@ It contain an array of **Drm Object**
 
 ## Known bugs
 
-- Games are added multiple times
+- Notifications spawn multiple time
+- When a new DRM is added to the list (version update), it is not refreshed for the user
