@@ -62,7 +62,13 @@ export class DRMManager {
     });
   }
 
-  // set the given binary the main one for the given game and save it
+  /**
+   * set the given binary the main one for the given game and save it
+   * @param drmName
+   * @param gameName
+   * @param binaryPath
+   * @param userSet has been set manually buy the user ?
+   */
   public async setBinaryForGame(
     drmName: string,
     gameName: string,

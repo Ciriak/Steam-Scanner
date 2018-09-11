@@ -18,6 +18,10 @@ export class TrayManager {
     this.update(scanner);
   }
 
+  /**
+   * Refresh the tray icon and menu
+   * @param scanner Scanner instance
+   */
   public update(scanner: Scanner) {
     const launchOnStartup: any = config.get("launchOnStartup");
     const enableNotifications: any = config.get("enableNotifications");
@@ -63,6 +67,10 @@ export class TrayManager {
     this.tray.setContextMenu(Menu.buildFromTemplate(contextMenu));
   }
 
+  /**
+   * Generate the game menu list with their options depending of their status
+   * @param scanner Scanner instance
+   */
   private generateGamesListTemplate(scanner: Scanner) {
     let accessor = this;
     const gamesListTemplate: any = [];
@@ -140,6 +148,10 @@ export class TrayManager {
     return gamesListTemplate;
   }
 
+  /**
+   * @returns the proper scan button / label depending of the scanner status
+   * @param scanner scanner instance
+   */
   private generateScanButton(scanner: Scanner) {
     let scanTemplate;
     // generate the "scanning"

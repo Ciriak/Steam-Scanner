@@ -19,14 +19,6 @@ const configPath = path.normalize(
   path.join(app.getPath("appData"), "Steam Scanner", "config.json")
 );
 
-try {
-  const cleanDrmConfig = require("./drm.json");
-} catch (e) {
-  helper.error(colors.red("ERROR ! Unable to read the known games list"));
-  helper.error(colors.red(e));
-  this.quitApp();
-}
-
 const cleanConfig = {
   steamDirectory: null,
   drm: {},
