@@ -6,8 +6,10 @@ import * as fs from "fs-extra";
 import * as shortcut from "steam-shortcut-editor";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
+import { Config } from "./Config";
 let isDev = require("electron-is-dev");
-const helper = new ScannerHelpers();
+const helper: ScannerHelpers = new ScannerHelpers();
+const config: Config = new Config();
 const colors = require("colors");
 
 if (process.argv.indexOf("--debug") > -1) {
@@ -66,7 +68,7 @@ export class SteamUser {
           helper.log(colors.cyan("_________________END_________________"));
         }
 
-        const drmList = helper.getConfig("drm");
+        const drmList = config.get("drm");
         for (const drmName in drmList) {
           if (drmList.hasOwnProperty(drmName)) {
             const drm = drmList[drmName];
@@ -143,7 +145,7 @@ export class SteamUser {
 
                   //notify if this is the first instance (and notification are enabled)
                   if (isFirstInstance) {
-                    const enableNotifications: any = helper.getConfig(
+                    const enableNotifications: any = config.get(
                       "enableNotifications"
                     );
                     helper.log(

@@ -20,6 +20,7 @@ import { DRMManager } from "./DRMManager";
 import { ScannerHelpers } from "./ScannerHelpers";
 import { SteamUser } from "./SteamUser";
 import { TrayManager } from "./TrayManager";
+import { Config } from "./Config";
 
 const possibleSteamLocations = [
   "$drive\\Program Files (x86)\\Steam",
@@ -29,6 +30,7 @@ const possibleSteamLocations = [
 const defaultCheckInterval: number = 2 * 60 * 1000; // 2min
 let helper: ScannerHelpers;
 const drmManager = new DRMManager();
+const config: Config = new Config();
 let binariesCheckerInterval: any;
 let binaryCheckerCount: number = 0;
 const maxBinaryChecking: number = 20;
@@ -41,27 +43,28 @@ export class Scanner {
   public minCPUFilter: any;
   public cleanning: boolean = false;
   public isScanning: boolean = false;
+  public config: Config = config;
   public versionLabel: any = "Steam Scanner V." + app.getVersion();
   private tray: TrayManager;
 
   constructor() {
     helper = new ScannerHelpers();
     // ensure default  config for notifications and los
-    helper.updateLaunchOnStartup();
-    helper.updateNotifications();
+    config.updateLaunchOnStartup();
+    config.updateNotifications();
     helper.log(colors.cyan.underline(this.versionLabel));
     if (isDev) {
       helper.log(colors.bgCyan("=== Debug Mode ==="));
     }
 
-    this.checkInterval = helper.getConfig("checkInterval"); // ms between 2 check
+    this.checkInterval = config.get("checkInterval"); // ms between 2 check
     // if the cpu usage a a found process is below, it will be ignored
     // it prevent that the setup are added instead of the game exe itself
-    this.minCPUFilter = helper.getConfig("minCPUFilter");
+    this.minCPUFilter = config.get("minCPUFilter");
     // set default value for check interval and save it
     if (!this.checkInterval) {
       this.checkInterval = defaultCheckInterval;
-      helper.setConfig("checkInterval", this.checkInterval);
+      config.set("checkInterval", this.checkInterval);
     }
 
     this.tray = new TrayManager(this);
@@ -77,11 +80,11 @@ export class Scanner {
     await helper.checkArgv(this);
 
     this.isScanning = true;
-    let checkInterval: any = helper.getConfig("checkInterval");
+    let checkInterval: any = config.get("checkInterval");
     // set default value for check interval and save it
 
     //check if this is th first scan ever
-    const launched = helper.getConfig("launched");
+    const launched = config.get("launched");
     if (!launched) {
       // notify the user that Steam Scanner run in background
       notifier.notify({
@@ -89,14 +92,14 @@ export class Scanner {
         message: "Click on the tray icon for more options",
         icon: path.join(__dirname, "/assets/scanner.png")
       });
-      helper.setConfig("launched", true);
+      config.set("launched", true);
     }
 
     this.tray.update(this);
 
     if (!checkInterval) {
       checkInterval = defaultCheckInterval;
-      helper.setConfig("checkInterval", checkInterval);
+      config.set("checkInterval", checkInterval);
     }
     this.tray.update(this);
     await this.checkSteamInstallation();
@@ -147,7 +150,7 @@ export class Scanner {
     helper.log("Checking Steam location...");
 
     // try to get steam directory from the config
-    this.steamDirectory = helper.getConfig("steamDirectory");
+    this.steamDirectory = config.get("steamDirectory");
 
     // if steam directory not found, try to find it
     if (!this.steamDirectory) {
@@ -177,7 +180,7 @@ export class Scanner {
     );
 
     // save steam location
-    helper.setConfig("steamDirectory", this.steamDirectory);
+    config.set("steamDirectory", this.steamDirectory);
 
     helper.log("Looking for steam accounts...");
 
@@ -237,7 +240,7 @@ export class Scanner {
     // we retrieve all waiting binaries
 
     //  heaven of for !
-    const drmList: any = helper.getConfig("drm");
+    const drmList: any = config.get("drm");
     const watchedItems: any[] = [];
 
     // references all watched binaries on all found games

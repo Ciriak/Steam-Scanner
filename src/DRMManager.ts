@@ -10,7 +10,9 @@ import {
   ICON_SIZE_EXTRA_SMALL,
   ICON_SIZE_SMALL
 } from "system-icon";
+import { Config } from "./Config";
 const helper: ScannerHelpers = new ScannerHelpers();
+const config: Config = new Config();
 
 //retrieve drms list
 let drmList;
@@ -68,21 +70,15 @@ export class DRMManager {
     userSet: boolean // manually set by the user, wont apply the other rules
   ) {
     // set the binary
-    helper.setConfig(
-      "drm." + drmName + ".games." + gameName + ".binary",
-      binaryPath
-    );
+    config.set("drm." + drmName + ".games." + gameName + ".binary", binaryPath);
 
     //set the userSet propertie if given
     if (userSet) {
-      helper.setConfig(
-        "drm." + drmName + ".games." + gameName + ".userSet",
-        true
-      );
+      config.set("drm." + drmName + ".games." + gameName + ".userSet", true);
     }
 
     // clean listenedBinaries prtopertie
-    helper.setConfig(
+    config.set(
       "drm." + drmName + ".games." + gameName + ".listenedBinaries",
       null
     );
@@ -147,7 +143,7 @@ export class DRMManager {
     }
 
     //save it into the config
-    helper.setConfig("drm." + drmName + ".games." + gameName + ".icon", {
+    config.set("drm." + drmName + ".games." + gameName + ".icon", {
       "16": smallIconFilePath,
       "32": mediumIconFilePath
     });

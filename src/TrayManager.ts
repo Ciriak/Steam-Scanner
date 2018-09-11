@@ -5,6 +5,8 @@ const { Menu, Tray, dialog } = require("electron");
 import { DRMManager } from "./DRMManager";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
+import { Config } from "./Config";
+const config: Config = new Config();
 
 const helper = new ScannerHelpers();
 export class TrayManager {
@@ -17,8 +19,8 @@ export class TrayManager {
   }
 
   public update(scanner: Scanner) {
-    const launchOnStartup: any = helper.getConfig("launchOnStartup");
-    const enableNotifications: any = helper.getConfig("enableNotifications");
+    const launchOnStartup: any = config.get("launchOnStartup");
+    const enableNotifications: any = config.get("enableNotifications");
 
     const scanTemplate = this.generateScanButton(scanner);
     const gamesListTemplate = this.generateGamesListTemplate(scanner);
@@ -32,7 +34,7 @@ export class TrayManager {
         type: "checkbox",
         checked: enableNotifications,
         click() {
-          helper.updateNotifications();
+          config.updateNotifications();
         }
       },
       {
@@ -40,7 +42,7 @@ export class TrayManager {
         type: "checkbox",
         checked: launchOnStartup,
         click() {
-          helper.updateLaunchOnStartup();
+          config.updateLaunchOnStartup();
         }
       },
       {
@@ -67,7 +69,7 @@ export class TrayManager {
     const drmManager = new DRMManager();
     let gamesCount = 0;
 
-    const drmList = helper.getConfig("drm");
+    const drmList = config.get("drm");
     for (const drmName in drmList) {
       if (drmList.hasOwnProperty(drmName)) {
         const drm = drmList[drmName];

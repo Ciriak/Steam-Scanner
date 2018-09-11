@@ -8,11 +8,13 @@ import * as recursive from "recursive-readdir";
 import { ScannerHelpers } from "./ScannerHelpers";
 import * as colors from "colors";
 import { DRMManager } from "./DRMManager";
+import { Config } from "./Config";
 
 const helper: ScannerHelpers = new ScannerHelpers();
+const config: Config = new Config();
 
 //retrieve the known binaries list
-let knownGamesList;
+let knownGamesList, drmConfig;
 try {
   knownGamesList = require("./games.json");
 } catch (e) {
@@ -40,7 +42,7 @@ export class DRM {
   }
 
   public async checkInstallation() {
-    const drmConfig: any = helper.getConfig("drm." + this.name);
+    const drmConfig: any = config.get("drm." + this.name);
     // if the binary location is not defined, try to find it
     if (!drmConfig || !drmConfig.binaryLocation) {
       const parsedPossibleLocations: string[] = await helper.addDrivesToPossibleLocations(
@@ -53,7 +55,7 @@ export class DRM {
         // try to list all the users in the userdata folder of steam
         if (fs.existsSync(loc)) {
           this.binaryLocation = loc;
-          helper.setConfig("drm." + this.name, this);
+          config.set("drm." + this.name, this);
           break;
         }
       }
@@ -142,7 +144,7 @@ export class DRM {
         const parsedGamepath = path.parse(gameItem.directory);
         gameItem.name = parsedGamepath.name;
 
-        const gameConfig: any = helper.getConfig(
+        const gameConfig: any = config.get(
           "drm." + this.name + ".games." + gameName
         );
 
@@ -164,7 +166,7 @@ export class DRM {
         }
 
         //clean the list of listened binaries
-        helper.setConfig(
+        config.set(
           "drm." + this.name + ".games." + gameItem.name + ".listenedBinaries",
           null
         );
@@ -197,10 +199,7 @@ export class DRM {
         if (binariesPathList.length === 1) {
           let dm = new DRMManager();
 
-          helper.setConfig(
-            "drm." + this.name + ".games." + gameItem.name,
-            gameItem
-          );
+          config.set("drm." + this.name + ".games." + gameItem.name, gameItem);
 
           await dm.setBinaryForGame(
             this.name,
@@ -215,10 +214,7 @@ export class DRM {
 
         //if there is more than one binary, add the list the the listenners
         if (binariesPathList.length > 1) {
-          helper.setConfig(
-            "drm." + this.name + ".games." + gameItem.name,
-            gameItem
-          );
+          config.set("drm." + this.name + ".games." + gameItem.name, gameItem);
 
           /*
           Here, we will listen for an active process to have the same name than a binarie found in the game files
@@ -226,7 +222,7 @@ export class DRM {
         */
           helper.log("Trying to find the process for " + gameItem.name);
 
-          helper.setConfig(
+          config.set(
             "drm." +
               this.name +
               ".games." +
