@@ -1,5 +1,8 @@
 {
   "Overwatch": {
     "binaries": ["Overwatch Launcher.exe"]
+  },
+  "World of Warcraft": {
+    "binaries": ["World of Warcraft Launcher.exe"]
   }
 }

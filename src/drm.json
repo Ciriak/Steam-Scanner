@@ -9,13 +9,10 @@
       ],
       "gamesPossibleLocations": [
         {
-          "path":
-            "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\games",
-          "uniqueGameFolder": false
+          "path": "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\games"
         },
         {
-          "path": "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\games",
-          "uniqueGameFolder": false
+          "path": "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\games"
         }
       ]
     },
@@ -28,12 +25,10 @@
       ],
       "gamesPossibleLocations": [
         {
-          "path": "$drive\\Program Files (x86)\\Origin Games",
-          "uniqueGameFolder": false
+          "path": "$drive\\Program Files (x86)\\Origin Games"
         },
         {
-          "path": "$drive\\Programmes\\Origin Games",
-          "uniqueGameFolder": false
+          "path": "$drive\\Programmes\\Origin Games"
         }
       ]
     },
@@ -52,6 +47,17 @@
         },
         {
           "path": "$drive\\Programmes\\Overwatch",
+          "defaultBinary": "Overwatch Launcher.exe",
+          "uniqueGameFolder": true
+        },
+        {
+          "path": "$drive\\Program Files (x86)\\World of Warcraft",
+          "defaultBinary": "World of Warcraft Launcher.exe",
+          "uniqueGameFolder": true
+        },
+        {
+          "path": "$drive\\Programmes\\World of Warcraft",
+          "defaultBinary": "World of Warcraft Launcher.exe",
           "uniqueGameFolder": true
         }
       ]
