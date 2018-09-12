@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app } from "electron";
 import { Scanner } from "./Scanner";
 let scanner: any;
 app.on("ready", () => {

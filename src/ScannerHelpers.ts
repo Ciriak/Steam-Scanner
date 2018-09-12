@@ -4,10 +4,8 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import * as drivelist from "drivelist";
 import * as isDev from "electron-is-dev";
-import * as colors from "colors";
 import * as electronLog from "electron-log";
 import { Scanner } from "./Scanner";
-import { Config } from "./Config";
 
 //log config
 electronLog.transports.file.level = "info";
