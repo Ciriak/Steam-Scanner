@@ -87,7 +87,7 @@ export class TrayManager {
             const game = drm.games[gameName];
             let gameMenuLabel,
               startPath,
-              icon = null;
+              icon = path.join(__dirname, "assets", "unknown-game.png");
 
             if (game.binary) {
               gameMenuLabel = "Change the executable of ";
