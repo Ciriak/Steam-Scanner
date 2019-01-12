@@ -26,6 +26,6 @@
     "system-icon": "^0.1.2"
   },
   "devDependencies": {
-    "electron": "^1.8.4"
+    "electron": "^4.0.0"
   }
 }
