@@ -34,7 +34,7 @@ export class Config {
     this.check();
     // Read the package.json
     try {
-      const pJson = fs.readJsonSync("./package.json");
+      const pJson = fs.readJsonSync(path.join(__dirname, "package.json"));
       this.version = pJson.version;
     } catch (error) {
       helper.error(error);
