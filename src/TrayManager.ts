@@ -97,9 +97,9 @@ export class TrayManager {
               startPath = game.directory;
             }
             gamesCount++;
-            if (game.icon && game.icon["16"]) {
-              icon = game.icon["16"];
-            }
+            // if (game.icon && game.icon["16"]) {
+            //   icon = game.icon["16"];
+            // }
             gamesListTemplate.push({
               icon: icon,
               label: gameName,

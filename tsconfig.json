@@ -1,12 +1,17 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "baseUrl": ".",
     "target": "es6",
+    "module": "commonjs",
     "sourceMap": true,
-    "lib": ["es2015"],
+    "outDir": "dist",
+    "removeComments": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*"]
     }
-  }
+  },
+  "include": ["src/**/*"],
+
+  "files": ["./src/app.ts"]
 }

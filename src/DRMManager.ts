@@ -5,11 +5,11 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import { DRM } from "./DRM";
 import { ScannerHelpers } from "./ScannerHelpers";
-import {
-  getIconForPath,
-  ICON_SIZE_EXTRA_SMALL,
-  ICON_SIZE_SMALL
-} from "system-icon";
+// import {
+//   getIconForPath,
+//   ICON_SIZE_EXTRA_SMALL,
+//   ICON_SIZE_SMALL
+// } from "system-icon";
 import { Config } from "./Config";
 const helper: ScannerHelpers = new ScannerHelpers();
 const config: Config = new Config();
@@ -116,37 +116,37 @@ export class DRMManager {
 
     // find associate icon
 
-    try {
-      //small icon
-      fs.ensureFileSync(smallIconFilePath);
+    // try {
+    //   //small icon
+    //   fs.ensureFileSync(smallIconFilePath);
 
-      fs.ensureFileSync(mediumIconFilePath);
+    //   fs.ensureFileSync(mediumIconFilePath);
 
-      //dirty af :(
-      getIconForPath(binaryPath, ICON_SIZE_EXTRA_SMALL, function(
-        err,
-        smallIconData
-      ) {
-        if (err) {
-          helper.error(err);
-        }
-        fs.writeFileSync(smallIconFilePath, smallIconData);
-        getIconForPath(binaryPath, ICON_SIZE_SMALL, function(
-          err,
-          mediumIconData
-        ) {
-          if (err) {
-            helper.error(err);
-          }
-          fs.writeFileSync(mediumIconFilePath, mediumIconData);
-        });
-      });
-    } catch (err) {
-      helper.error(err);
-      return new Promise((resolve) => {
-        resolve();
-      });
-    }
+    //   //dirty af :(
+    //   getIconForPath(binaryPath, ICON_SIZE_EXTRA_SMALL, function(
+    //     err,
+    //     smallIconData
+    //   ) {
+    //     if (err) {
+    //       helper.error(err);
+    //     }
+    //     fs.writeFileSync(smallIconFilePath, smallIconData);
+    //     getIconForPath(binaryPath, ICON_SIZE_SMALL, function(
+    //       err,
+    //       mediumIconData
+    //     ) {
+    //       if (err) {
+    //         helper.error(err);
+    //       }
+    //       fs.writeFileSync(mediumIconFilePath, mediumIconData);
+    //     });
+    //   });
+    // } catch (err) {
+    //   helper.error(err);
+    //   return new Promise((resolve) => {
+    //     resolve();
+    //   });
+    // }
 
     //save it into the config
     config.set("drm." + drmName + ".games." + gameName + ".icon", {

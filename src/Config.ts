@@ -28,12 +28,23 @@ const cleanConfig = {
 };
 
 export class Config {
-  public isDev = isDev;
+  public isDev: boolean = isDev;
+  public version: string;
   constructor() {
     this.check();
+    // Read the package.json
+    try {
+      const pJson = fs.readJsonSync("./package.json");
+      this.version = pJson.version;
+    } catch (error) {
+      helper.error(error);
+      process.exit();
+    }
   }
 
-  // check if the configFile is valid or corrupted, and create a clean one if needed
+  /**
+   * Check if the configFile is valid or corrupted, and create a clean one if needed
+   */
   private check() {
     let data;
     try {

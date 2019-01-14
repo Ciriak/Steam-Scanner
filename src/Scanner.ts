@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import * as notifier from "node-notifier";
 import * as path from "path";
 import * as colors from "colors";
-const { snapshot } = require("process-list");
+var ps = require("current-processes");
 let isDev = require("electron-is-dev");
 
 const Spinner = require("cli-spinner").Spinner;
@@ -44,7 +44,7 @@ export class Scanner {
   public cleanning: boolean = false;
   public isScanning: boolean = false;
   public config: Config = config;
-  public versionLabel: any = "Steam Scanner V." + app.getVersion();
+  public versionLabel: any = "Steam Scanner V." + config.version;
   private tray: TrayManager;
 
   constructor() {
@@ -284,7 +284,8 @@ export class Scanner {
     }
 
     // retrieve the list of all current active process
-    let processList = await snapshot("cpu", "name");
+    //TODO use ps-list here
+    let processList = await ps.get();
 
     // order by cpu usage for perf reason (shorten the loop)
     processList = _.orderBy(processList, "cpu", "desc");

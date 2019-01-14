@@ -62,11 +62,11 @@ export class SteamUser {
           );
         }
 
-        if (isDev) {
-          helper.log(colors.cyan("---- Content of the shortcuts file ----"));
-          helper.log(shortcutData);
-          helper.log(colors.cyan("_________________END_________________"));
-        }
+        // if (isDev) {
+        //   helper.log(colors.cyan("---- Content of the shortcuts file ----"));
+        //   helper.log(shortcutData);
+        //   helper.log(colors.cyan("_________________END_________________"));
+        // }
 
         const drmList = config.get("drm");
         for (const drmName in drmList) {
