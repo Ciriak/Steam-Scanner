@@ -15,7 +15,7 @@ if (process.argv.indexOf("--debug") > -1) {
   isDev = true;
 }
 import { clearInterval } from "timers";
-import { LauncherManager } from "./LauncherManager";
+import { LaunchersManager } from "./LaunchersManager";
 import { ScannerHelpers } from "./ScannerHelpers";
 import { SteamUser } from "./SteamUser";
 import { TrayManager } from "./TrayManager";
@@ -28,7 +28,7 @@ const possibleSteamLocations = [
 
 const defaultCheckInterval: number = 2 * 60 * 1000; // 2min
 let helper: ScannerHelpers;
-const launcherManager = new LauncherManager();
+const launchersManager = new LaunchersManager();
 const config: Config = new Config();
 let binariesCheckerInterval: any;
 let binaryCheckerCount: number = 0;
@@ -102,7 +102,8 @@ export class Scanner {
     }
     this.tray.update(this);
     await this.checkSteamInstallation();
-    await this.updateGames();
+    await this.updateLaunchers();
+    //await this.updateGames();
     await this.updateShortcuts();
     await this.binariesListener();
     clearInterval(binariesCheckerInterval);
@@ -120,10 +121,20 @@ export class Scanner {
   }
 
   /**
+   * Scan for Installed Launcher
+   */
+  public async updateLaunchers() {
+    await launchersManager.getAllLaunchers();
+    return new Promise((resolve) => {
+      resolve();
+    });
+  }
+
+  /**
    * Scan for Installed Launcher, find the games binaries and add them to the listener
    */
   public async updateGames() {
-    await launcherManager.getAllGames();
+    await launchersManager.getAllGames();
     return new Promise((resolve) => {
       resolve();
     });
@@ -181,7 +192,7 @@ export class Scanner {
     // save steam location
     config.set("steamDirectory", this.steamDirectory);
 
-    helper.log("Looking for steam accounts...");
+    helper.log("Looking for Steam accounts...");
 
     const userDirectories: string[] = [];
     const usersDir = path.join(this.steamDirectory, "userdata");
@@ -339,7 +350,7 @@ export class Scanner {
             "Process found for " + item.game.name + " ! => " + item.binary
           )
         );
-        await launcherManager.setBinaryForGame(
+        await launchersManager.setBinaryForGame(
           item.launcher.name,
           item.game.name,
           item.binaryPath,

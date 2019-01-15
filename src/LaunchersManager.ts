@@ -2,6 +2,7 @@ declare const Promise: any;
 import { app } from "electron";
 import * as colors from "colors";
 import * as path from "path";
+import * as fs from "fs-extra";
 import { Launcher } from "./Launcher";
 import { ScannerHelpers } from "./ScannerHelpers";
 // import {
@@ -13,46 +14,88 @@ import { Config } from "./Config";
 const helper: ScannerHelpers = new ScannerHelpers();
 const config: Config = new Config();
 
-//retrieve drms list
-let launchersList;
-try {
-  let launchersConfigFile = require("./launcher.json");
-  launchersList = launchersConfigFile.launcher;
-} catch (e) {
-  helper.error(colors.red("FATAL ERROR ! Unable to read Launcher config"));
-  helper.error(colors.red(e));
-  helper.quitApp();
-}
-
 // ===== Pattern for the config file =======
 // For the gamesProperties :
 // %pattern% :getPath method of Electron => https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
 // $this.xxx = a propertie of the current item (ex : name)
 
-export class LauncherManager {
+export class LaunchersManager {
   public detectedLaunchers: Launcher[] = [];
+  public launchersList: Launcher[] = [];
+  private launchersConfigFilesLocation = path.join(
+    __dirname,
+    "library",
+    "launchers"
+  );
+  constructor() {
+    //retrieve drms list from library (not an actual scan)
+    try {
+      //scan the launchers config folder
+      const launchersFilesList = fs.readdirSync(
+        this.launchersConfigFilesLocation
+      );
+      //loop on all files
+      for (
+        let launcherFileIndex = 0;
+        launcherFileIndex < launchersFilesList.length;
+        launcherFileIndex++
+      ) {
+        const launcherData = fs.readJSONSync(
+          path.join(
+            this.launchersConfigFilesLocation,
+            launchersFilesList[launcherFileIndex]
+          )
+        );
+        // add the launcher config to the launchers list
+        this.launchersList.push(launcherData);
+      }
+    } catch (e) {
+      helper.error(
+        colors.red("FATAL ERROR ! Unable to retrieve launchers config !")
+      );
+      helper.error(colors.red(e));
+      helper.quitApp();
+    }
+  }
 
   /**
    * Return a list of all found game (other than steam)
    */
   public async getAllGames() {
-    //list installed LauncherS
-    for (const launcherName in launchersList) {
-      if (launchersList.hasOwnProperty(launcherName)) {
-        const launcher = new Launcher(launchersList[launcherName]);
-        await launcher.checkInstallation();
-        if (launcher.binaryLocation) {
-          this.detectedLaunchers.push(launcher);
-        }
-      }
+    //get games from all installed Launcher
+    for (
+      let launcherIndex = 0;
+      launcherIndex < this.launchersList.length;
+      launcherIndex++
+    ) {
+      const launcherConfig = this.launchersList[launcherIndex];
+      const launcher = this.detectedLaunchers[launcherConfig.name];
+
+      await launcher.getGames();
     }
 
-    //get games from all installed Launcher
-    for (const launcherName in this.detectedLaunchers) {
-      if (launchersList.hasOwnProperty(launcherName)) {
-        const launcher = this.detectedLaunchers[launcherName];
+    return new Promise((resolve) => {
+      resolve();
+    });
+  }
 
-        await launcher.getGames();
+  /**
+   * Return a list of all found launchers (other than steam)
+   */
+  public async getAllLaunchers() {
+    //list installed LauncherS
+    helper.log("Checking installed Launchers");
+    for (
+      let launcherIndex = 0;
+      launcherIndex < this.launchersList.length;
+      launcherIndex++
+    ) {
+      const launcherConfig = this.launchersList[launcherIndex];
+      const launcher = new Launcher(launcherConfig);
+      await launcher.checkInstallation();
+      // binaryLocation has been set, add it to the list
+      if (launcher.binaryLocation) {
+        this.detectedLaunchers.push(launcher);
       }
     }
 

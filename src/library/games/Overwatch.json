@@ -1,5 +1,6 @@
 {
   "name": "Overwatch",
   "binaries": ["Overwatch Launcher.exe"],
-  "launcher": "BattleNet"
+  "launcher": "BattleNet",
+  "folder": "Overwatch"
 }

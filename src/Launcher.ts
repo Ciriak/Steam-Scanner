@@ -7,7 +7,7 @@ import * as recursive from "recursive-readdir";
 
 import { ScannerHelpers } from "./ScannerHelpers";
 import * as colors from "colors";
-import { LauncherManager } from "./LauncherManager";
+import { LaunchersManager } from "./LaunchersManager";
 import { Config } from "./Config";
 
 const helper: ScannerHelpers = new ScannerHelpers();
@@ -72,7 +72,9 @@ export class Launcher {
       resolve();
     });
   }
-
+  /**
+   * Try to retrieve the games from the launcher
+   */
   public async getGames() {
     await this.getGamesDirectories();
     await this.getGamesBinaries();
@@ -81,7 +83,9 @@ export class Launcher {
     });
   }
 
-  // use the found games directories
+  /**
+   * Try to find games from the launcher propertie => games directory" (ex: "Origin Games")
+   */
   private async getGamesDirectories() {
     for (const possibleLocation of this.gamesPossibleLocations) {
       possibleLocation.path = await helper.addDrivesToPossibleLocations([
@@ -94,34 +98,19 @@ export class Launcher {
         if uniqueGameFolder === true, scan exe, else scan folders
       */
 
-        if (possibleLocation.uniqueGameFolder) {
-          //game directory
-          try {
-            let dir = path.basename(locationPath);
-            if (fs.pathExistsSync(locationPath)) {
-              this.games[dir] = { directory: locationPath };
+        //Directory of games
+        try {
+          const items = fs.readdirSync(locationPath);
+          // only keep the directories
+          for (const dir of items) {
+            const currentGameDir = path.normalize(path.join(locationPath, dir));
+            if (fs.lstatSync(currentGameDir).isDirectory()) {
+              this.games[dir] = { directory: currentGameDir };
             }
-          } catch (e) {
-            // skip if the possible game folder don't exist
-            continue;
           }
-        } else {
-          //Directory of games
-          try {
-            const items = fs.readdirSync(locationPath);
-            // only keep the directories
-            for (const dir of items) {
-              const currentGameDir = path.normalize(
-                path.join(locationPath, dir)
-              );
-              if (fs.lstatSync(currentGameDir).isDirectory()) {
-                this.games[dir] = { directory: currentGameDir };
-              }
-            }
-            // skip if the possible game folder don't exist
-          } catch (e) {
-            continue;
-          }
+          // skip if the possible game folder don't exist
+        } catch (e) {
+          continue;
         }
       }
     }
@@ -201,7 +190,7 @@ export class Launcher {
 
         // if there is only one binaries, set it by default
         if (binariesPathList.length === 1) {
-          let dm = new LauncherManager();
+          let dm = new LaunchersManager();
 
           config.set(
             "launcher." + this.name + ".games." + gameItem.name,

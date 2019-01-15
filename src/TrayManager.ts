@@ -2,7 +2,7 @@ import * as path from "path";
 const colors = require("colors");
 
 const { Menu, Tray, dialog } = require("electron");
-import { LauncherManager } from "./LauncherManager";
+import { LaunchersManager } from "./LaunchersManager";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
 import { Config } from "./Config";
@@ -74,7 +74,7 @@ export class TrayManager {
   private generateGamesListTemplate(scanner: Scanner) {
     let accessor = this;
     const gamesListTemplate: any = [];
-    const launcherManager = new LauncherManager();
+    const launchersManager = new LaunchersManager();
     let gamesCount = 0;
 
     const launchersList = config.get("launchers");
@@ -117,7 +117,7 @@ export class TrayManager {
                         if (!filePath || !filePath[0]) {
                           return;
                         }
-                        launcherManager.setBinaryForGame(
+                        launchersManager.setBinaryForGame(
                           launcherName,
                           gameName,
                           filePath[0],

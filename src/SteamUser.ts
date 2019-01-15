@@ -30,8 +30,6 @@ export class SteamUser {
   // isFirstInstance : used in case of multiple users, only the first instance send log and notifications
   // this prevent spam (ex : 6 notification because there is 6 steam accounts)
   public async updateShortcuts(isFirstInstance: boolean, clean: boolean) {
-    helper.log("Updating shortcuts...");
-
     //if clean mode, only remove the short
     if (clean) {
       helper.warn(colors.yellow("Removing the shortcut file"));
@@ -173,6 +171,7 @@ export class SteamUser {
         }
 
         if (updatedShortcuts && isFirstInstance) {
+          helper.log("Updating Steam shortcuts...");
           shortcut.writeFile(this.shortcutsFilePath, shortcutData, (errW) => {
             helper.log("Writing into shortcuts file...");
             if (errW) {
