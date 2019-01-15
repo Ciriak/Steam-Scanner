@@ -19,7 +19,7 @@ try {
   let launchersConfigFile = require("./launcher.json");
   launchersList = launchersConfigFile.launcher;
 } catch (e) {
-  helper.error(colors.red("FATAL ERROR ! Unable to read DRM config"));
+  helper.error(colors.red("FATAL ERROR ! Unable to read Launcher config"));
   helper.error(colors.red(e));
   helper.quitApp();
 }
@@ -30,27 +30,27 @@ try {
 // $this.xxx = a propertie of the current item (ex : name)
 
 export class LauncherManager {
-  public detectedDrm: Launcher[] = [];
+  public detectedLaunchers: Launcher[] = [];
 
   /**
    * Return a list of all found game (other than steam)
    */
   public async getAllGames() {
-    //list installed DRMS
+    //list installed LauncherS
     for (const launcherName in launchersList) {
       if (launchersList.hasOwnProperty(launcherName)) {
-        const launcher = new DRM(launchersList[launcherName]);
+        const launcher = new Launcher(launchersList[launcherName]);
         await launcher.checkInstallation();
         if (launcher.binaryLocation) {
-          this.detectedDrm.push(drm);
+          this.detectedLaunchers.push(launcher);
         }
       }
     }
 
-    //get games from all installed DRM
-    for (const launcherName in this.detectedDrm) {
+    //get games from all installed Launcher
+    for (const launcherName in this.detectedLaunchers) {
       if (launchersList.hasOwnProperty(launcherName)) {
-        const launcher = this.detectedDrm[launcherName];
+        const launcher = this.detectedLaunchers[launcherName];
 
         await launcher.getGames();
       }

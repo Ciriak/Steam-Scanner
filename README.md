@@ -14,16 +14,16 @@ Get all you games on Steam ! Steam Scanner run as a background process, grab gam
 | :-------------------------------: | :--------------------------------: |
 | ![](./src/assets/screen-tray.png) | ![](./src/assets/screen-steam.png) |
 
-| Table of contents                       |
-| --------------------------------------- |
-| [Downloads](#downloads)                 |
-| [Supported OS](#supported-os)           |
-| [Supported DRM](#supported-drm)         |
-| [Dev prerequisites](#dev-prerequisites) |
-| [Developping](#developping)             |
-| [Launch parameters](#launch-parameters) |
-| [DRM config file](#drm-config-file)     |
-| [Known bugs](#known-bugs)               |
+| Table of contents                        |
+| ---------------------------------------- |
+| [Downloads](#downloads)                  |
+| [Supported OS](#supported-os)            |
+| [Supported Launcher](#supported-drm)     |
+| [Dev prerequisites](#dev-prerequisites)  |
+| [Developping](#developping)              |
+| [Launch parameters](#launch-parameters)  |
+| [Launcher config file](#drm-config-file) |
+| [Known bugs](#known-bugs)                |
 
 ## Downloads
 
@@ -33,9 +33,9 @@ Get all you games on Steam ! Steam Scanner run as a background process, grab gam
 
 For now only **Windows** is supported
 
-## Supported DRM
+## Supported Launcher
 
-| DRM                                                                               | Supported |
+| Launcher                                                                          | Supported |
 | --------------------------------------------------------------------------------- | --------- |
 | <img src="https://i.imgur.com/C0PYnQH.png" width="18px" height="18px"> Uplay      | ✔️        |
 | <img src="https://i.imgur.com/0iLlyMK.png" width="18px" height="18px"> Origin     | ✔️        |
@@ -103,20 +103,20 @@ The following launch parameters are available :
 | - - clean | Clear the saved config and all shortcuts saved on Steam     |
 | - - debug | Show additionnal outputs in the console (like updater logs) |
 
-## DRM config file
+## Launcher config file
 
 _/src/launcher.json_
 
-**launcher.json** contain the configuration used to find the DRM and to overrides some default behaviour (like choosing a game executable by default)
+**launcher.json** contain the configuration used to find the Launcher and to overrides some default behaviour (like choosing a game executable by default)
 
-It contain an array of **Drm Object**
+It contain an array of **Launchers Object**
 
-#### DRM Object
+#### Launcher Object
 
 |        property         |         type         | default | required | notes                                                                                                                   |
 | :---------------------: | :------------------: | :-----: | :------: | ----------------------------------------------------------------------------------------------------------------------- |
-|          name           |        string        |         |   true   | Name of the DRM                                                                                                         |
-|       binaryName        |  string (fileName)   |         |   true   | Name of the executable of the DRM                                                                                       |
+|          name           |        string        |         |   true   | Name of the Launcher                                                                                                    |
+|       binaryName        |  string (fileName)   |         |   true   | Name of the executable of the Launcher                                                                                  |
 | binaryPossibleLocations |    string(path)[]    |         |   true   | Array of path where **binaryName** may be found, use the **\$drive** string to tell the scanner to search on each drive |
 | gamesPossibleLocations  | gameLocationObject[] |         |   true   | See **GameLocationObject** below                                                                                        |
 
@@ -131,4 +131,4 @@ It contain an array of **Drm Object**
 ## Known bugs
 
 - Notifications spawn multiple time
-- When a new DRM is added to the list (version update), it is not refreshed for the user
+- When a new Launcher is added to the list (version update), it is not refreshed for the user

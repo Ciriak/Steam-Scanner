@@ -1,5 +1,4 @@
 declare const Promise: any;
-import { app } from "electron";
 import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as notifier from "node-notifier";
@@ -16,7 +15,7 @@ if (process.argv.indexOf("--debug") > -1) {
   isDev = true;
 }
 import { clearInterval } from "timers";
-import { DRMManager } from "./LauncherManager";
+import { LauncherManager } from "./LauncherManager";
 import { ScannerHelpers } from "./ScannerHelpers";
 import { SteamUser } from "./SteamUser";
 import { TrayManager } from "./TrayManager";
@@ -29,7 +28,7 @@ const possibleSteamLocations = [
 
 const defaultCheckInterval: number = 2 * 60 * 1000; // 2min
 let helper: ScannerHelpers;
-const launcherManager = new DRMManager();
+const launcherManager = new LauncherManager();
 const config: Config = new Config();
 let binariesCheckerInterval: any;
 let binaryCheckerCount: number = 0;
@@ -121,7 +120,7 @@ export class Scanner {
   }
 
   /**
-   * Scan for Installed DRM, find the games binaries and add them to the listener
+   * Scan for Installed Launcher, find the games binaries and add them to the listener
    */
   public async updateGames() {
     await launcherManager.getAllGames();
@@ -263,7 +262,7 @@ export class Scanner {
               const binary = parsedBinarypath.base; // xx.exe
               // add the watched item info to the global list
               watchedItems.push({
-                launcherLauncher,
+                launcher: launcher,
                 game: game,
                 binary: binary,
                 binaryPath: binaryPath

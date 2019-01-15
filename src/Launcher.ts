@@ -7,7 +7,7 @@ import * as recursive from "recursive-readdir";
 
 import { ScannerHelpers } from "./ScannerHelpers";
 import * as colors from "colors";
-import { DRMManager } from "./LauncherManager";
+import { LauncherManager } from "./LauncherManager";
 import { Config } from "./Config";
 
 const helper: ScannerHelpers = new ScannerHelpers();
@@ -201,7 +201,7 @@ export class Launcher {
 
         // if there is only one binaries, set it by default
         if (binariesPathList.length === 1) {
-          let dm = new DRMManager();
+          let dm = new LauncherManager();
 
           config.set(
             "launcher." + this.name + ".games." + gameItem.name,

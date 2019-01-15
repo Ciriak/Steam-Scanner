@@ -21,7 +21,7 @@ const configPath = path.normalize(
 
 const cleanConfig = {
   steamDirectory: null,
-  launcher{},
+  launchers: {},
   launchOnStartup: true,
   enableNotifications: true,
   minCPUFilter: 15

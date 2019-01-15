@@ -2,7 +2,7 @@ import * as path from "path";
 const colors = require("colors");
 
 const { Menu, Tray, dialog } = require("electron");
-import { DRMManager } from "./LauncherManager";
+import { LauncherManager } from "./LauncherManager";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
 import { Config } from "./Config";
@@ -74,7 +74,7 @@ export class TrayManager {
   private generateGamesListTemplate(scanner: Scanner) {
     let accessor = this;
     const gamesListTemplate: any = [];
-    const launcherManager = new DRMManager();
+    const launcherManager = new LauncherManager();
     let gamesCount = 0;
 
     const launchersList = config.get("launchers");
