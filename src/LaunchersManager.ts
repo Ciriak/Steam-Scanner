@@ -22,47 +22,28 @@ const config: Config = new Config();
 export class LaunchersManager {
   public detectedLaunchers: Launcher[] = [];
   public launchersList: Launcher[] = [];
+  public gamesList: any[] = [];
   private launchersConfigFilesLocation = path.join(
     __dirname,
     "library",
     "launchers"
   );
+  private gamesConfigFilesLocation = path.join(__dirname, "library", "games");
+
+  /**
+   * retrieve the supported launchers list from library (not an actual scan)
+   * retrieve the "unique" games config from the library
+   */
   constructor() {
-    //retrieve drms list from library (not an actual scan)
-    try {
-      //scan the launchers config folder
-      const launchersFilesList = fs.readdirSync(
-        this.launchersConfigFilesLocation
-      );
-      //loop on all files
-      for (
-        let launcherFileIndex = 0;
-        launcherFileIndex < launchersFilesList.length;
-        launcherFileIndex++
-      ) {
-        const launcherData = fs.readJSONSync(
-          path.join(
-            this.launchersConfigFilesLocation,
-            launchersFilesList[launcherFileIndex]
-          )
-        );
-        // add the launcher config to the launchers list
-        this.launchersList.push(launcherData);
-      }
-    } catch (e) {
-      helper.error(
-        colors.red("FATAL ERROR ! Unable to retrieve launchers config !")
-      );
-      helper.error(colors.red(e));
-      helper.quitApp();
-    }
+    this.retrieveLaunchersFromLibrary();
+    this.retrieveGamesFromLibrary();
   }
 
   /**
-   * Return a list of all found game (other than steam)
+   * Return a list of all found game
    */
   public async getAllGames() {
-    //get games from all installed Launcher
+    //get games from all installed Launcher first
     for (
       let launcherIndex = 0;
       launcherIndex < this.launchersList.length;
@@ -143,6 +124,70 @@ export class LaunchersManager {
     return new Promise((resolve) => {
       resolve();
     });
+  }
+
+  /**
+   * Scan all json files for launchers on the library
+   */
+  private retrieveLaunchersFromLibrary() {
+    try {
+      //scan the launchers config folder
+      const launchersFilesList = fs.readdirSync(
+        this.launchersConfigFilesLocation
+      );
+      //loop through all files
+      for (
+        let launcherFileIndex = 0;
+        launcherFileIndex < launchersFilesList.length;
+        launcherFileIndex++
+      ) {
+        const launcherData = fs.readJSONSync(
+          path.join(
+            this.launchersConfigFilesLocation,
+            launchersFilesList[launcherFileIndex]
+          )
+        );
+        // add the launcher config to the launchers list
+        this.launchersList.push(launcherData);
+      }
+    } catch (e) {
+      helper.error(
+        colors.red("FATAL ERROR ! Unable to retrieve launchers configs !")
+      );
+      helper.error(colors.red(e));
+      helper.quitApp();
+    }
+  }
+
+  /**
+   * Scan all json files for unique games on the library
+   */
+  private retrieveGamesFromLibrary() {
+    try {
+      //scan the launchers config folder
+      const gamesFilesList = fs.readdirSync(this.gamesConfigFilesLocation);
+      //loop through all files
+      for (
+        let gameFileIndex = 0;
+        gameFileIndex < gamesFilesList.length;
+        gameFileIndex++
+      ) {
+        const gameData = fs.readJSONSync(
+          path.join(
+            this.gamesConfigFilesLocation,
+            gamesFilesList[gameFileIndex]
+          )
+        );
+        // add the launcher config to the launchers list
+        this.gamesList.push(gameData);
+      }
+    } catch (e) {
+      helper.error(
+        colors.red("FATAL ERROR ! Unable to retrieve games configs !")
+      );
+      helper.error(colors.red(e));
+      helper.quitApp();
+    }
   }
 
   /**
