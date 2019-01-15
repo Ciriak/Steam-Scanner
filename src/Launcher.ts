@@ -7,14 +7,14 @@ import * as recursive from "recursive-readdir";
 
 import { ScannerHelpers } from "./ScannerHelpers";
 import * as colors from "colors";
-import { DRMManager } from "./DRMManager";
+import { DRMManager } from "./LauncherManager";
 import { Config } from "./Config";
 
 const helper: ScannerHelpers = new ScannerHelpers();
 const config: Config = new Config();
 
 //retrieve the known binaries list
-let knownGamesList, drmConfig;
+let knownGamesList, launcherConfig;
 try {
   knownGamesList = require("./games.json");
 } catch (e) {
@@ -23,7 +23,7 @@ try {
   helper.quitApp();
 }
 
-export class DRM {
+export class Launcher {
   public name: any;
   public binaryName: string;
   public binaryLocation: string;
@@ -33,18 +33,18 @@ export class DRM {
   private binaryPossibleLocations: string[] = [];
   private gamesPossibleLocations: any[] = [];
 
-  constructor(drmItem: any) {
-    this.name = drmItem.name;
-    this.binaryPossibleLocations = drmItem.binaryPossibleLocations;
-    this.gamesPossibleLocations = drmItem.gamesPossibleLocations;
-    this.binaryName = drmItem.binaryName;
+  constructor(launcherItem: any) {
+    this.name = launcherItem.name;
+    this.binaryPossibleLocations = launcherItem.binaryPossibleLocations;
+    this.gamesPossibleLocations = launcherItem.gamesPossibleLocations;
+    this.binaryName = launcherItem.binaryName;
     this.games = {};
   }
 
   public async checkInstallation() {
-    const drmConfig: any = config.get("drm." + this.name);
+    const launcherConfig: any = config.get("launcher." + this.name);
     // if the binary location is not defined, try to find it
-    if (!drmConfig || !drmConfig.binaryLocation) {
+    if (!launcherConfig || !launcherConfig.binaryLocation) {
       const parsedPossibleLocations: string[] = await helper.addDrivesToPossibleLocations(
         this.binaryPossibleLocations
       );
@@ -55,12 +55,12 @@ export class DRM {
         // try to list all the users in the userdata folder of steam
         if (fs.existsSync(loc)) {
           this.binaryLocation = loc;
-          config.set("drm." + this.name, this);
+          config.set("launcher." + this.name, this);
           break;
         }
       }
     } else {
-      this.binaryLocation = drmConfig.binaryLocation;
+      this.binaryLocation = launcherConfig.binaryLocation;
     }
 
     if (this.binaryLocation) {
@@ -145,7 +145,7 @@ export class DRM {
         gameItem.name = parsedGamepath.name;
 
         const gameConfig: any = config.get(
-          "drm." + this.name + ".games." + gameName
+          "launcher." + this.name + ".games." + gameName
         );
 
         // if game and his binary are already known => skip
@@ -167,7 +167,11 @@ export class DRM {
 
         //clean the list of listened binaries
         config.set(
-          "drm." + this.name + ".games." + gameItem.name + ".listenedBinaries",
+          "launcher." +
+            this.name +
+            ".games." +
+            gameItem.name +
+            ".listenedBinaries",
           null
         );
 
@@ -199,7 +203,10 @@ export class DRM {
         if (binariesPathList.length === 1) {
           let dm = new DRMManager();
 
-          config.set("drm." + this.name + ".games." + gameItem.name, gameItem);
+          config.set(
+            "launcher." + this.name + ".games." + gameItem.name,
+            gameItem
+          );
 
           await dm.setBinaryForGame(
             this.name,
@@ -214,7 +221,10 @@ export class DRM {
 
         //if there is more than one binary, add the list the the listenners
         if (binariesPathList.length > 1) {
-          config.set("drm." + this.name + ".games." + gameItem.name, gameItem);
+          config.set(
+            "launcher." + this.name + ".games." + gameItem.name,
+            gameItem
+          );
 
           /*
           Here, we will listen for an active process to have the same name than a binarie found in the game files
@@ -223,7 +233,7 @@ export class DRM {
           helper.log("Trying to find the process for " + gameItem.name);
 
           config.set(
-            "drm." +
+            "launcher." +
               this.name +
               ".games." +
               gameItem.name +

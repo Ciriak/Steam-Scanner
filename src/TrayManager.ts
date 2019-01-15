@@ -2,7 +2,7 @@ import * as path from "path";
 const colors = require("colors");
 
 const { Menu, Tray, dialog } = require("electron");
-import { DRMManager } from "./DRMManager";
+import { DRMManager } from "./LauncherManager";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
 import { Config } from "./Config";
@@ -74,17 +74,17 @@ export class TrayManager {
   private generateGamesListTemplate(scanner: Scanner) {
     let accessor = this;
     const gamesListTemplate: any = [];
-    const drmManager = new DRMManager();
+    const launcherManager = new DRMManager();
     let gamesCount = 0;
 
-    const drmList = config.get("drm");
-    for (const drmName in drmList) {
-      if (drmList.hasOwnProperty(drmName)) {
-        const drm = drmList[drmName];
+    const launchersList = config.get("launchers");
+    for (const launcherName in launchersList) {
+      if (launchersList.hasOwnProperty(launcherName)) {
+        const launcher = launchersList[launcherName];
         // aLl games of a drm
-        for (const gameName in drm.games) {
-          if (drm.games.hasOwnProperty(gameName)) {
-            const game = drm.games[gameName];
+        for (const gameName in launcher.games) {
+          if (launcher.games.hasOwnProperty(gameName)) {
+            const game = launcher.games[gameName];
             let gameMenuLabel,
               startPath,
               icon = path.join(__dirname, "assets", "unknown-game.png");
@@ -117,8 +117,8 @@ export class TrayManager {
                         if (!filePath || !filePath[0]) {
                           return;
                         }
-                        drmManager.setBinaryForGame(
-                          drmName,
+                        launcherManager.setBinaryForGame(
+                          launcherName,
                           gameName,
                           filePath[0],
                           true

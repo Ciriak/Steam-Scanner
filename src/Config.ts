@@ -21,7 +21,7 @@ const configPath = path.normalize(
 
 const cleanConfig = {
   steamDirectory: null,
-  drm: {},
+  launcher{},
   launchOnStartup: true,
   enableNotifications: true,
   minCPUFilter: 15
@@ -71,7 +71,7 @@ export class Config {
   /**
    * retrieve a propertie into the config
    * key can be an object path
-   * @param key propertie target (drm.games.Overwatch)
+   * @param key propertie target (launcher.games.Overwatch)
    */
   public get(key: string) {
     try {

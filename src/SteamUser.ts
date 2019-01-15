@@ -68,13 +68,13 @@ export class SteamUser {
         //   helper.log(colors.cyan("_________________END_________________"));
         // }
 
-        const drmList = config.get("drm");
-        for (const drmName in drmList) {
-          if (drmList.hasOwnProperty(drmName)) {
-            const drm = drmList[drmName];
-            for (const gameName in drm.games) {
-              if (drm.games.hasOwnProperty(gameName)) {
-                const game = drm.games[gameName];
+        const launchersList = config.get("launchers");
+        for (const launcherName in launchersList) {
+          if (launchersList.hasOwnProperty(launcherName)) {
+            const launcher = launchersList[launcherName];
+            for (const gameName in launcher.games) {
+              if (launcher.games.hasOwnProperty(gameName)) {
+                const game = launcher.games[gameName];
 
                 // skip if the binary of the game in unknown
                 if (!game.binary) {
@@ -136,7 +136,7 @@ export class SteamUser {
                   // add the new shortcut
                   shortcutData.shortcuts.push({
                     exe: game.binary,
-                    tags: [drm.name],
+                    tags: [launcher.name],
                     appName: game.name,
                     StartDir: game.directory
                   });

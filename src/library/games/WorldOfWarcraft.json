@@ -1,0 +1,5 @@
+{
+  "name": "World Of Warcraft",
+  "binaries": ["World of Warcraft Launcher.exe"],
+  "launcher": "BattleNet"
+}

@@ -1,0 +1,30 @@
+{
+  "name": "BattleNet",
+  "binaryName": "Battle.net Launcher.exe",
+  "binaryPossibleLocations": [
+    "$drive\\Program Files (x86)\\Battle.net",
+    "$drive\\Programmes\\Battle.net"
+  ],
+  "gamesPossibleLocations": [
+    {
+      "path": "$drive\\Program Files (x86)\\Overwatch",
+      "defaultBinary": "Overwatch Launcher.exe",
+      "uniqueGameFolder": true
+    },
+    {
+      "path": "$drive\\Programmes\\Overwatch",
+      "defaultBinary": "Overwatch Launcher.exe",
+      "uniqueGameFolder": true
+    },
+    {
+      "path": "$drive\\Program Files (x86)\\World of Warcraft",
+      "defaultBinary": "World of Warcraft Launcher.exe",
+      "uniqueGameFolder": true
+    },
+    {
+      "path": "$drive\\Programmes\\World of Warcraft",
+      "defaultBinary": "World of Warcraft Launcher.exe",
+      "uniqueGameFolder": true
+    }
+  ]
+}

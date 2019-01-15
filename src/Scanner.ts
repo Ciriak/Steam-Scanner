@@ -16,7 +16,7 @@ if (process.argv.indexOf("--debug") > -1) {
   isDev = true;
 }
 import { clearInterval } from "timers";
-import { DRMManager } from "./DRMManager";
+import { DRMManager } from "./LauncherManager";
 import { ScannerHelpers } from "./ScannerHelpers";
 import { SteamUser } from "./SteamUser";
 import { TrayManager } from "./TrayManager";
@@ -29,7 +29,7 @@ const possibleSteamLocations = [
 
 const defaultCheckInterval: number = 2 * 60 * 1000; // 2min
 let helper: ScannerHelpers;
-const drmManager = new DRMManager();
+const launcherManager = new DRMManager();
 const config: Config = new Config();
 let binariesCheckerInterval: any;
 let binaryCheckerCount: number = 0;
@@ -124,7 +124,7 @@ export class Scanner {
    * Scan for Installed DRM, find the games binaries and add them to the listener
    */
   public async updateGames() {
-    await drmManager.getAllGames();
+    await launcherManager.getAllGames();
     return new Promise((resolve) => {
       resolve();
     });
@@ -240,17 +240,17 @@ export class Scanner {
     // we retrieve all waiting binaries
 
     //  heaven of for !
-    const drmList: any = config.get("drm");
+    const launchersList: any = config.get("launchers");
     const watchedItems: any[] = [];
 
     // references all watched binaries on all found games
-    for (const drmName in drmList) {
-      if (drmList.hasOwnProperty(drmName)) {
-        const drm = drmList[drmName];
+    for (const launcherName in launchersList) {
+      if (launchersList.hasOwnProperty(launcherName)) {
+        const launcher = launchersList[launcherName];
         // aLl games of a drm
-        for (const gameName in drm.games) {
-          if (drm.games.hasOwnProperty(gameName)) {
-            const game = drm.games[gameName];
+        for (const gameName in launcher.games) {
+          if (launcher.games.hasOwnProperty(gameName)) {
+            const game = launcher.games[gameName];
 
             // skip if no binary is watched
             if (!game.listenedBinaries) {
@@ -263,7 +263,7 @@ export class Scanner {
               const binary = parsedBinarypath.base; // xx.exe
               // add the watched item info to the global list
               watchedItems.push({
-                drm: drm,
+                launcherLauncher,
                 game: game,
                 binary: binary,
                 binaryPath: binaryPath
@@ -340,8 +340,8 @@ export class Scanner {
             "Process found for " + item.game.name + " ! => " + item.binary
           )
         );
-        await drmManager.setBinaryForGame(
-          item.drm.name,
+        await launcherManager.setBinaryForGame(
+          item.launcher.name,
           item.game.name,
           item.binaryPath,
           false

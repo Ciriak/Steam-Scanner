@@ -3,6 +3,7 @@
     <img src="https://i.imgur.com/TQwOYJC.png" width="150px" height="150px">
 
 [![GitHub version](https://badge.fury.io/gh/nj-neer%2FSteam-Scanner.svg)](https://github.com/nj-neer/Steam-Scanner/releases/latest)
+
 [![Build status](https://ci.appveyor.com/api/projects/status/la08lmcifr0q6r9q?svg=true)](https://ci.appveyor.com/project/Cyriaqu3/steam-scanner)
 
 </center>
@@ -104,28 +105,28 @@ The following launch parameters are available :
 
 ## DRM config file
 
-_/src/drm.json_
+_/src/launcher.json_
 
-**drm.json** contain the configuration used to find the DRM and to overrides some default behaviour (like choosing a game executable by default)
+**launcher.json** contain the configuration used to find the DRM and to overrides some default behaviour (like choosing a game executable by default)
 
 It contain an array of **Drm Object**
 
 #### DRM Object
 
-|        property         |         type         | default | required | notes                                                                                                                  |
-| :---------------------: | :------------------: | :-----: | :------: | ---------------------------------------------------------------------------------------------------------------------- |
-|          name           |        string        |         |   true   | Name of the DRM                                                                                                        |
-|       binaryName        |  string (fileName)   |         |   true   | Name of the executable of the DRM                                                                                      |
-| binaryPossibleLocations |    string(path)[]    |         |   true   | Array of path where **binaryName** may be found, use the **$drive** string to tell the scanner to search on each drive |
-| gamesPossibleLocations  | gameLocationObject[] |         |   true   | See **GameLocationObject** below                                                                                       |
+|        property         |         type         | default | required | notes                                                                                                                   |
+| :---------------------: | :------------------: | :-----: | :------: | ----------------------------------------------------------------------------------------------------------------------- |
+|          name           |        string        |         |   true   | Name of the DRM                                                                                                         |
+|       binaryName        |  string (fileName)   |         |   true   | Name of the executable of the DRM                                                                                       |
+| binaryPossibleLocations |    string(path)[]    |         |   true   | Array of path where **binaryName** may be found, use the **\$drive** string to tell the scanner to search on each drive |
+| gamesPossibleLocations  | gameLocationObject[] |         |   true   | See **GameLocationObject** below                                                                                        |
 
 #### GameLocationObject
 
-|     property     |     type     | default | required | notes                                                                                                     |
-| :--------------: | :----------: | :-----: | :------: | --------------------------------------------------------------------------------------------------------- |
-|       path       | string(path) |         |   true   | Path where the folder may be found, use the **$drive** string to tell the scanner to search on each drive |
-| uniqueGameFolder |   boolean    |  false  |  false   | If **true**, the folder will be treated as a game folder (and not a list of game folders)                 |
-|     userSet      |   boolean    |  false  |  false   | If true, the shortcut has been set manually by the user and all other rules are ignored                   |
+|     property     |     type     | default | required | notes                                                                                                      |
+| :--------------: | :----------: | :-----: | :------: | ---------------------------------------------------------------------------------------------------------- |
+|       path       | string(path) |         |   true   | Path where the folder may be found, use the **\$drive** string to tell the scanner to search on each drive |
+| uniqueGameFolder |   boolean    |  false  |  false   | If **true**, the folder will be treated as a game folder (and not a list of game folders)                  |
+|     userSet      |   boolean    |  false  |  false   | If true, the shortcut has been set manually by the user and all other rules are ignored                    |
 
 ## Known bugs
 
