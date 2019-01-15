@@ -63,13 +63,13 @@ npm install --global --production windows-build-tools
 Install the dependencies and generate the dist folder
 
 ```
-yarn
+npm i
 ```
 
 Start the watcher
 
 ```
-yarn run dev
+npm run dev
 ```
 
 ### Launching the app (dev mode)
@@ -81,17 +81,7 @@ electron dist/app.js
 ### Building
 
 ```
-yarn run build
-```
-
-**note :** Yarn doesn't show detailled error messages, use the vanilla command (ex: electron-builder") to display the full error if the build fail
-
-### Deploy a release
-
-**note** You need to create a file named **.gh-token** with the Github release token in it
-
-```
-yarn run deploy
+npm run build
 ```
 
 ## Launch parameters
@@ -103,32 +93,27 @@ The following launch parameters are available :
 | - - clean | Clear the saved config and all shortcuts saved on Steam     |
 | - - debug | Show additionnal outputs in the console (like updater logs) |
 
-## Launcher config file
+## Launcher config files
 
-_/src/launcher.json_
+_/src/library/launchers/**#launcher-name#**.json_
 
-**launcher.json** contain the configuration used to find the Launcher and to overrides some default behaviour (like choosing a game executable by default)
+#### Launcher Config file properties
 
-It contain an array of **Launchers Object**
+|        property         |       type        | default | required | notes                                                                                                                   |
+| :---------------------: | :---------------: | :-----: | :------: | ----------------------------------------------------------------------------------------------------------------------- |
+|          name           |      string       |         |   true   | Name of the Launcher                                                                                                    |
+|       binaryName        | string (fileName) |         |   true   | Name of the executable of the Launcher                                                                                  |
+| binaryPossibleLocations |  string(path)[]   |         |   true   | Array of path where **binaryName** may be found, use the **\$drive** string to tell the scanner to search on each drive |
 
-#### Launcher Object
+## Game config files
 
-|        property         |         type         | default | required | notes                                                                                                                   |
-| :---------------------: | :------------------: | :-----: | :------: | ----------------------------------------------------------------------------------------------------------------------- |
-|          name           |        string        |         |   true   | Name of the Launcher                                                                                                    |
-|       binaryName        |  string (fileName)   |         |   true   | Name of the executable of the Launcher                                                                                  |
-| binaryPossibleLocations |    string(path)[]    |         |   true   | Array of path where **binaryName** may be found, use the **\$drive** string to tell the scanner to search on each drive |
-| gamesPossibleLocations  | gameLocationObject[] |         |   true   | See **GameLocationObject** below                                                                                        |
+_/src/library/games/**#game-name#**.json_
 
-#### GameLocationObject
+#### Game config file properties
 
-|     property     |     type     | default | required | notes                                                                                                      |
-| :--------------: | :----------: | :-----: | :------: | ---------------------------------------------------------------------------------------------------------- |
-|       path       | string(path) |         |   true   | Path where the folder may be found, use the **\$drive** string to tell the scanner to search on each drive |
-| uniqueGameFolder |   boolean    |  false  |  false   | If **true**, the folder will be treated as a game folder (and not a list of game folders)                  |
-|     userSet      |   boolean    |  false  |  false   | If true, the shortcut has been set manually by the user and all other rules are ignored                    |
-
-## Known bugs
-
-- Notifications spawn multiple time
-- When a new Launcher is added to the list (version update), it is not refreshed for the user
+|  property  |   type   | default | required | notes                                                                  |
+| :--------: | :------: | :-----: | :------: | ---------------------------------------------------------------------- |
+|    name    |  string  |         |   true   | Name of the game                                                       |
+|  binaries  | string[] |         |   true   | List of possible binaries file name (ex : **Overwatch Launcher.exe** ) |
+|  launcher  |  string  |         |  false   | name of the launcher associated with this game (ex: **Uplay**)         |
+| folderName |  string  |         |  false   | Name of the game folder, **name** will be used if not given            |
