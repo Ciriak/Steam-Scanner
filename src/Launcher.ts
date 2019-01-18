@@ -30,10 +30,12 @@ export class Launcher {
   public configPath: string;
   public gamesInstallDirectory;
   public games: any;
+  private manager: LaunchersManager;
   private binaryPossibleLocations: string[] = [];
   private gamesPossibleLocations: any[] = [];
 
-  constructor(launcherItem: any) {
+  constructor(launcherItem: any, manager: LaunchersManager) {
+    this.manager = manager;
     this.name = launcherItem.name;
     this.binaryPossibleLocations = launcherItem.binaryPossibleLocations;
     this.gamesPossibleLocations = launcherItem.gamesPossibleLocations;
@@ -87,11 +89,11 @@ export class Launcher {
    * Try to find games from the launcher propertie => games directory" (ex: "Origin Games")
    */
   private async getGamesDirectories() {
+    helper.log("[" + this.name + "] Looking for games directories...");
     for (const possibleLocation of this.gamesPossibleLocations) {
       possibleLocation.path = await helper.addDrivesToPossibleLocations([
         possibleLocation.path
       ]);
-
       for (const locationPath of possibleLocation.path) {
         /*
         two case possible here
@@ -191,14 +193,14 @@ export class Launcher {
 
         // if there is only one binaries, set it by default
         if (binariesPathList.length === 1) {
-          const dm = new LaunchersManager();
+          const launcherManager = this.manager;
 
           config.set(
             "launcher." + this.name + ".games." + gameItem.name,
             gameItem
           );
 
-          await dm.setBinaryForGame(
+          await launcherManager.setBinaryForGame(
             this.name,
             gameItem.name,
             binariesPathList[0],

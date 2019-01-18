@@ -47,11 +47,10 @@ export class LaunchersManager {
     // get games from all installed Launcher first
     for (
       let launcherIndex = 0;
-      launcherIndex < this.launchersList.length;
+      launcherIndex < this.detectedLaunchers.length;
       launcherIndex++
     ) {
-      const launcherConfig = this.launchersList[launcherIndex];
-      const launcher = this.detectedLaunchers[launcherConfig.name];
+      const launcher = this.detectedLaunchers[launcherIndex];
 
       await launcher.getGames();
     }
@@ -73,7 +72,7 @@ export class LaunchersManager {
       launcherIndex++
     ) {
       const launcherConfig = this.launchersList[launcherIndex];
-      const launcher = new Launcher(launcherConfig);
+      const launcher = new Launcher(launcherConfig, this);
       await launcher.checkInstallation();
       // binaryLocation has been set, add it to the list
       if (launcher.binaryLocation) {

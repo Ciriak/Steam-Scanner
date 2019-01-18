@@ -85,7 +85,7 @@ export class SteamUser {
 
                 // check if the game is already in the steam shortcuts
                 let gameCount: number = 0;
-                let unwantedIndexList: number[] = [];
+                const unwantedIndexList: number[] = [];
                 for (let i = 0; i < shortcutData.shortcuts.length; i++) {
                   const shortcut = shortcutData.shortcuts[i];
                   if (
@@ -128,9 +128,8 @@ export class SteamUser {
                     );
                     updatedShortcuts = true;
                   }
-                }
-                // shortcut don't already exist, add it
-                else {
+                } else {
+                  // shortcut don't already exist, add it
                   // add the new shortcut
                   shortcutData.shortcuts.push({
                     exe: game.binary,
@@ -141,7 +140,7 @@ export class SteamUser {
                   updatedShortcuts = true;
                   addedShortcuts++;
 
-                  //notify if this is the first instance (and notification are enabled)
+                  // notify if this is the first instance (and notification are enabled)
                   if (isFirstInstance) {
                     const enableNotifications: any = config.get(
                       "enableNotifications"

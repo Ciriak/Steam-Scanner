@@ -15,11 +15,11 @@ if (process.argv.indexOf("--debug") > -1) {
   isDev = true;
 }
 import { clearInterval } from "timers";
+import { Config } from "./Config";
 import { LaunchersManager } from "./LaunchersManager";
 import { ScannerHelpers } from "./ScannerHelpers";
 import { SteamUser } from "./SteamUser";
 import { TrayManager } from "./TrayManager";
-import { Config } from "./Config";
 
 const possibleSteamLocations = [
   "$drive\\Program Files (x86)\\Steam",
@@ -103,7 +103,7 @@ export class Scanner {
     this.tray.update(this);
     await this.checkSteamInstallation();
     await this.updateLaunchers();
-    //await this.updateGames();
+    await this.updateGames();
     await this.updateShortcuts();
     await this.binariesListener();
     clearInterval(binariesCheckerInterval);
@@ -112,7 +112,7 @@ export class Scanner {
       5 * 1000
     ); // every 10 sec - 10 times
 
-    //if cleanning has been asked, it has been done
+    // if cleanning has been asked, it has been done
     this.cleanning = false;
 
     return new Promise((resolve) => {
