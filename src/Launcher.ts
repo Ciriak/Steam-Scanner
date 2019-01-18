@@ -5,16 +5,16 @@ import * as _ from "lodash";
 import * as path from "path";
 import * as recursive from "recursive-readdir";
 
-import { ScannerHelpers } from "./ScannerHelpers";
 import * as colors from "colors";
-import { LaunchersManager } from "./LaunchersManager";
 import { Config } from "./Config";
+import { LaunchersManager } from "./LaunchersManager";
+import { ScannerHelpers } from "./ScannerHelpers";
 
 const helper: ScannerHelpers = new ScannerHelpers();
 const config: Config = new Config();
 
-//retrieve the known binaries list
-let knownGamesList, launcherConfig;
+// retrieve the known binaries list
+let knownGamesList;
 try {
   knownGamesList = require("./games.json");
 } catch (e) {
@@ -98,7 +98,7 @@ export class Launcher {
         if uniqueGameFolder === true, scan exe, else scan folders
       */
 
-        //Directory of games
+        // Directory of games
         try {
           const items = fs.readdirSync(locationPath);
           // only keep the directories
@@ -125,7 +125,9 @@ export class Launcher {
    */
   private async getGamesBinaries() {
     let isKnownGame = false;
-    for (const gameName in this.games) {
+    for (let gameIndex = 0; gameIndex < this.games.length; gameIndex++) {
+      const gameName = this.games[gameIndex];
+
       const binariesPathList = [];
       if (this.games.hasOwnProperty(gameName)) {
         const gameItem = this.games[gameName];
@@ -142,7 +144,7 @@ export class Launcher {
           continue;
         }
 
-        //check if the game is a "known" game :
+        // check if the game is a "known" game :
         if (knownGamesList[gameItem.name]) {
           helper.log(
             colors.cyan(
@@ -150,11 +152,11 @@ export class Launcher {
                 " is a known game, trying to find one of the known executable..."
             )
           );
-          //game is a known game, generate a list of possible binary location
+          // game is a known game, generate a list of possible binary location
           isKnownGame = true;
         }
 
-        //clean the list of listened binaries
+        // clean the list of listened binaries
         config.set(
           "launcher." +
             this.name +
@@ -164,25 +166,24 @@ export class Launcher {
           null
         );
 
-        // ignore files named "foo.cs" or files that end in ".html".
         const filesList = await recursive(gameItem.directory);
         filesListLoop: for (const fileName of filesList) {
           if (isKnownGame) {
             if (!knownGamesList[gameItem.name].binaries) {
               break;
             }
-            //only search in known locations (from games.json)
+            // only search in known locations (from games.json)
             for (const binary of knownGamesList[gameItem.name].binaries) {
-              //ex : c//program/overwatch/Overwatch.exe => Overwatch.exe
+              // ex : c//program/overwatch/Overwatch.exe => Overwatch.exe
               if (fileName.search(binary) > -1) {
                 binariesPathList.push(fileName);
                 helper.log(colors.green(fileName + " FOUND !"));
-                break filesListLoop; //stop everything, we found what we want, a known game executable
+                break filesListLoop; // stop everything, we found what we want, a known game executable
               }
             }
           }
 
-          //reference all executables
+          // reference all executables
           if (fileName.search(".exe") > -1) {
             binariesPathList.push(fileName);
           }
@@ -190,7 +191,7 @@ export class Launcher {
 
         // if there is only one binaries, set it by default
         if (binariesPathList.length === 1) {
-          let dm = new LaunchersManager();
+          const dm = new LaunchersManager();
 
           config.set(
             "launcher." + this.name + ".games." + gameItem.name,
@@ -208,7 +209,7 @@ export class Launcher {
           continue;
         }
 
-        //if there is more than one binary, add the list the the listenners
+        // if there is more than one binary, add the list the the listenners
         if (binariesPathList.length > 1) {
           config.set(
             "launcher." + this.name + ".games." + gameItem.name,

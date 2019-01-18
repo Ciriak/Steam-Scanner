@@ -1,16 +1,17 @@
 declare const Promise: any;
-import { app } from "electron";
 import * as colors from "colors";
-import * as path from "path";
+import { app } from "electron";
 import * as fs from "fs-extra";
-import { Launcher } from "./Launcher";
-import { ScannerHelpers } from "./ScannerHelpers";
+import * as path from "path";
 // import {
 //   getIconForPath,
 //   ICON_SIZE_EXTRA_SMALL,
 //   ICON_SIZE_SMALL
 // } from "system-icon";
 import { Config } from "./Config";
+import { Launcher } from "./Launcher";
+import { Scanner } from "./Scanner";
+import { ScannerHelpers } from "./ScannerHelpers";
 const helper: ScannerHelpers = new ScannerHelpers();
 const config: Config = new Config();
 
@@ -43,7 +44,7 @@ export class LaunchersManager {
    * Return a list of all found game
    */
   public async getAllGames() {
-    //get games from all installed Launcher first
+    // get games from all installed Launcher first
     for (
       let launcherIndex = 0;
       launcherIndex < this.launchersList.length;
@@ -64,7 +65,7 @@ export class LaunchersManager {
    * Return a list of all found launchers (other than steam)
    */
   public async getAllLaunchers() {
-    //list installed LauncherS
+    // list installed LauncherS
     helper.log("Checking installed Launchers");
     for (
       let launcherIndex = 0;
@@ -104,7 +105,7 @@ export class LaunchersManager {
       binaryPath
     );
 
-    //set the userSet propertie if given
+    // set the userSet propertie if given
     if (userSet) {
       config.set(
         "launcher." + launcherName + ".games." + gameName + ".userSet",
@@ -118,7 +119,7 @@ export class LaunchersManager {
       null
     );
 
-    //retrieve the icon and generate a file
+    // retrieve the icon and generate a file
     await this.generateGameIcon(binaryPath, launcherName, gameName);
 
     return new Promise((resolve) => {
@@ -131,11 +132,11 @@ export class LaunchersManager {
    */
   private retrieveLaunchersFromLibrary() {
     try {
-      //scan the launchers config folder
+      // scan the launchers config folder
       const launchersFilesList = fs.readdirSync(
         this.launchersConfigFilesLocation
       );
-      //loop through all files
+      // loop through all files
       for (
         let launcherFileIndex = 0;
         launcherFileIndex < launchersFilesList.length;
@@ -164,9 +165,9 @@ export class LaunchersManager {
    */
   private retrieveGamesFromLibrary() {
     try {
-      //scan the launchers config folder
+      // scan the launchers config folder
       const gamesFilesList = fs.readdirSync(this.gamesConfigFilesLocation);
-      //loop through all files
+      // loop through all files
       for (
         let gameFileIndex = 0;
         gameFileIndex < gamesFilesList.length;
@@ -241,10 +242,10 @@ export class LaunchersManager {
     //   });
     // }
 
-    //save it into the config
+    // save it into the config
     config.set("launcher." + launcherName + ".games." + gameName + ".icon", {
-      "16": smallIconFilePath,
-      "32": mediumIconFilePath
+      16: smallIconFilePath,
+      32: mediumIconFilePath
     });
 
     return new Promise((resolve) => {

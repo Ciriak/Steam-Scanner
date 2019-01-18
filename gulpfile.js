@@ -6,7 +6,9 @@ const colors = require("colors");
 const terser = require("gulp-terser");
 const packager = require("electron-packager");
 const shell = require("gulp-shell");
-var tsProject = ts.createProject("tsconfig.json");
+const sourcemaps = require("gulp-sourcemaps");
+const path = require("path");
+const tsProject = ts.createProject("tsconfig.json");
 
 const packageOptions = {
   dir: "./dist",
@@ -61,11 +63,12 @@ gulp.task("generate-package-file", function(callback) {
 });
 
 gulp.task("compile", function() {
-  var tsResult = gulp
+  return gulp
     .src("./src/**/*.ts") // or tsProject.src()
-    .pipe(tsProject());
-
-  return tsResult.js.pipe(gulp.dest("dist"));
+    .pipe(sourcemaps.init())
+    .pipe(tsProject())
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest("./dist"));
 });
 
 gulp.task(
@@ -106,7 +109,7 @@ gulp.task(
       "generate-package-file",
       "copy-models",
       "copy-assets",
-      gulp.series("compile", "min-es6")
+      gulp.series("compile")
     )
   )
 );

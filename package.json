@@ -31,14 +31,15 @@
   "homepage": "https://github.com/nj-neer/Steam-Scanner#readme",
   "devDependencies": {
     "del": "^3.0.0",
+    "electron": "^4.0.1",
     "electron-packager": "^13.0.1",
     "gulp": "^4.0.0",
     "gulp-shell": "^0.6.5",
+    "gulp-sourcemaps": "^2.6.4",
     "gulp-terser": "^1.1.7",
     "gulp-typescript": "^5.0.0",
     "typedoc": "^0.14.1",
-    "typescript": "^3.2.2",
-    "electron": "^4.0.1"
+    "typescript": "^3.2.2"
   },
   "dependencies": {
     "auto-launch": "^5.0.5",
