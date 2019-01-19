@@ -4,6 +4,7 @@ import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as notifier from "node-notifier";
 import * as path from "path";
+import * as recursive from "recursive-readdir";
 const ps = require("current-processes");
 let isDev = require("electron-is-dev");
 
@@ -138,6 +139,7 @@ export class Scanner {
    */
   public async updateGames() {
     await launchersManager.getAllGames();
+    await this.getGamesBinaries();
     return new Promise((resolve) => {
       resolve();
     });
@@ -416,6 +418,117 @@ export class Scanner {
         progress.percent = Math.round(progress.percent);
         helper.log("Downloading update : " + progress.percent + "%");
       }
+    });
+  }
+
+  /**
+   * Try to find the games main executables
+   * if there is more than one executable, add them to the watch list for the scanner
+   */
+  private async getGamesBinaries() {
+    for (
+      let gameIndex = 0;
+      gameIndex < launchersManager.gamesList.length;
+      gameIndex++
+    ) {
+      const gameItem = launchersManager.gamesList[gameIndex];
+
+      const binariesPathList = [];
+
+      const gameConfig: any = config.get(
+        "launcher." + this.name + ".games." + gameItem.name
+      );
+
+      // Check the config to see if the game and his binary are alkeary known
+      // if yes, skip it
+      if (gameConfig && gameConfig.binary) {
+        continue;
+      }
+
+      // clean the list of listened binaries
+      config.set(
+        "launcher." +
+          this.name +
+          ".games." +
+          gameItem.name +
+          ".listenedBinaries",
+        null
+      );
+
+      const filesList = await recursive(gameItem.folder);
+      // Check all the files in the found directory
+      // if one of the file is contained in the game.binaries properties, it is set as the game default binary
+      filesListLoop: for (const fileName of filesList) {
+        for (const binary of launchersManager.gamesList[gameIndex].binaries) {
+          if (fileName.search(binary) > -1) {
+            binariesPathList.push(fileName);
+            helper.log(colors.green(fileName + " FOUND !"));
+            break filesListLoop; // stop everything, we found what we want, a known game executable
+          }
+        }
+
+        // reference all executables
+        if (fileName.search(".exe") > -1) {
+          binariesPathList.push(fileName);
+        }
+      }
+
+      gameItem.binaries = binariesPathList;
+
+      if (gameItem.binaries.length === 0) {
+        helper.warn(
+          colors.yellow(
+            "No executable found in the folder for " +
+              colors.cyan(gameItem.name) +
+              " it has been skipped"
+          )
+        );
+        continue;
+      }
+
+      // if there is only one binaries, set it by default
+      if (gameItem.binaries.length === 1) {
+        const launcherManager = this.manager;
+
+        config.set(
+          "launcher." + this.name + ".games." + gameItem.name,
+          gameItem
+        );
+
+        await launcherManager.setBinaryForGame(
+          this.name,
+          gameItem.name,
+          binariesPathList[0],
+          false
+        );
+        launchersManager.gamesList[gameIndex].binaries = [binariesPathList[0]];
+        launchersManager.gamesList[gameIndex].binarySet = true;
+
+        continue;
+      }
+
+      // if there is more than one binary, add the list the the listenners
+      if (gameItem.binaries.length > 1) {
+        config.set(
+          "launcher." + this.name + ".games." + gameItem.name,
+          gameItem
+        );
+
+        /*
+          Here, we will listen for an active process to have the same name than a binarie found in the game files
+          add the game the the listener, things happend in "Scanner.ts"
+        */
+        helper.log(
+          "Watching " +
+            colors.cyan("" + gameItem.binaries.length + "") +
+            " executable files for the game " +
+            colors.cyan(gameItem.name)
+        );
+      }
+    }
+
+    return new Promise((resolve) => {
+      resolve();
     });
   }
 }

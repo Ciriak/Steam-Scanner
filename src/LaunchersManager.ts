@@ -41,7 +41,7 @@ export class LaunchersManager {
   }
 
   /**
-   * Return a list of all found game
+   * Update the games list for all launchers
    */
   public async getAllGames() {
     // get games from all installed Launcher
@@ -52,7 +52,7 @@ export class LaunchersManager {
     ) {
       const launcher = this.detectedLaunchers[launcherIndex];
 
-      await launcher.getGames();
+      await launcher.getGamesDirectories();
     }
 
     return new Promise((resolve) => {

@@ -3,5 +3,5 @@ interface IGame {
   binaries: string[];
   launcher?: string;
   folder: string;
-  binarySet: boolean;
+  binarySet?: boolean;
 }
