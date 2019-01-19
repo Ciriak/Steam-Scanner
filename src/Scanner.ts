@@ -1,10 +1,10 @@
 declare const Promise: any;
+import * as colors from "colors";
 import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as notifier from "node-notifier";
 import * as path from "path";
-import * as colors from "colors";
-var ps = require("current-processes");
+const ps = require("current-processes");
 let isDev = require("electron-is-dev");
 
 const Spinner = require("cli-spinner").Spinner;
@@ -43,7 +43,7 @@ export class Scanner {
   public cleanning: boolean = false;
   public isScanning: boolean = false;
   public config: Config = config;
-  public versionLabel: any = "Steam Scanner V." + config.version;
+  public versionLabel: string = "Steam Scanner V." + config.version;
   private tray: TrayManager;
 
   constructor() {
@@ -51,10 +51,13 @@ export class Scanner {
     // ensure default  config for notifications and los
     config.updateLaunchOnStartup();
     config.updateNotifications();
+
+    // show a label in the console
     helper.log(colors.cyan.underline(this.versionLabel));
     if (isDev) {
       helper.log(colors.bgCyan("=== Debug Mode ==="));
     }
+    //
 
     this.checkInterval = config.get("checkInterval"); // ms between 2 check
     // if the cpu usage a a found process is below, it will be ignored
@@ -79,10 +82,10 @@ export class Scanner {
     await helper.checkArgv(this);
 
     this.isScanning = true;
-    let checkInterval: any = config.get("checkInterval");
+    let checkInterval: number = config.get("checkInterval");
     // set default value for check interval and save it
 
-    //check if this is th first scan ever
+    // check if this is th first scan ever
     const launched = config.get("launched");
     if (!launched) {
       // notify the user that Steam Scanner run in background
@@ -140,7 +143,9 @@ export class Scanner {
     });
   }
 
-  // update the steamShortcuts (send the query to each Steam user found)
+  /**
+   * Update the steam Shortcuts (Updated for each steam user)
+   */
   public async updateShortcuts() {
     // update the shortcuts for all found user
     let isFirstInstance: boolean = true;
@@ -294,7 +299,7 @@ export class Scanner {
     }
 
     // retrieve the list of all current active process
-    //TODO use ps-list here
+    // TODO use ps-list here
     let processList = await ps.get();
 
     // order by cpu usage for perf reason (shorten the loop)
@@ -338,8 +343,8 @@ export class Scanner {
           continue;
         }
 
-        //the binary has been found but don't exist anymore, skip
-        let binaryExist = fs.existsSync(item.binaryPath);
+        // the binary has been found but don't exist anymore, skip
+        const binaryExist = fs.existsSync(item.binaryPath);
         if (!binaryExist) {
           continue;
         }
@@ -366,6 +371,9 @@ export class Scanner {
     });
   }
 
+  /**
+   * Check for update and auto install if a newer version is found
+   */
   private checkUpdates() {
     if (isDev) {
       helper.log(colors.cyan("Updater logs enabled"));

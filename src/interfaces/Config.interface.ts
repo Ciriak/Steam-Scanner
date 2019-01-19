@@ -1,4 +1,4 @@
-interface CleanConfig {
+interface ICOnfig {
   steamDirectory: string;
   launchers: object;
   launchOnStartup: boolean;

@@ -13,23 +13,12 @@ import { ScannerHelpers } from "./ScannerHelpers";
 const helper: ScannerHelpers = new ScannerHelpers();
 const config: Config = new Config();
 
-// retrieve the known binaries list
-let knownGamesList;
-try {
-  knownGamesList = require("./games.json");
-} catch (e) {
-  helper.error(colors.red("ERROR ! Unable to read the known games list"));
-  helper.error(colors.red(e));
-  helper.quitApp();
-}
-
 export class Launcher {
   public name: any;
   public binaryName: string;
   public binaryLocation: string;
   public configPath: string;
   public gamesInstallDirectory;
-  public games: any;
   private manager: LaunchersManager;
   private binaryPossibleLocations: string[] = [];
   private gamesPossibleLocations: any[] = [];
@@ -40,7 +29,6 @@ export class Launcher {
     this.binaryPossibleLocations = launcherItem.binaryPossibleLocations;
     this.gamesPossibleLocations = launcherItem.gamesPossibleLocations;
     this.binaryName = launcherItem.binaryName;
-    this.games = {};
   }
 
   public async checkInstallation() {
@@ -107,7 +95,13 @@ export class Launcher {
           for (const dir of items) {
             const currentGameDir = path.normalize(path.join(locationPath, dir));
             if (fs.lstatSync(currentGameDir).isDirectory()) {
-              this.games[dir] = { directory: currentGameDir };
+              // push a game item to the global watch list
+              this.manager.gamesList.push({
+                name: currentGameDir,
+                folder: currentGameDir,
+                binaries: [],
+                launcher: this.name
+              });
             }
           }
           // skip if the possible game folder don't exist
@@ -127,112 +121,115 @@ export class Launcher {
    */
   private async getGamesBinaries() {
     let isKnownGame = false;
-    for (let gameIndex = 0; gameIndex < this.games.length; gameIndex++) {
-      const gameName = this.games[gameIndex];
+    for (
+      let gameIndex = 0;
+      gameIndex < this.manager.gamesList.length;
+      gameIndex++
+    ) {
+      const gameItem = this.manager.gamesList[gameIndex];
 
       const binariesPathList = [];
-      if (this.games.hasOwnProperty(gameName)) {
-        const gameItem = this.games[gameName];
-        // set the game name based on his folder
-        const parsedGamepath = path.parse(gameItem.directory);
-        gameItem.name = parsedGamepath.name;
 
-        const gameConfig: any = config.get(
-          "launcher." + this.name + ".games." + gameName
+      // set the game name based on his folder
+      const parsedGamepath = path.parse(gameItem.folder);
+      gameItem.name = parsedGamepath.name;
+
+      const gameConfig: any = config.get(
+        "launcher." + this.name + ".games." + gameItem.name
+      );
+
+      // if game and his binary are already known => skip
+      if (gameConfig && gameConfig.binary) {
+        continue;
+      }
+
+      // check if the game is a "known" game :
+      if (this.manager.gamesList[gameItem.name]) {
+        helper.log(
+          colors.cyan(
+            gameItem.name +
+              " is a known game, trying to find one of the known executable..."
+          )
+        );
+        // game is a known game, generate a list of possible binary location
+        isKnownGame = true;
+      }
+
+      // clean the list of listened binaries
+      config.set(
+        "launcher." +
+          this.name +
+          ".games." +
+          gameItem.name +
+          ".listenedBinaries",
+        null
+      );
+
+      const filesList = await recursive(gameItem.folder);
+      filesListLoop: for (const fileName of filesList) {
+        if (isKnownGame) {
+          if (!this.manager.gamesList[gameItem.name].binaries) {
+            break;
+          }
+          // only search in known locations (from games.json)
+          for (const binary of this.manager.gamesList[gameItem.name].binaries) {
+            // ex : c//program/overwatch/Overwatch.exe => Overwatch.exe
+            if (fileName.search(binary) > -1) {
+              binariesPathList.push(fileName);
+              helper.log(colors.green(fileName + " FOUND !"));
+              break filesListLoop; // stop everything, we found what we want, a known game executable
+            }
+          }
+        }
+
+        // reference all executables
+        if (fileName.search(".exe") > -1) {
+          binariesPathList.push(fileName);
+        }
+      }
+
+      // if there is only one binaries, set it by default
+      if (binariesPathList.length === 1) {
+        const launcherManager = this.manager;
+
+        config.set(
+          "launcher." + this.name + ".games." + gameItem.name,
+          gameItem
         );
 
-        // if game and his binary are already known => skip
-        if (gameConfig && gameConfig.binary) {
-          continue;
-        }
+        await launcherManager.setBinaryForGame(
+          this.name,
+          gameItem.name,
+          binariesPathList[0],
+          false
+        );
+        this.manager.gamesList[gameIndex].binaries = [binariesPathList[0]];
+        this.manager.gamesList[gameIndex].binarySet = true;
 
-        // check if the game is a "known" game :
-        if (knownGamesList[gameItem.name]) {
-          helper.log(
-            colors.cyan(
-              gameItem.name +
-                " is a known game, trying to find one of the known executable..."
-            )
-          );
-          // game is a known game, generate a list of possible binary location
-          isKnownGame = true;
-        }
+        continue;
+      }
 
-        // clean the list of listened binaries
+      // if there is more than one binary, add the list the the listenners
+      if (binariesPathList.length > 1) {
+        config.set(
+          "launcher." + this.name + ".games." + gameItem.name,
+          gameItem
+        );
+
+        /*
+          Here, we will listen for an active process to have the same name than a binarie found in the game files
+          add the game the the listener, things happend in "Scanner.ts"
+        */
+        helper.log("Trying to find the process for " + gameItem.name);
+
         config.set(
           "launcher." +
             this.name +
             ".games." +
             gameItem.name +
             ".listenedBinaries",
-          null
+          binariesPathList
         );
-
-        const filesList = await recursive(gameItem.directory);
-        filesListLoop: for (const fileName of filesList) {
-          if (isKnownGame) {
-            if (!knownGamesList[gameItem.name].binaries) {
-              break;
-            }
-            // only search in known locations (from games.json)
-            for (const binary of knownGamesList[gameItem.name].binaries) {
-              // ex : c//program/overwatch/Overwatch.exe => Overwatch.exe
-              if (fileName.search(binary) > -1) {
-                binariesPathList.push(fileName);
-                helper.log(colors.green(fileName + " FOUND !"));
-                break filesListLoop; // stop everything, we found what we want, a known game executable
-              }
-            }
-          }
-
-          // reference all executables
-          if (fileName.search(".exe") > -1) {
-            binariesPathList.push(fileName);
-          }
-        }
-
-        // if there is only one binaries, set it by default
-        if (binariesPathList.length === 1) {
-          const launcherManager = this.manager;
-
-          config.set(
-            "launcher." + this.name + ".games." + gameItem.name,
-            gameItem
-          );
-
-          await launcherManager.setBinaryForGame(
-            this.name,
-            gameItem.name,
-            binariesPathList[0],
-            false
-          );
-          this.games[gameName].binary = binariesPathList[0];
-
-          continue;
-        }
-
-        // if there is more than one binary, add the list the the listenners
-        if (binariesPathList.length > 1) {
-          config.set(
-            "launcher." + this.name + ".games." + gameItem.name,
-            gameItem
-          );
-
-          /*
-          Here, we will listen for an active process to have the same name than a binarie found in the game files
-          add the game the the listener, things happend in "Scanner.ts"
-        */
-          helper.log("Trying to find the process for " + gameItem.name);
-
-          config.set(
-            "launcher." +
-              this.name +
-              ".games." +
-              gameItem.name +
-              ".listenedBinaries",
-            binariesPathList
-          );
-        }
       }
     }
 

@@ -1,25 +1,25 @@
 declare const Promise: any;
+import * as autoLaunch from "auto-launch";
+import * as colors from "colors";
 import { app } from "electron";
+import * as isDev from "electron-is-dev";
+import * as electronLog from "electron-log";
 import * as fs from "fs-extra";
 import * as objectPath from "object-path";
 import * as path from "path";
-import * as isDev from "electron-is-dev";
-import * as colors from "colors";
-import * as electronLog from "electron-log";
-import * as autoLaunch from "auto-launch";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
 
 const helper = new ScannerHelpers();
 
-//log config
+// log config
 electronLog.transports.file.level = "info";
 
 const configPath = path.normalize(
   path.join(app.getPath("appData"), "Steam Scanner", "config.json")
 );
 
-const cleanConfig = {
+const cleanConfig: ICOnfig = {
   steamDirectory: null,
   launchers: {},
   launchOnStartup: true,
@@ -31,7 +31,7 @@ export class Config {
   public isDev: boolean = isDev;
   public version: string;
   constructor() {
-    this.check();
+    this.checkIntegrity();
     // Read the package.json
     try {
       const pJson = fs.readJsonSync(path.join(__dirname, "package.json"));
@@ -40,32 +40,6 @@ export class Config {
       helper.error(error);
       process.exit();
     }
-  }
-
-  /**
-   * Check if the configFile is valid or corrupted, and create a clean one if needed
-   */
-  private check() {
-    let data;
-    try {
-      // be sure that the file exist
-      fs.ensureFileSync(configPath);
-      data = fs.readJsonSync(configPath);
-
-      // if there is a missing propertie in the saved config, reset it
-      for (const propertie in cleanConfig) {
-        if (!data[propertie]) {
-          data[propertie] = cleanConfig[propertie];
-        }
-      }
-    } catch (e) {
-      // create a clean config file if don't exist or is corrupted
-      // this also happend for the first launch, so we add a notification
-      helper.log(colors.yellow("NOTICE - creating a clean config file..."));
-      data = this.getCleanConfig();
-    }
-    // write a parsed and validated config file
-    fs.writeJsonSync(configPath, data);
   }
 
   /**
@@ -89,7 +63,7 @@ export class Config {
 
   // save a propertie into the config
   public set(key: string, value: any) {
-    this.check();
+    this.checkIntegrity();
     const configData = fs.readJsonSync(configPath);
     const parsedKey = key.split(".");
 
@@ -129,6 +103,9 @@ export class Config {
     });
   }
 
+  /**
+   * Read the config to find if the "launchOnStartup" option is enabled, if true, enable it
+   */
   public updateLaunchOnStartup() {
     const launcher = new autoLaunch({ name: "Steam Scanner" });
     const launch = this.get("launchOnStartup");
@@ -149,6 +126,9 @@ export class Config {
     }
   }
 
+  /**
+   * Read the config to find if the "enableNotifications" option is enabled, if true, enable it
+   */
   public updateNotifications() {
     const notif = this.get("enableNotifications");
     this.set("enableNotifications", notif);
@@ -159,6 +139,35 @@ export class Config {
     }
   }
 
+  /**
+   * Check if the configFile is valid or corrupted, and create a clean one if needed
+   */
+  private checkIntegrity() {
+    let data;
+    try {
+      // be sure that the file exist
+      fs.ensureFileSync(configPath);
+      data = fs.readJsonSync(configPath);
+
+      // if there is a missing propertie in the saved config, reset it
+      for (const propertie in cleanConfig) {
+        if (!data[propertie]) {
+          data[propertie] = cleanConfig[propertie];
+        }
+      }
+    } catch (e) {
+      // create a clean config file if don't exist or is corrupted
+      // this also happend for the first launch, so we add a notification
+      helper.log(colors.yellow("NOTICE - creating a clean config file..."));
+      data = this.getCleanConfig();
+    }
+    // write a parsed and validated config file
+    fs.writeJsonSync(configPath, data);
+  }
+
+  /**
+   * Return a clean config object
+   */
   private getCleanConfig() {
     return cleanConfig;
   }

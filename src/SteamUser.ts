@@ -1,12 +1,12 @@
 declare const Promise: any;
+import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as notifier from "node-notifier";
 import * as path from "path";
-import * as fs from "fs-extra";
 import * as shortcut from "steam-shortcut-editor";
+import { Config } from "./Config";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
-import { Config } from "./Config";
 let isDev = require("electron-is-dev");
 const helper: ScannerHelpers = new ScannerHelpers();
 const config: Config = new Config();
@@ -27,10 +27,14 @@ export class SteamUser {
     this.initUser();
   }
 
-  // isFirstInstance : used in case of multiple users, only the first instance send log and notifications
-  // this prevent spam (ex : 6 notification because there is 6 steam accounts)
+  /**
+   * Update the shortcuts for this user
+   * @param isFirstInstance used in case of multiple users, only the first instance send log and notifications
+   * this prevent spam (ex : 6 notification because there is 6 steam accounts)
+   * @param clean if true : clear all shortcuts added by steam scanner
+   */
   public async updateShortcuts(isFirstInstance: boolean, clean: boolean) {
-    //if clean mode, only remove the short
+    // if clean mode, only remove the short
     if (clean) {
       helper.warn(colors.yellow("Removing the shortcut file"));
       try {
@@ -87,10 +91,10 @@ export class SteamUser {
                 let gameCount: number = 0;
                 const unwantedIndexList: number[] = [];
                 for (let i = 0; i < shortcutData.shortcuts.length; i++) {
-                  const shortcut = shortcutData.shortcuts[i];
+                  const nShortcut = shortcutData.shortcuts[i];
                   if (
-                    shortcut.appname === gameName ||
-                    shortcut.appName === gameName
+                    nShortcut.appname === gameName ||
+                    nShortcut.appName === gameName
                   ) {
                     gameCount++;
 
@@ -106,7 +110,7 @@ export class SteamUser {
                   if (isDev) {
                     helper.log("Shortcut already exist for " + gameName);
                   }
-                  //if the game has been added twice or more for some reason
+                  // if the game has been added twice or more for some reason
                   if (gameCount > 1) {
                     helper.log(
                       colors.yellow(
@@ -116,8 +120,8 @@ export class SteamUser {
                       )
                     );
 
-                    //remove all unwanted , by their index
-                    unwantedIndexList.reverse(); //reverse the array before => don't fucked up the index list
+                    // remove all unwanted , by their index
+                    unwantedIndexList.reverse(); // reverse the array before => don't fucked up the index list
                     for (const unwantedIndex of unwantedIndexList) {
                       shortcutData.shortcuts.splice(unwantedIndex, 1);
                     }

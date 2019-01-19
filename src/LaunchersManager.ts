@@ -10,7 +10,6 @@ import * as path from "path";
 // } from "system-icon";
 import { Config } from "./Config";
 import { Launcher } from "./Launcher";
-import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
 const helper: ScannerHelpers = new ScannerHelpers();
 const config: Config = new Config();
@@ -23,7 +22,8 @@ const config: Config = new Config();
 export class LaunchersManager {
   public detectedLaunchers: Launcher[] = [];
   public launchersList: Launcher[] = [];
-  public gamesList: any[] = [];
+  public gamesList: IGame[] = [];
+
   private launchersConfigFilesLocation = path.join(
     __dirname,
     "library",
@@ -44,7 +44,7 @@ export class LaunchersManager {
    * Return a list of all found game
    */
   public async getAllGames() {
-    // get games from all installed Launcher first
+    // get games from all installed Launcher
     for (
       let launcherIndex = 0;
       launcherIndex < this.detectedLaunchers.length;
@@ -160,34 +160,38 @@ export class LaunchersManager {
   }
 
   /**
-   * Scan all json files for unique games on the library
+   * Parse all games files from the library
+   * @returns known games list
    */
   private retrieveGamesFromLibrary() {
+    // retrieve games from the library
+    // retrieve the known binaries list
+    const games: IGame[] = [];
+    let knownGamesList;
     try {
-      // scan the launchers config folder
-      const gamesFilesList = fs.readdirSync(this.gamesConfigFilesLocation);
-      // loop through all files
-      for (
-        let gameFileIndex = 0;
-        gameFileIndex < gamesFilesList.length;
-        gameFileIndex++
-      ) {
-        const gameData = fs.readJSONSync(
-          path.join(
-            this.gamesConfigFilesLocation,
-            gamesFilesList[gameFileIndex]
-          )
-        );
-        // add the launcher config to the launchers list
-        this.gamesList.push(gameData);
-      }
+      knownGamesList = fs.readdirSync(path.join(__dirname, "library", "games"));
     } catch (e) {
-      helper.error(
-        colors.red("FATAL ERROR ! Unable to retrieve games configs !")
-      );
+      helper.error(colors.red("ERROR ! Unable to read the known games list"));
       helper.error(colors.red(e));
       helper.quitApp();
     }
+
+    for (
+      let gameFileIndex = 0;
+      gameFileIndex < knownGamesList.length;
+      gameFileIndex++
+    ) {
+      const gameFile = knownGamesList[gameFileIndex];
+      try {
+        const gameData = fs.readJSONSync(
+          path.join(__dirname, "library", "games", gameFile)
+        );
+        games.push(gameData);
+      } catch (error) {
+        continue;
+      }
+    }
+    return games;
   }
 
   /**

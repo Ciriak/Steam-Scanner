@@ -1,13 +1,13 @@
 declare const Promise: any;
-import { app } from "electron";
-import * as fs from "fs-extra";
-import * as path from "path";
 import * as drivelist from "drivelist";
+import { app } from "electron";
 import * as isDev from "electron-is-dev";
 import * as electronLog from "electron-log";
+import * as path from "path";
+
 import { Scanner } from "./Scanner";
 
-//log config
+// log config
 electronLog.transports.file.level = "info";
 
 export class ScannerHelpers {
