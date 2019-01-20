@@ -70,7 +70,7 @@ export class SteamUser {
         //   helper.log(colors.cyan("_________________END_________________"));
         // }
 
-        const launchersList = config.get("launchers");
+        const launchersList = config.launchers;
         for (const launcherName in launchersList) {
           if (launchersList.hasOwnProperty(launcherName)) {
             const launcher = launchersList[launcherName];

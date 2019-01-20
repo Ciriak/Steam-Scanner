@@ -21,15 +21,13 @@ const config: Config = new Config();
 
 export class LaunchersManager {
   public detectedLaunchers: Launcher[] = [];
-  public launchersList: Launcher[] = [];
-  public gamesList: IGame[] = [];
+  public launchersList: ILauncher[] = [];
 
   private launchersConfigFilesLocation = path.join(
     __dirname,
     "library",
     "launchers"
   );
-  private gamesConfigFilesLocation = path.join(__dirname, "library", "games");
 
   /**
    * retrieve the supported launchers list from library (not an actual scan)
@@ -37,7 +35,6 @@ export class LaunchersManager {
    */
   constructor() {
     this.retrieveLaunchersFromLibrary();
-    this.retrieveGamesFromLibrary();
   }
 
   /**
@@ -51,8 +48,8 @@ export class LaunchersManager {
       launcherIndex++
     ) {
       const launcher = this.detectedLaunchers[launcherIndex];
-
       await launcher.getGamesDirectories();
+      await launcher.getGamesBinaries();
     }
 
     return new Promise((resolve) => {
@@ -62,6 +59,7 @@ export class LaunchersManager {
 
   /**
    * Return a list of all found launchers (other than steam)
+   * Also add a "Library" categorie for games founds from the library
    */
   public async getAllLaunchers() {
     // list installed LauncherS
@@ -73,6 +71,13 @@ export class LaunchersManager {
     ) {
       const launcherConfig = this.launchersList[launcherIndex];
       const launcher = new Launcher(launcherConfig, this);
+      // check instalation except for "library"
+      if (launcher.name === "Library") {
+        // add lirbary to the launchers list anyway
+        this.detectedLaunchers.push(launcher);
+        config.launchers[launcher.name] = launcher;
+        continue;
+      }
       await launcher.checkInstallation();
       // binaryLocation has been set, add it to the list
       if (launcher.binaryLocation) {
@@ -98,25 +103,19 @@ export class LaunchersManager {
     binaryPath: string,
     userSet: boolean // manually set by the user, wont apply the other rules
   ) {
-    // set the binary
-    config.set(
-      "launcher." + launcherName + ".games." + gameName + ".binary",
-      binaryPath
-    );
+    try {
+      // set the binary
+      config.launchers[launcherName].games[gameName].binaries = [binaryPath];
 
-    // set the userSet propertie if given
-    if (userSet) {
-      config.set(
-        "launcher." + launcherName + ".games." + gameName + ".userSet",
-        true
-      );
+      // set the userSet propertie if given
+      if (userSet) {
+        config.launchers[launcherName].games[gameName].userSet = true;
+      }
+
+      config.save();
+    } catch (error) {
+      helper.error(error);
     }
-
-    // clean listenedBinaries prtopertie
-    config.set(
-      "launcher." + launcherName + ".games." + gameName + ".listenedBinaries",
-      null
-    );
 
     // retrieve the icon and generate a file
     await this.generateGameIcon(binaryPath, launcherName, gameName);
@@ -157,41 +156,6 @@ export class LaunchersManager {
       helper.error(colors.red(e));
       helper.quitApp();
     }
-  }
-
-  /**
-   * Parse all games files from the library
-   * @returns known games list
-   */
-  private retrieveGamesFromLibrary() {
-    // retrieve games from the library
-    // retrieve the known binaries list
-    const games: IGame[] = [];
-    let knownGamesList;
-    try {
-      knownGamesList = fs.readdirSync(path.join(__dirname, "library", "games"));
-    } catch (e) {
-      helper.error(colors.red("ERROR ! Unable to read the known games list"));
-      helper.error(colors.red(e));
-      helper.quitApp();
-    }
-
-    for (
-      let gameFileIndex = 0;
-      gameFileIndex < knownGamesList.length;
-      gameFileIndex++
-    ) {
-      const gameFile = knownGamesList[gameFileIndex];
-      try {
-        const gameData = fs.readJSONSync(
-          path.join(__dirname, "library", "games", gameFile)
-        );
-        games.push(gameData);
-      } catch (error) {
-        continue;
-      }
-    }
-    return games;
   }
 
   /**
@@ -246,10 +210,16 @@ export class LaunchersManager {
     // }
 
     // save it into the config
-    config.set("launcher." + launcherName + ".games." + gameName + ".icon", {
-      16: smallIconFilePath,
-      32: mediumIconFilePath
-    });
+
+    try {
+      config.launchers[launcherName].games[gameName].iconPath = {
+        16: smallIconFilePath,
+        32: mediumIconFilePath
+      };
+      config.save();
+    } catch (error) {
+      helper.error(error);
+    }
 
     return new Promise((resolve) => {
       resolve();

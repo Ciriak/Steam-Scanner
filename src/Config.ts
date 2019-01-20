@@ -7,6 +7,7 @@ import * as electronLog from "electron-log";
 import * as fs from "fs-extra";
 import * as objectPath from "object-path";
 import * as path from "path";
+import { Launcher } from "./Launcher";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
 
@@ -19,7 +20,7 @@ const configPath = path.normalize(
   path.join(app.getPath("appData"), "Steam Scanner", "config.json")
 );
 
-const cleanConfig: ICOnfig = {
+const cleanConfig = {
   steamDirectory: null,
   launchers: {},
   launchOnStartup: true,
@@ -28,8 +29,15 @@ const cleanConfig: ICOnfig = {
 };
 
 export class Config {
-  public isDev: boolean = isDev;
-  public version: string;
+  public steamDirectory: string;
+  public launchers: object = {};
+  public launchOnStartup: boolean = true;
+  public enableNotifications: boolean = true;
+  public minCPUFilter: number = 15;
+  public scanInterval: number = 2 * 60 * 1000; // 2min;
+  public version: number;
+  public firstLaunch: boolean = true;
+  private isDev: boolean;
   constructor() {
     this.checkIntegrity();
     // Read the package.json
@@ -51,9 +59,8 @@ export class Config {
     try {
       // be sure that the file exist
       fs.ensureFileSync(configPath);
-      const configData = fs.readJsonSync(configPath);
       const parsedKey = key.split(".");
-      const configDataTarget = objectPath.get(configData, parsedKey);
+      const configDataTarget = objectPath.get(this, parsedKey);
       return configDataTarget;
     } catch (e) {
       helper.error(colors.red(e));
@@ -61,22 +68,16 @@ export class Config {
     }
   }
 
-  // save a propertie into the config
-  public set(key: string, value: any) {
+  // Save the current config class into the json
+  public save() {
     this.checkIntegrity();
     const configData = fs.readJsonSync(configPath);
-    const parsedKey = key.split(".");
-
-    objectPath.ensureExists(configData, parsedKey, value);
-    objectPath.set(configData, parsedKey, value);
-
     try {
       fs.writeJsonSync(configPath, configData);
     } catch (e) {
       helper.error(colors.red(e));
       return false;
     }
-    return value;
   }
 
   // reset shortcuts & config
@@ -117,11 +118,13 @@ export class Config {
     }
     if (launch === false) {
       launcher.disable();
-      this.set("launchOnStartup", false);
+      this.launchOnStartup = false;
+      this.save();
       helper.log("Disabled launch on startup");
     } else {
       launcher.enable();
-      this.set("launchOnStartup", true);
+      this.launchOnStartup = true;
+      this.save();
       helper.log("Enabled launch on startup");
     }
   }
@@ -131,7 +134,8 @@ export class Config {
    */
   public updateNotifications() {
     const notif = this.get("enableNotifications");
-    this.set("enableNotifications", notif);
+    this.enableNotifications = notif;
+    this.save();
     if (notif === true) {
       helper.log("Notifications enabled");
     } else {

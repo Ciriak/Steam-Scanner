@@ -4,7 +4,7 @@ import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as notifier from "node-notifier";
 import * as path from "path";
-import * as recursive from "recursive-readdir";
+
 const ps = require("current-processes");
 let isDev = require("electron-is-dev");
 
@@ -27,7 +27,6 @@ const possibleSteamLocations = [
   "$drive\\Programmes\\Steam"
 ];
 
-const defaultCheckInterval: number = 2 * 60 * 1000; // 2min
 let helper: ScannerHelpers;
 const launchersManager = new LaunchersManager();
 const config: Config = new Config();
@@ -39,10 +38,13 @@ export class Scanner {
   public steamDirectory: any;
   public externalGames: any;
   public steamUsers: SteamUser[] = [];
-  public checkInterval: any;
   public minCPUFilter: any;
   public cleanning: boolean = false;
   public isScanning: boolean = false;
+  /**
+   * List of games referenced into the library
+   */
+  public libraryGames: IGame[] = [];
   public config: Config = config;
   public versionLabel: string = "Steam Scanner V." + config.version;
   private tray: TrayManager;
@@ -52,6 +54,7 @@ export class Scanner {
     // ensure default  config for notifications and los
     config.updateLaunchOnStartup();
     config.updateNotifications();
+    this.libraryGames = this.retrieveGamesFromLibrary();
 
     // show a label in the console
     helper.log(colors.cyan.underline(this.versionLabel));
@@ -60,16 +63,9 @@ export class Scanner {
     }
     //
 
-    this.checkInterval = config.get("checkInterval"); // ms between 2 check
     // if the cpu usage a a found process is below, it will be ignored
     // it prevent that the setup are added instead of the game exe itself
-    this.minCPUFilter = config.get("minCPUFilter");
-    // set default value for check interval and save it
-    if (!this.checkInterval) {
-      this.checkInterval = defaultCheckInterval;
-      config.set("checkInterval", this.checkInterval);
-    }
-
+    this.minCPUFilter = config.minCPUFilter;
     this.tray = new TrayManager(this);
     this.tray.update(this);
 
@@ -83,26 +79,26 @@ export class Scanner {
     await helper.checkArgv(this);
 
     this.isScanning = true;
-    let checkInterval: number = config.get("checkInterval");
+    let scanInterval: number = config.scanInterval;
     // set default value for check interval and save it
 
     // check if this is th first scan ever
-    const launched = config.get("launched");
-    if (!launched) {
+    const firstLaunch = config.firstLaunch;
+    if (!firstLaunch) {
       // notify the user that Steam Scanner run in background
       notifier.notify({
         title: "Steam Scanner is running",
         message: "Click on the tray icon for more options",
         icon: path.join(__dirname, "/assets/scanner.png")
       });
-      config.set("launched", true);
+      config.firstLaunch = false;
+      config.save();
     }
 
     this.tray.update(this);
 
-    if (!checkInterval) {
-      checkInterval = defaultCheckInterval;
-      config.set("checkInterval", checkInterval);
+    if (!scanInterval) {
+      scanInterval = config.scanInterval;
     }
     this.tray.update(this);
     await this.checkSteamInstallation();
@@ -139,7 +135,7 @@ export class Scanner {
    */
   public async updateGames() {
     await launchersManager.getAllGames();
-    await this.getGamesBinaries();
+
     return new Promise((resolve) => {
       resolve();
     });
@@ -197,7 +193,8 @@ export class Scanner {
     );
 
     // save steam location
-    config.set("steamDirectory", this.steamDirectory);
+    config.steamDirectory = this.steamDirectory;
+    config.save();
 
     helper.log("Looking for Steam accounts...");
 
@@ -257,7 +254,7 @@ export class Scanner {
     // we retrieve all waiting binaries
 
     //  heaven of for !
-    const launchersList: any = config.get("launchers");
+    const launchersList: any = config.launchers;
     const watchedItems: any[] = [];
 
     // references all watched binaries on all found games
@@ -422,113 +419,37 @@ export class Scanner {
   }
 
   /**
-   * Try to find the games main executables
-   * if there is more than one executable, add them to the watch list for the scanner
+   * Parse all games files from the library
+   * @returns known games list
    */
-  private async getGamesBinaries() {
-    for (
-      let gameIndex = 0;
-      gameIndex < launchersManager.gamesList.length;
-      gameIndex++
-    ) {
-      const gameItem = launchersManager.gamesList[gameIndex];
-
-      const binariesPathList = [];
-
-      const gameConfig: any = config.get(
-        "launcher." + this.name + ".games." + gameItem.name
-      );
-
-      // Check the config to see if the game and his binary are alkeary known
-      // if yes, skip it
-      if (gameConfig && gameConfig.binary) {
-        continue;
-      }
-
-      // clean the list of listened binaries
-      config.set(
-        "launcher." +
-          this.name +
-          ".games." +
-          gameItem.name +
-          ".listenedBinaries",
-        null
-      );
-
-      const filesList = await recursive(gameItem.folder);
-      // Check all the files in the found directory
-      // if one of the file is contained in the game.binaries properties, it is set as the game default binary
-      filesListLoop: for (const fileName of filesList) {
-        for (const binary of launchersManager.gamesList[gameIndex].binaries) {
-          if (fileName.search(binary) > -1) {
-            binariesPathList.push(fileName);
-            helper.log(colors.green(fileName + " FOUND !"));
-            break filesListLoop; // stop everything, we found what we want, a known game executable
-          }
-        }
-
-        // reference all executables
-        if (fileName.search(".exe") > -1) {
-          binariesPathList.push(fileName);
-        }
-      }
-
-      gameItem.binaries = binariesPathList;
-
-      if (gameItem.binaries.length === 0) {
-        helper.warn(
-          colors.yellow(
-            "No executable found in the folder for " +
-              colors.cyan(gameItem.name) +
-              " it has been skipped"
-          )
-        );
-        continue;
-      }
-
-      // if there is only one binaries, set it by default
-      if (gameItem.binaries.length === 1) {
-        const launcherManager = this.manager;
-
-        config.set(
-          "launcher." + this.name + ".games." + gameItem.name,
-          gameItem
-        );
-
-        await launcherManager.setBinaryForGame(
-          this.name,
-          gameItem.name,
-          binariesPathList[0],
-          false
-        );
-        launchersManager.gamesList[gameIndex].binaries = [binariesPathList[0]];
-        launchersManager.gamesList[gameIndex].binarySet = true;
-
-        continue;
-      }
-
-      // if there is more than one binary, add the list the the listenners
-      if (gameItem.binaries.length > 1) {
-        config.set(
-          "launcher." + this.name + ".games." + gameItem.name,
-          gameItem
-        );
-
-        /*
-          Here, we will listen for an active process to have the same name than a binarie found in the game files
-          add the game the the listener, things happend in "Scanner.ts"
-        */
-        helper.log(
-          "Watching " +
-            colors.cyan("" + gameItem.binaries.length + "") +
-            " executable files for the game " +
-            colors.cyan(gameItem.name)
-        );
-      }
+  private retrieveGamesFromLibrary() {
+    // retrieve games from the library
+    // retrieve the known binaries list
+    const games: IGame[] = [];
+    let knownGamesList;
+    try {
+      knownGamesList = fs.readdirSync(path.join(__dirname, "library", "games"));
+    } catch (e) {
+      helper.error(colors.red("ERROR ! Unable to read the known games list"));
+      helper.error(colors.red(e));
+      helper.quitApp();
     }
 
-    return new Promise((resolve) => {
-      resolve();
-    });
+    for (
+      let gameFileIndex = 0;
+      gameFileIndex < knownGamesList.length;
+      gameFileIndex++
+    ) {
+      const gameFile = knownGamesList[gameFileIndex];
+      try {
+        const gameData = fs.readJSONSync(
+          path.join(__dirname, "library", "games", gameFile)
+        );
+        games.push(gameData);
+      } catch (error) {
+        continue;
+      }
+    }
+    return games;
   }
 }

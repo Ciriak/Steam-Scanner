@@ -41,6 +41,9 @@ export class ScannerHelpers {
    */
 
   public addDrivesToPossibleLocations(possibleLocations: string[]) {
+    if (!possibleLocations || possibleLocations.length === 0) {
+      return [];
+    }
     return new Promise((resolve) => {
       const mountPoints: string[] = [];
       const parsedPossibleLocations: string[] = [];

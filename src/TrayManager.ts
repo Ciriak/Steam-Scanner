@@ -2,10 +2,10 @@ import * as path from "path";
 const colors = require("colors");
 
 const { Menu, Tray, dialog } = require("electron");
+import { Config } from "./Config";
 import { LaunchersManager } from "./LaunchersManager";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
-import { Config } from "./Config";
 const config: Config = new Config();
 
 const helper = new ScannerHelpers();
@@ -72,12 +72,12 @@ export class TrayManager {
    * @param scanner Scanner instance
    */
   private generateGamesListTemplate(scanner: Scanner) {
-    let accessor = this;
+    const accessor = this;
     const gamesListTemplate: any = [];
     const launchersManager = new LaunchersManager();
     let gamesCount = 0;
 
-    const launchersList = config.get("launchers");
+    const launchersList = config.launchers;
     for (const launcherName in launchersList) {
       if (launchersList.hasOwnProperty(launcherName)) {
         const launcher = launchersList[launcherName];
@@ -85,9 +85,9 @@ export class TrayManager {
         for (const gameName in launcher.games) {
           if (launcher.games.hasOwnProperty(gameName)) {
             const game = launcher.games[gameName];
-            let gameMenuLabel,
-              startPath,
-              icon = path.join(__dirname, "assets", "unknown-game.png");
+            let gameMenuLabel;
+            let startPath;
+            const icon = path.join(__dirname, "assets", "unknown-game.png");
 
             if (game.binary) {
               gameMenuLabel = "Change the executable of ";

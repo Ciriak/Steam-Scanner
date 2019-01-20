@@ -1,4 +1,4 @@
-interface ICOnfig {
+interface IConfig {
   steamDirectory: string;
   launchers: object;
   launchOnStartup: boolean;
