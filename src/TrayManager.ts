@@ -6,12 +6,12 @@ import { Config } from "./Config";
 import { LaunchersManager } from "./LaunchersManager";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
-const config: Config = new Config();
 
 const helper = new ScannerHelpers();
 export class TrayManager {
   private tray: any;
   private scanner: Scanner;
+
   constructor(scanner: Scanner) {
     this.scanner = scanner;
     this.tray = new Tray(path.join(__dirname, "assets/tray.png"));
@@ -23,12 +23,13 @@ export class TrayManager {
    * @param scanner Scanner instance
    */
   public update(scanner: Scanner) {
-    const launchOnStartup: any = config.get("launchOnStartup");
-    const enableNotifications: any = config.get("enableNotifications");
+    const launchOnStartup: any = this.scanner.config.launchOnStartup;
+    const enableNotifications: any = this.scanner.config.enableNotifications;
 
     const scanTemplate = this.generateScanButton(scanner);
-    const gamesListTemplate = this.generateGamesListTemplate(scanner);
-
+    const gamesListTemplate = this.generateGamesListTemplate();
+    // todo remove that
+    const trayRef = this;
     const contextMenu = [
       { label: this.scanner.versionLabel, type: "normal", enabled: false },
       { type: "separator" },
@@ -38,7 +39,7 @@ export class TrayManager {
         type: "checkbox",
         checked: enableNotifications,
         click() {
-          config.updateNotifications();
+          this.config.updateNotifications();
         }
       },
       {
@@ -46,7 +47,7 @@ export class TrayManager {
         type: "checkbox",
         checked: launchOnStartup,
         click() {
-          config.updateLaunchOnStartup();
+          trayRef.scanner.config.updateLaunchOnStartup();
         }
       },
       {
@@ -71,13 +72,13 @@ export class TrayManager {
    * Generate the game menu list with their options depending of their status
    * @param scanner Scanner instance
    */
-  private generateGamesListTemplate(scanner: Scanner) {
+  private generateGamesListTemplate() {
     const accessor = this;
     const gamesListTemplate: any = [];
-    const launchersManager = new LaunchersManager();
+    const launchersManager = this.scanner.launchersManager;
     let gamesCount = 0;
 
-    const launchersList = config.launchers;
+    const launchersList = this.scanner.config.launchers;
     for (const launcherName in launchersList) {
       if (launchersList.hasOwnProperty(launcherName)) {
         const launcher = launchersList[launcherName];

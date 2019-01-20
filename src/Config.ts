@@ -70,6 +70,7 @@ export class Config {
 
   // Save the current config class into the json
   public save() {
+    return true;
     this.checkIntegrity();
     const configData = fs.readJsonSync(configPath);
     try {

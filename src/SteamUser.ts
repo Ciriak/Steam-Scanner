@@ -36,7 +36,7 @@ export class SteamUser {
   public async updateShortcuts(isFirstInstance: boolean, clean: boolean) {
     // if clean mode, only remove the short
     if (clean) {
-      helper.warn(colors.yellow("Removing the shortcut file"));
+      helper.warn("Removing the shortcut file");
       try {
         fs.unlinkSync(this.shortcutsFilePath);
       } catch (err) {
@@ -58,9 +58,7 @@ export class SteamUser {
             shortcuts: []
           };
           helper.warn(
-            colors.yellow(
-              "WARNING - unable to parse the steam shortcuts file, it will be cleaned"
-            )
+            "WARNING - unable to parse the steam shortcuts file, it will be cleaned"
           );
         }
 
@@ -112,12 +110,10 @@ export class SteamUser {
                   }
                   // if the game has been added twice or more for some reason
                   if (gameCount > 1) {
-                    helper.log(
-                      colors.yellow(
-                        "WARNING - " +
-                          gameName +
-                          " has been added more than once, cleaning..."
-                      )
+                    helper.warn(
+                      "WARNING - " +
+                        gameName +
+                        " has been added more than once, cleaning..."
                     );
 
                     // remove all unwanted , by their index

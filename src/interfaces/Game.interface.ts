@@ -4,6 +4,10 @@ interface IGame {
    */
   name: string;
   /**
+   * Name of the folder (if different of the game name itself)
+   */
+  folderName?: string;
+  /**
    * List of game executable
    * if there is more than one, the scanner will try to determine which one is the main one
    * If there is only one, it it the main executable

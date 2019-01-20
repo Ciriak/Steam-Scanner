@@ -28,8 +28,7 @@ const possibleSteamLocations = [
 ];
 
 let helper: ScannerHelpers;
-const launchersManager = new LaunchersManager();
-const config: Config = new Config();
+
 let binariesCheckerInterval: any;
 let binaryCheckerCount: number = 0;
 const maxBinaryChecking: number = 20;
@@ -41,19 +40,21 @@ export class Scanner {
   public minCPUFilter: any;
   public cleanning: boolean = false;
   public isScanning: boolean = false;
+  public config: Config = new Config();
+  public launchersManager: LaunchersManager;
   /**
    * List of games referenced into the library
    */
   public libraryGames: IGame[] = [];
-  public config: Config = config;
-  public versionLabel: string = "Steam Scanner V." + config.version;
+  public versionLabel: string = "Steam Scanner V." + this.config.version;
   private tray: TrayManager;
 
   constructor() {
     helper = new ScannerHelpers();
     // ensure default  config for notifications and los
-    config.updateLaunchOnStartup();
-    config.updateNotifications();
+    this.config.updateLaunchOnStartup();
+    this.config.updateNotifications();
+    this.launchersManager = new LaunchersManager(this.config, this);
     this.libraryGames = this.retrieveGamesFromLibrary();
 
     // show a label in the console
@@ -65,7 +66,7 @@ export class Scanner {
 
     // if the cpu usage a a found process is below, it will be ignored
     // it prevent that the setup are added instead of the game exe itself
-    this.minCPUFilter = config.minCPUFilter;
+    this.minCPUFilter = this.config.minCPUFilter;
     this.tray = new TrayManager(this);
     this.tray.update(this);
 
@@ -79,11 +80,11 @@ export class Scanner {
     await helper.checkArgv(this);
 
     this.isScanning = true;
-    let scanInterval: number = config.scanInterval;
+    let scanInterval: number = this.config.scanInterval;
     // set default value for check interval and save it
 
     // check if this is th first scan ever
-    const firstLaunch = config.firstLaunch;
+    const firstLaunch = this.config.firstLaunch;
     if (!firstLaunch) {
       // notify the user that Steam Scanner run in background
       notifier.notify({
@@ -91,14 +92,14 @@ export class Scanner {
         message: "Click on the tray icon for more options",
         icon: path.join(__dirname, "/assets/scanner.png")
       });
-      config.firstLaunch = false;
-      config.save();
+      this.config.firstLaunch = false;
+      this.config.save();
     }
 
     this.tray.update(this);
 
     if (!scanInterval) {
-      scanInterval = config.scanInterval;
+      scanInterval = this.config.scanInterval;
     }
     this.tray.update(this);
     await this.checkSteamInstallation();
@@ -124,7 +125,7 @@ export class Scanner {
    * Scan for Installed Launcher
    */
   public async updateLaunchers() {
-    await launchersManager.getAllLaunchers();
+    await this.launchersManager.getAllLaunchers();
     return new Promise((resolve) => {
       resolve();
     });
@@ -134,7 +135,7 @@ export class Scanner {
    * Scan for Installed Launcher, find the games binaries and add them to the listener
    */
   public async updateGames() {
-    await launchersManager.getAllGames();
+    await this.launchersManager.getAllGames();
 
     return new Promise((resolve) => {
       resolve();
@@ -163,7 +164,7 @@ export class Scanner {
     helper.log("Checking Steam location...");
 
     // try to get steam directory from the config
-    this.steamDirectory = config.get("steamDirectory");
+    this.steamDirectory = this.config.get("steamDirectory");
 
     // if steam directory not found, try to find it
     if (!this.steamDirectory) {
@@ -193,8 +194,8 @@ export class Scanner {
     );
 
     // save steam location
-    config.steamDirectory = this.steamDirectory;
-    config.save();
+    this.config.steamDirectory = this.steamDirectory;
+    this.config.save();
 
     helper.log("Looking for Steam accounts...");
 
@@ -254,7 +255,7 @@ export class Scanner {
     // we retrieve all waiting binaries
 
     //  heaven of for !
-    const launchersList: any = config.launchers;
+    const launchersList: any = this.config.launchers;
     const watchedItems: any[] = [];
 
     // references all watched binaries on all found games
@@ -354,7 +355,7 @@ export class Scanner {
             "Process found for " + item.game.name + " ! => " + item.binary
           )
         );
-        await launchersManager.setBinaryForGame(
+        await this.launchersManager.setBinaryForGame(
           item.launcher.name,
           item.game.name,
           item.binaryPath,

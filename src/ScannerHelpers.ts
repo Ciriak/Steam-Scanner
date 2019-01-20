@@ -1,10 +1,10 @@
 declare const Promise: any;
+import * as colors from "colors";
 import * as drivelist from "drivelist";
 import { app } from "electron";
 import * as isDev from "electron-is-dev";
 import * as electronLog from "electron-log";
 import * as path from "path";
-
 import { Scanner } from "./Scanner";
 
 // log config
@@ -24,7 +24,7 @@ export class ScannerHelpers {
    * Report warning
    */
   public warn(msg: string) {
-    electronLog.warn(msg);
+    electronLog.warn(colors.yellow(msg));
   }
 
   /**

@@ -9,8 +9,7 @@ import { LaunchersManager } from "./LaunchersManager";
 import { ScannerHelpers } from "./ScannerHelpers";
 
 const helper: ScannerHelpers = new ScannerHelpers();
-const config: Config = new Config();
-
+let config: Config;
 export class Launcher {
   public name: string;
   public binaryName?: string;
@@ -30,10 +29,11 @@ export class Launcher {
     this.binaryPossibleLocations = launcherItem.binaryPossibleLocations;
     this.gamesPossibleLocations = launcherItem.gamesPossibleLocations;
     this.binaryName = launcherItem.binaryName;
+    config = this.manager.config;
   }
 
   public async checkInstallation() {
-    const launcherConfig: any = config.launchers;
+    const launcherConfig: any = config.launchers[this.name];
     // if the binary location is not defined, try to find it
     if (!launcherConfig || !launcherConfig.binaryLocation) {
       const parsedPossibleLocations: string[] = await helper.addDrivesToPossibleLocations(
@@ -74,8 +74,9 @@ export class Launcher {
 
   /**
    * Try to find games from the launcher propertie (ex: "Origin Games")
+   * @param isLibrary if this is the librarty launcher, only add the folders that are referenced in the games library
    */
-  public async getGamesDirectories() {
+  public async getGamesDirectories(isLibrary: boolean) {
     // skip if no game directory registered for this launcher (ex: Battle.net)
     if (!this.gamesPossibleLocations) {
       return new Promise((resolve) => {
@@ -93,13 +94,21 @@ export class Launcher {
         // Directory of games
         try {
           const items = fs.readdirSync(locationPath);
-          // only keep the directories
+
           for (const dir of items) {
             const currentGameDir = path.normalize(path.join(locationPath, dir));
-            // TODO probably need to better check here if the folder is indeed a game folder
 
-            if (fs.lstatSync(currentGameDir).isDirectory()) {
-              const parsedGameDir = path.parse(currentGameDir);
+            // skip if this is not a folder
+            if (!fs.lstatSync(currentGameDir).isDirectory()) {
+              continue;
+            }
+
+            // TODO probably need to better check here if the folder is indeed a game folder
+            const parsedGameDir = path.parse(currentGameDir);
+            // if this is the library launcher, only keep the folders that are referenced in the games library
+            if (isLibrary) {
+              this.checkLibraryGamesFolders(parsedGameDir);
+            } else {
               // check if the game already exist in the list
               const checkIndex = _.indexOf(this.games, {
                 name: parsedGameDir.name
@@ -116,6 +125,7 @@ export class Launcher {
               }
             }
           }
+
           // skip if the possible game folder don't exist
         } catch (e) {
           continue;
@@ -234,5 +244,115 @@ export class Launcher {
     return new Promise((resolve) => {
       resolve();
     });
+  }
+
+  /**
+   * Check if a given folder correspond to a game referenced in the games library
+   * If true, try to find the associated launcher
+   * @param checkedDirName name of the current checked directory
+   */
+  private checkLibraryGamesFolders(parsedDirectory: path.ParsedPath) {
+    const checkIndex = _.indexOf(this.manager.scanner.libraryGames, {
+      folderPath: parsedDirectory.name
+    });
+    for (
+      let libraryGameIndex = 0;
+      libraryGameIndex < this.manager.scanner.libraryGames.length;
+      libraryGameIndex++
+    ) {
+      const libraryGame = this.manager.scanner.libraryGames[libraryGameIndex];
+      if (
+        libraryGame.folderName === parsedDirectory.name ||
+        libraryGame.name === parsedDirectory.name
+      ) {
+        helper.log(
+          "The game " +
+            colors.cyan(libraryGame.name) +
+            " has been detected, validating ..."
+        );
+        // The game is referenced in the library, add it to his launcher if it exist on this system
+        if (this.checkIfgameCanBeAdded(parsedDirectory, libraryGame)) {
+          libraryGame.folderPath = path.join(
+            parsedDirectory.dir,
+            parsedDirectory.base
+          );
+          libraryGame.binaries = [
+            path.join(libraryGame.folderPath, libraryGame.binaries[0])
+          ];
+          // all check passed, add it to the corresponding launcher
+          try {
+            config.launchers[libraryGame.launcher].games[
+              libraryGame.name
+            ] = libraryGame;
+          } catch (error) {
+            helper.error(error);
+            return false;
+          }
+        }
+
+        break;
+      }
+    }
+  }
+
+  private checkIfgameCanBeAdded(
+    parsedDirectory: path.ParsedPath,
+    libraryGame: IGame
+  ): boolean {
+    // TODO Allow games without launchers
+
+    // refused because the game dont have a known launcher
+    if (!libraryGame.launcher) {
+      helper.warn(
+        "Unable to add " +
+          colors.cyan(libraryGame.name) +
+          " : no launcher referenced ..."
+      );
+      return false;
+    }
+    // refused because the game launcher doesn't exist in this system
+    if (!config.launchers[libraryGame.launcher]) {
+      helper.warn(
+        "Unable to add " +
+          colors.cyan(libraryGame.name) +
+          " : " +
+          libraryGame.launcher +
+          " is not detected on this system ..."
+      );
+      return false;
+    }
+
+    // refused because the game doesn't have a valid binary target
+    if (!libraryGame.binaries || !libraryGame.binaries[0]) {
+      helper.warn(
+        "Unable to add " +
+          colors.cyan(libraryGame.name) +
+          " : " +
+          " No binary referenced ..."
+      );
+      return false;
+    }
+
+    // check if the binary referenced in the library exist in this system
+    const checkBinaryPath = path.join(
+      parsedDirectory.dir,
+      parsedDirectory.base,
+      libraryGame.binaries[0]
+    );
+
+    // refused because the binary referenced doesn't exist in the target folder
+    if (!fs.existsSync(checkBinaryPath)) {
+      helper.warn(
+        "Unable to add " +
+          colors.cyan(libraryGame.name) +
+          " : " +
+          " The file " +
+          checkBinaryPath +
+          " doesn't exist ..."
+      );
+      return false;
+    }
+
+    return true;
   }
 }

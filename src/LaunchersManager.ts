@@ -11,8 +11,8 @@ import * as path from "path";
 import { Config } from "./Config";
 import { Launcher } from "./Launcher";
 import { ScannerHelpers } from "./ScannerHelpers";
+import { Scanner } from "./Scanner";
 const helper: ScannerHelpers = new ScannerHelpers();
-const config: Config = new Config();
 
 // ===== Pattern for the config file =======
 // For the gamesProperties :
@@ -22,6 +22,8 @@ const config: Config = new Config();
 export class LaunchersManager {
   public detectedLaunchers: Launcher[] = [];
   public launchersList: ILauncher[] = [];
+  public config: Config;
+  public scanner: Scanner;
 
   private launchersConfigFilesLocation = path.join(
     __dirname,
@@ -33,7 +35,9 @@ export class LaunchersManager {
    * retrieve the supported launchers list from library (not an actual scan)
    * retrieve the "unique" games config from the library
    */
-  constructor() {
+  constructor(config: Config, scanner: Scanner) {
+    this.config = config;
+    this.scanner = scanner;
     this.retrieveLaunchersFromLibrary();
   }
 
@@ -48,7 +52,8 @@ export class LaunchersManager {
       launcherIndex++
     ) {
       const launcher = this.detectedLaunchers[launcherIndex];
-      await launcher.getGamesDirectories();
+      const isLibrary = launcher.name === "Library";
+      await launcher.getGamesDirectories(isLibrary);
       await launcher.getGamesBinaries();
     }
 
@@ -75,7 +80,7 @@ export class LaunchersManager {
       if (launcher.name === "Library") {
         // add lirbary to the launchers list anyway
         this.detectedLaunchers.push(launcher);
-        config.launchers[launcher.name] = launcher;
+        this.config.launchers[launcher.name] = launcher;
         continue;
       }
       await launcher.checkInstallation();
@@ -105,14 +110,16 @@ export class LaunchersManager {
   ) {
     try {
       // set the binary
-      config.launchers[launcherName].games[gameName].binaries = [binaryPath];
+      this.config.launchers[launcherName].games[gameName].binaries = [
+        binaryPath
+      ];
 
       // set the userSet propertie if given
       if (userSet) {
-        config.launchers[launcherName].games[gameName].userSet = true;
+        this.config.launchers[launcherName].games[gameName].userSet = true;
       }
 
-      config.save();
+      this.config.save();
     } catch (error) {
       helper.error(error);
     }
@@ -212,11 +219,11 @@ export class LaunchersManager {
     // save it into the config
 
     try {
-      config.launchers[launcherName].games[gameName].iconPath = {
+      this.config.launchers[launcherName].games[gameName].iconPath = {
         16: smallIconFilePath,
         32: mediumIconFilePath
       };
-      config.save();
+      this.config.save();
     } catch (error) {
       helper.error(error);
     }
