@@ -77,7 +77,7 @@ export class SteamUser {
                 const game = launcher.games[gameName];
 
                 // skip if the binary of the game in unknown
-                if (!game.binary) {
+                if (!game.binaries || !game.binaries[0]) {
                   continue;
                 }
 
@@ -132,10 +132,10 @@ export class SteamUser {
                   // shortcut don't already exist, add it
                   // add the new shortcut
                   shortcutData.shortcuts.push({
-                    exe: game.binary,
+                    exe: game.binaries[0],
                     tags: [launcher.name],
                     appName: game.name,
-                    StartDir: game.directory
+                    StartDir: game.folderPath
                   });
                   updatedShortcuts = true;
                   addedShortcuts++;
@@ -148,12 +148,12 @@ export class SteamUser {
                     helper.log(
                       colors.green("Added a shortcut for " + game.name + " =>")
                     );
-                    helper.log(game.binary);
-                    let icon = path.join(__dirname, "assets/scanner.png");
+                    helper.log(game.binaries[0]);
+                    // let icon = path.join(__dirname, "assets/scanner.png");
 
-                    if (game.icon) {
-                      icon = path.normalize(game.icon["32"]);
-                    }
+                    // if (game.icon) {
+                    //   icon = path.normalize(game.icon["32"]);
+                    // }
                     if (enableNotifications) {
                       notifier.notify({
                         title: game.name,

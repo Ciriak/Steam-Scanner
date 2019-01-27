@@ -90,12 +90,12 @@ export class TrayManager {
             let startPath;
             const icon = path.join(__dirname, "assets", "unknown-game.png");
 
-            if (game.binary) {
+            if (game.binaries && game.binaries[0]) {
               gameMenuLabel = "Change the executable of ";
-              startPath = game.binary;
+              startPath = game.binaries[0];
             } else {
               gameMenuLabel = "Select the executable of ";
-              startPath = game.directory;
+              startPath = game.folderPath;
             }
             gamesCount++;
             // if (game.icon && game.icon["16"]) {
@@ -124,7 +124,7 @@ export class TrayManager {
                           filePath[0],
                           true
                         );
-                        scanner.updateShortcuts();
+                        accessor.scanner.updateShortcuts();
                         helper.log(
                           colors.cyan("Binary updated for " + gameName + " =>")
                         );

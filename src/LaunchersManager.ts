@@ -10,8 +10,8 @@ import * as path from "path";
 // } from "system-icon";
 import { Config } from "./Config";
 import { Launcher } from "./Launcher";
-import { ScannerHelpers } from "./ScannerHelpers";
 import { Scanner } from "./Scanner";
+import { ScannerHelpers } from "./ScannerHelpers";
 const helper: ScannerHelpers = new ScannerHelpers();
 
 // ===== Pattern for the config file =======
@@ -21,7 +21,7 @@ const helper: ScannerHelpers = new ScannerHelpers();
 
 export class LaunchersManager {
   public detectedLaunchers: Launcher[] = [];
-  public launchersList: ILauncher[] = [];
+  public launchersList: Launcher[] = [];
   public config: Config;
   public scanner: Scanner;
 

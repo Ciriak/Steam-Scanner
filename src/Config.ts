@@ -30,14 +30,13 @@ const cleanConfig = {
 
 export class Config {
   public steamDirectory: string;
-  public launchers: object = {};
+  public launchers: { [name: string]: Launcher } = {};
   public launchOnStartup: boolean = true;
   public enableNotifications: boolean = true;
   public minCPUFilter: number = 15;
   public scanInterval: number = 2 * 60 * 1000; // 2min;
   public version: number;
   public firstLaunch: boolean = true;
-  private isDev: boolean;
   constructor() {
     this.checkIntegrity();
     // Read the package.json
