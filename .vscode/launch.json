@@ -1,8 +1,11 @@
 {
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Steam Scanner Debug",
+      "name": "Debug Main Process",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceRoot}",
@@ -10,8 +13,8 @@
       "windows": {
         "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
       },
-      "program": "${workspaceRoot}/dist/app.js",
-      "protocol": "inspector"
+      "args": [],
+      "program": "${workspaceRoot}/dist/app.js"
     }
   ]
 }

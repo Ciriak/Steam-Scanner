@@ -1,12 +1,12 @@
 declare const Promise: any;
+import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as notifier from "node-notifier";
 import * as path from "path";
-import * as fs from "fs-extra";
 import * as shortcut from "steam-shortcut-editor";
+import { Config } from "./Config";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
-import { Config } from "./Config";
 let isDev = require("electron-is-dev");
 const helper: ScannerHelpers = new ScannerHelpers();
 const config: Config = new Config();
@@ -27,14 +27,16 @@ export class SteamUser {
     this.initUser();
   }
 
-  // isFirstInstance : used in case of multiple users, only the first instance send log and notifications
-  // this prevent spam (ex : 6 notification because there is 6 steam accounts)
+  /**
+   * Update the shortcuts for this user
+   * @param isFirstInstance used in case of multiple users, only the first instance send log and notifications
+   * this prevent spam (ex : 6 notification because there is 6 steam accounts)
+   * @param clean if true : clear all shortcuts added by steam scanner
+   */
   public async updateShortcuts(isFirstInstance: boolean, clean: boolean) {
-    helper.log("Updating shortcuts...");
-
-    //if clean mode, only remove the short
+    // if clean mode, only remove the short
     if (clean) {
-      helper.warn(colors.yellow("Removing the shortcut file"));
+      helper.warn("Removing the shortcut file");
       try {
         fs.unlinkSync(this.shortcutsFilePath);
       } catch (err) {
@@ -56,28 +58,26 @@ export class SteamUser {
             shortcuts: []
           };
           helper.warn(
-            colors.yellow(
-              "WARNING - unable to parse the steam shortcuts file, it will be cleaned"
-            )
+            "WARNING - unable to parse the steam shortcuts file, it will be cleaned"
           );
         }
 
-        if (isDev) {
-          helper.log(colors.cyan("---- Content of the shortcuts file ----"));
-          helper.log(shortcutData);
-          helper.log(colors.cyan("_________________END_________________"));
-        }
+        // if (isDev) {
+        //   helper.log(colors.cyan("---- Content of the shortcuts file ----"));
+        //   helper.log(shortcutData);
+        //   helper.log(colors.cyan("_________________END_________________"));
+        // }
 
-        const drmList = config.get("drm");
-        for (const drmName in drmList) {
-          if (drmList.hasOwnProperty(drmName)) {
-            const drm = drmList[drmName];
-            for (const gameName in drm.games) {
-              if (drm.games.hasOwnProperty(gameName)) {
-                const game = drm.games[gameName];
+        const launchersList = config.launchers;
+        for (const launcherName in launchersList) {
+          if (launchersList.hasOwnProperty(launcherName)) {
+            const launcher = launchersList[launcherName];
+            for (const gameName in launcher.games) {
+              if (launcher.games.hasOwnProperty(gameName)) {
+                const game = launcher.games[gameName];
 
                 // skip if the binary of the game in unknown
-                if (!game.binary) {
+                if (!game.binaries || !game.binaries[0]) {
                   continue;
                 }
 
@@ -87,12 +87,12 @@ export class SteamUser {
 
                 // check if the game is already in the steam shortcuts
                 let gameCount: number = 0;
-                let unwantedIndexList: number[] = [];
+                const unwantedIndexList: number[] = [];
                 for (let i = 0; i < shortcutData.shortcuts.length; i++) {
-                  const shortcut = shortcutData.shortcuts[i];
+                  const nShortcut = shortcutData.shortcuts[i];
                   if (
-                    shortcut.appname === gameName ||
-                    shortcut.appName === gameName
+                    nShortcut.appname === gameName ||
+                    nShortcut.appName === gameName
                   ) {
                     gameCount++;
 
@@ -108,18 +108,16 @@ export class SteamUser {
                   if (isDev) {
                     helper.log("Shortcut already exist for " + gameName);
                   }
-                  //if the game has been added twice or more for some reason
+                  // if the game has been added twice or more for some reason
                   if (gameCount > 1) {
-                    helper.log(
-                      colors.yellow(
-                        "WARNING - " +
-                          gameName +
-                          " has been added more than once, cleaning..."
-                      )
+                    helper.warn(
+                      "WARNING - " +
+                        gameName +
+                        " has been added more than once, cleaning..."
                     );
 
-                    //remove all unwanted , by their index
-                    unwantedIndexList.reverse(); //reverse the array before => don't fucked up the index list
+                    // remove all unwanted , by their index
+                    unwantedIndexList.reverse(); // reverse the array before => don't fucked up the index list
                     for (const unwantedIndex of unwantedIndexList) {
                       shortcutData.shortcuts.splice(unwantedIndex, 1);
                     }
@@ -130,20 +128,19 @@ export class SteamUser {
                     );
                     updatedShortcuts = true;
                   }
-                }
-                // shortcut don't already exist, add it
-                else {
+                } else {
+                  // shortcut don't already exist, add it
                   // add the new shortcut
                   shortcutData.shortcuts.push({
-                    exe: game.binary,
-                    tags: [drm.name],
+                    exe: game.binaries[0],
+                    tags: [launcher.name],
                     appName: game.name,
-                    StartDir: game.directory
+                    StartDir: game.folderPath
                   });
                   updatedShortcuts = true;
                   addedShortcuts++;
 
-                  //notify if this is the first instance (and notification are enabled)
+                  // notify if this is the first instance (and notification are enabled)
                   if (isFirstInstance) {
                     const enableNotifications: any = config.get(
                       "enableNotifications"
@@ -151,12 +148,12 @@ export class SteamUser {
                     helper.log(
                       colors.green("Added a shortcut for " + game.name + " =>")
                     );
-                    helper.log(game.binary);
-                    let icon = path.join(__dirname, "assets/scanner.png");
+                    helper.log(game.binaries[0]);
+                    // let icon = path.join(__dirname, "assets/scanner.png");
 
-                    if (game.icon) {
-                      icon = path.normalize(game.icon["32"]);
-                    }
+                    // if (game.icon) {
+                    //   icon = path.normalize(game.icon["32"]);
+                    // }
                     if (enableNotifications) {
                       notifier.notify({
                         title: game.name,
@@ -173,6 +170,7 @@ export class SteamUser {
         }
 
         if (updatedShortcuts && isFirstInstance) {
+          helper.log("Updating Steam shortcuts...");
           shortcut.writeFile(this.shortcutsFilePath, shortcutData, (errW) => {
             helper.log("Writing into shortcuts file...");
             if (errW) {

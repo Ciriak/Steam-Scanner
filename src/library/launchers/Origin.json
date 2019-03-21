@@ -1,0 +1,16 @@
+{
+  "name": "Origin",
+  "binaryName": "Origin.exe",
+  "binaryPossibleLocations": [
+    "$drive\\Program Files (x86)\\Origin",
+    "$drive\\Programmes\\Origin"
+  ],
+  "gamesPossibleLocations": [
+    {
+      "path": "$drive\\Program Files (x86)\\Origin Games"
+    },
+    {
+      "path": "$drive\\Programmes\\Origin Games"
+    }
+  ]
+}

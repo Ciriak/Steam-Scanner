@@ -1,0 +1,11 @@
+{
+  "name": "Library",
+  "gamesPossibleLocations": [
+    {
+      "path": "$drive\\Program Files (x86)"
+    },
+    {
+      "path": "$drive\\Programmes"
+    }
+  ]
+}

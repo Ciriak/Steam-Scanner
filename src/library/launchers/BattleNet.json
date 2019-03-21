@@ -1,0 +1,8 @@
+{
+  "name": "BattleNet",
+  "binaryName": "Battle.net Launcher.exe",
+  "binaryPossibleLocations": [
+    "$drive\\Program Files (x86)\\Battle.net",
+    "$drive\\Programmes\\Battle.net"
+  ]
+}

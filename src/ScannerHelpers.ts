@@ -1,13 +1,13 @@
 declare const Promise: any;
-import { app } from "electron";
-import * as fs from "fs-extra";
-import * as path from "path";
+import * as colors from "colors";
 import * as drivelist from "drivelist";
+import { app } from "electron";
 import * as isDev from "electron-is-dev";
 import * as electronLog from "electron-log";
+import * as path from "path";
 import { Scanner } from "./Scanner";
 
-//log config
+// log config
 electronLog.transports.file.level = "info";
 
 export class ScannerHelpers {
@@ -24,7 +24,7 @@ export class ScannerHelpers {
    * Report warning
    */
   public warn(msg: string) {
-    electronLog.warn(msg);
+    electronLog.warn(colors.yellow(msg));
   }
 
   /**
@@ -41,6 +41,9 @@ export class ScannerHelpers {
    */
 
   public addDrivesToPossibleLocations(possibleLocations: string[]) {
+    if (!possibleLocations || possibleLocations.length === 0) {
+      return [];
+    }
     return new Promise((resolve) => {
       const mountPoints: string[] = [];
       const parsedPossibleLocations: string[] = [];

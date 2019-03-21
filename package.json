@@ -1,14 +1,15 @@
 {
   "name": "steam-scanner",
-  "version": "0.0.10",
+  "version": "1.0.1",
   "description": "Automatically add your game to you Steam library",
   "main": "app.js",
   "scripts": {
-    "postinstall": "gulp",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc ./src/app.ts --outDir ./dist/ --watch --sourcemap",
+    "postinstall": "./node_modules/.bin/electron-rebuild && gulp install",
+    "gulp": "gulp",
+    "dev": "gulp dev",
     "build": "gulp build",
-    "deploy": "gulp deploy"
+    "clean": "gulp clean",
+    "doc": "typedoc --out ./doc"
   },
   "repository": {
     "type": "git",
@@ -29,59 +30,32 @@
   },
   "homepage": "https://github.com/nj-neer/Steam-Scanner#readme",
   "devDependencies": {
-    "@types/fs-extra": "^5.0.1",
-    "@types/lodash": "^4.14.106",
-    "@types/object-path": "^0.9.29",
-    "colors": "^1.3.0",
     "del": "^3.0.0",
-    "electron": "^2.0.0",
-    "electron-builder": "^20.8.1",
-    "gulp": "^3.9.1",
-    "gulp-sync": "^0.1.4",
-    "gulp-tsc": "^1.3.2",
-    "gulp-uglify": "^3.0.1",
-    "gulp-yarn": "^1.0.1",
-    "is-npm-not-yarn": "^2.0.4"
-  },
-  "build": {
-    "appId": "com.cyriaque.steam-scanner",
-    "productName": "Steam Scanner",
-    "directories": {
-      "app": "dist",
-      "output": "build",
-      "buildResources": "dist"
-    },
-    "win": {
-      "target": "nsis",
-      "publish": "github",
-      "icon": "dist/assets/scanner.ico"
-    },
-    "nsis": {
-      "artifactName": "steam-scanner-setup-${version}.${ext}",
-      "installerIcon": "dist/assets/scanner.ico",
-      "differentialPackage": false
-    },
-    "asar": {
-      "smartUnpack": false
-    },
-    "linux": {
-      "icon": "dist/assets/scanner.ico",
-      "category": "Development"
-    },
-    "appImage": {
-      "publish": false,
-      "systemIntegration": "doNotAsk",
-      "category": "Development",
-      "artifactName": "${productName}-${version}.${ext}"
-    }
+    "electron": "^4.0.1",
+    "electron-packager": "^13.0.1",
+    "gulp": "^4.0.0",
+    "gulp-shell": "^0.6.5",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-terser": "^1.1.7",
+    "gulp-typescript": "^5.0.0",
+    "tslint": "^5.12.1",
+    "typedoc": "^0.14.1",
+    "typescript": "^3.2.2"
   },
   "dependencies": {
-    "async": "^2.6.0",
-    "fs-extra": "^5.0.0",
-    "gulp-archiver": "^1.0.0",
-    "mime-types": "^2.1.18",
-    "prebuild-install": "^2.5.3",
-    "request": "^2.85.0",
-    "typescript": "^2.8.3"
+    "auto-launch": "^5.0.5",
+    "cli-spinner": "^0.2.8",
+    "colors": "^1.3.3",
+    "current-processes": "^0.2.1",
+    "drivelist": "^6.4.6",
+    "electron-is-dev": "^1.0.1",
+    "electron-log": "^2.2.17",
+    "electron-updater": "^4.0.6",
+    "fs-extra": "^7.0.1",
+    "lodash": "^4.17.11",
+    "node-notifier": "^5.3.0",
+    "object-path": "^0.11.4",
+    "recursive-readdir": "^2.2.2",
+    "steam-shortcut-editor": "^3.1.1"
   }
 }

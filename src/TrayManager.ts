@@ -2,16 +2,16 @@ import * as path from "path";
 const colors = require("colors");
 
 const { Menu, Tray, dialog } = require("electron");
-import { DRMManager } from "./DRMManager";
+import { Config } from "./Config";
+import { LaunchersManager } from "./LaunchersManager";
 import { Scanner } from "./Scanner";
 import { ScannerHelpers } from "./ScannerHelpers";
-import { Config } from "./Config";
-const config: Config = new Config();
 
 const helper = new ScannerHelpers();
 export class TrayManager {
   private tray: any;
   private scanner: Scanner;
+
   constructor(scanner: Scanner) {
     this.scanner = scanner;
     this.tray = new Tray(path.join(__dirname, "assets/tray.png"));
@@ -23,12 +23,13 @@ export class TrayManager {
    * @param scanner Scanner instance
    */
   public update(scanner: Scanner) {
-    const launchOnStartup: any = config.get("launchOnStartup");
-    const enableNotifications: any = config.get("enableNotifications");
+    const launchOnStartup: any = this.scanner.config.launchOnStartup;
+    const enableNotifications: any = this.scanner.config.enableNotifications;
 
     const scanTemplate = this.generateScanButton(scanner);
-    const gamesListTemplate = this.generateGamesListTemplate(scanner);
-
+    const gamesListTemplate = this.generateGamesListTemplate();
+    // todo remove that
+    const trayRef = this;
     const contextMenu = [
       { label: this.scanner.versionLabel, type: "normal", enabled: false },
       { type: "separator" },
@@ -38,7 +39,7 @@ export class TrayManager {
         type: "checkbox",
         checked: enableNotifications,
         click() {
-          config.updateNotifications();
+          this.config.updateNotifications();
         }
       },
       {
@@ -46,7 +47,7 @@ export class TrayManager {
         type: "checkbox",
         checked: launchOnStartup,
         click() {
-          config.updateLaunchOnStartup();
+          trayRef.scanner.config.updateLaunchOnStartup();
         }
       },
       {
@@ -71,35 +72,35 @@ export class TrayManager {
    * Generate the game menu list with their options depending of their status
    * @param scanner Scanner instance
    */
-  private generateGamesListTemplate(scanner: Scanner) {
-    let accessor = this;
+  private generateGamesListTemplate() {
+    const accessor = this;
     const gamesListTemplate: any = [];
-    const drmManager = new DRMManager();
+    const launchersManager = this.scanner.launchersManager;
     let gamesCount = 0;
 
-    const drmList = config.get("drm");
-    for (const drmName in drmList) {
-      if (drmList.hasOwnProperty(drmName)) {
-        const drm = drmList[drmName];
+    const launchersList = this.scanner.config.launchers;
+    for (const launcherName in launchersList) {
+      if (launchersList.hasOwnProperty(launcherName)) {
+        const launcher = launchersList[launcherName];
         // aLl games of a drm
-        for (const gameName in drm.games) {
-          if (drm.games.hasOwnProperty(gameName)) {
-            const game = drm.games[gameName];
-            let gameMenuLabel,
-              startPath,
-              icon = path.join(__dirname, "assets", "unknown-game.png");
+        for (const gameName in launcher.games) {
+          if (launcher.games.hasOwnProperty(gameName)) {
+            const game = launcher.games[gameName];
+            let gameMenuLabel;
+            let startPath;
+            const icon = path.join(__dirname, "assets", "unknown-game.png");
 
-            if (game.binary) {
+            if (game.binaries && game.binaries[0]) {
               gameMenuLabel = "Change the executable of ";
-              startPath = game.binary;
+              startPath = game.binaries[0];
             } else {
               gameMenuLabel = "Select the executable of ";
-              startPath = game.directory;
+              startPath = game.folderPath;
             }
             gamesCount++;
-            if (game.icon && game.icon["16"]) {
-              icon = game.icon["16"];
-            }
+            // if (game.icon && game.icon["16"]) {
+            //   icon = game.icon["16"];
+            // }
             gamesListTemplate.push({
               icon: icon,
               label: gameName,
@@ -117,13 +118,13 @@ export class TrayManager {
                         if (!filePath || !filePath[0]) {
                           return;
                         }
-                        drmManager.setBinaryForGame(
-                          drmName,
+                        launchersManager.setBinaryForGame(
+                          launcherName,
                           gameName,
                           filePath[0],
                           true
                         );
-                        scanner.updateShortcuts();
+                        accessor.scanner.updateShortcuts();
                         helper.log(
                           colors.cyan("Binary updated for " + gameName + " =>")
                         );

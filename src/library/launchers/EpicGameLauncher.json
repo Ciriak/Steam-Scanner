@@ -1,0 +1,16 @@
+{
+  "name": "Epic Game Launcher",
+  "binaryName": "EpicGamesLauncher.exe",
+  "binaryPossibleLocations": [
+    "$drive\\Program Files (x86)\\Epic Games\\Launcher\\Portal\\Binaries\\Win32",
+    "$drive\\Programmes\\Epic Games\\Launcher\\Portal\\Binaries\\Win32"
+  ],
+  "gamesPossibleLocations": [
+    {
+      "path": "$drive\\Program Files (x86)\\Epic Games"
+    },
+    {
+      "path": "$drive\\Programmes\\Epic Games"
+    }
+  ]
+}
