@@ -112,8 +112,8 @@ export class SteamUser {
                   if (gameCount > 1) {
                     helper.warn(
                       "WARNING - " +
-                        gameName +
-                        " has been added more than once, cleaning..."
+                      gameName +
+                      " has been added more than once, cleaning..."
                     );
 
                     // remove all unwanted , by their index
@@ -123,8 +123,8 @@ export class SteamUser {
                     }
                     helper.log(
                       "Removed " +
-                        unwantedIndexList.length +
-                        " unwanted shortcuts"
+                      unwantedIndexList.length +
+                      " unwanted shortcuts"
                     );
                     updatedShortcuts = true;
                   }
@@ -155,12 +155,12 @@ export class SteamUser {
                     //   icon = path.normalize(game.icon["32"]);
                     // }
                     if (enableNotifications) {
-                      notifier.notify({
-                        title: game.name,
-                        message:
-                          "This game has been added to your library, please restart Steam",
-                        icon: icon
-                      });
+                      // notifier.notify({
+                      //   title: game.name,
+                      //   message:
+                      //     "This game has been added to your library, please restart Steam",
+                      //   icon: icon
+                      // });
                     }
                   }
                 }
