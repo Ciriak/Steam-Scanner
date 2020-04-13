@@ -19,10 +19,6 @@ export default class Config {
 
     configPath = path.join(app.getPath("appData"), appName);
     configFilePath = path.join(this.configPath, "config.json")
-    constructor() {
-        this.loadConfig();
-    }
-
 
     get enableNotifications(): boolean {
         return this._enableNotifications;
@@ -65,15 +61,18 @@ export default class Config {
      *
      * If unable to load the config, it will generate a clean one
      */
-    private loadConfig(): IConfig {
-        try {
-            const config = readJsonSync(this.configFilePath) as IConfig;
-            log("Config loaded");
-            return config;
-        } catch (error) {
-            logWarn("Unable to load the config");
-            return this.writeDefaultConfig();
-        }
+    public async load(): Promise<IConfig> {
+        return new Promise((resolve) => {
+            try {
+                const config = readJsonSync(this.configFilePath) as IConfig;
+                log("Config loaded");
+                return resolve(config)
+            } catch (error) {
+                logWarn("Unable to load the config");
+                const config = this.writeDefaultConfig();
+                return resolve(config);
+            }
+        })
     }
 
     /**

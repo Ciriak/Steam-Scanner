@@ -13,7 +13,7 @@ export class Launcher implements ILauncher {
     public name: string;
     private nameLabel: string;
     public exeName: string = "";
-    public exeLocation: string = "";
+    public exeLocation?: string = "";
 
     /**
      * List of games found for this launcher
@@ -25,9 +25,9 @@ export class Launcher implements ILauncher {
     public gamesPossibleLocations?: IGameLocation[] = [];
 
     constructor(launcherItem: ILauncher, manager: LaunchersManager, scanner: SteamScanner) {
-        this.manager = manager;
         this.scanner = scanner;
         this.config = scanner.config;
+        this.manager = manager;
         this.name = launcherItem.name;
         this.nameLabel = colors.cyan("[" + this.name + "]");
         this.exePossibleLocations = launcherItem.exePossibleLocations;
@@ -42,31 +42,36 @@ export class Launcher implements ILauncher {
     public async checkInstallation(): Promise<IInstallationState> {
         log("Checking installation for " + this.name);
         return new Promise(async (resolve) => {
-            let launcherConfig: any = this.config.launchers[this.name];
+            let launcherConfig = this.config.launchers[this.name];
             // if the binary location is not defined, try to find it
-            if (!launcherConfig || !launcherConfig.exeLocation) {
-                const parsedPossibleLocations: string[] = await addDrivesToPossibleLocations(
-                    this.exePossibleLocations
-                );
-
-                // first we locate the drm directory
-                for (let loc of parsedPossibleLocations) {
-                    loc = path.normalize(path.join(loc, this.exeName));
-                    // try to list all the users in the userdata folder of steam
-                    if (fs.existsSync(loc)) {
-                        this.exeLocation = loc;
-
-                        try {
-                            launcherConfig = this;
-                            // this.config.save();
-                        } catch (error) {
-                            logError(error);
-                        }
-                        break;
-                    }
-                }
-            } else {
+            if (launcherConfig && launcherConfig.exeName && launcherConfig.exeLocation) {
                 this.exeLocation = launcherConfig.exeLocation;
+
+                return resolve({
+                    launcher: this,
+                    installed: true
+                });
+            }
+
+            const parsedPossibleLocations: string[] = await addDrivesToPossibleLocations(
+                this.exePossibleLocations
+            );
+
+            // first we locate the drm directory
+            for (let loc of parsedPossibleLocations) {
+                loc = path.normalize(path.join(loc, this.exeName));
+                // try to list all the users in the userdata folder of steam
+                if (fs.existsSync(loc)) {
+                    this.exeLocation = loc;
+
+                    try {
+                        launcherConfig = this;
+                        // this.config.save();
+                    } catch (error) {
+                        logError(error);
+                    }
+                    break;
+                }
             }
 
             if (this.exeLocation) {
@@ -75,6 +80,7 @@ export class Launcher implements ILauncher {
                     launcher: this,
                     installed: true
                 });
+
             } else {
                 logWarn(this.name + " not found");
                 return resolve({
@@ -173,6 +179,7 @@ export class Launcher implements ILauncher {
                 if (this.games.hasOwnProperty(gameName)) {
                     const gameInstance = new Game(this.games[gameName], this.scanner);
                     this.games[gameName].binaries = await gameInstance.getBinaries();
+                    await gameInstance.findGameExecutable();
                 }
             }
 

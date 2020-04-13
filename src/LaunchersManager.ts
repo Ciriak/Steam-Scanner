@@ -5,7 +5,7 @@ import SteamScanner from "./app";
 import { logError, log } from "./utils/helper.utils";
 import launchers from "./library/launchers/LaunchersList";
 import Config from "./Config";
-import { IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
+import ILauncher, { IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
 
 // ===== Pattern for the config file =======
 // For the gamesProperties :
@@ -84,6 +84,7 @@ export class LaunchersManager {
                 }
                 // Set the launchers list
                 this.installedLaunchers = installedLaunchers;
+                this.setInstalledLaunchers(installedLaunchers);
                 resolve(installedLaunchers);
             });
 
@@ -92,6 +93,25 @@ export class LaunchersManager {
 
 
 
+    }
+
+    /**
+     * Save the instaled launchers into the config
+     * @param installedLaunchers
+     */
+    private setInstalledLaunchers(installedLaunchers: Launcher[]) {
+        const parsedLaunchers: { [key: string]: ILauncher } = {};
+        for (const launcher of installedLaunchers) {
+            parsedLaunchers[launcher.name] = {
+                exeName: launcher.exeName,
+                exePossibleLocations: launcher.exePossibleLocations,
+                name: launcher.name,
+                games: launcher.games,
+                gamesPossibleLocations: launcher.gamesPossibleLocations,
+                exeLocation: launcher.exeLocation
+            }
+        }
+        this.config.launchers = parsedLaunchers;
     }
 
     /**

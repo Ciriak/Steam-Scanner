@@ -13,22 +13,21 @@ export default class GameHelper {
     scanner: SteamScanner;
     config: Config;
     constructor(gameData: IGame, scanner: SteamScanner) {
-        this.gameData = this.checkGameData(gameData);
         this.scanner = scanner;
         this.config = scanner.config;
+        this.gameData = this.checkGameData(gameData);
     }
 
     /**
      * Check if some data already saved exist
      */
     private checkGameData(gameData: IGame): IGame {
-        console.log(gameData)
         try {
             let gameConfig: IGame | null = null;
-            if (this.gameData.name && this.gameData.launcher && this.config.launchers[this.gameData.launcher]) {
-                const launcher = this.config.launchers[this.gameData.launcher];
+            if (gameData.name && gameData.launcher && this.config.launchers[gameData.launcher]) {
+                const launcher = this.config.launchers[gameData.launcher];
                 if (launcher && launcher.games) {
-                    gameConfig = launcher.games[this.gameData.name];
+                    gameConfig = launcher.games[gameData.name];
                     if (gameConfig) {
                         // if a config is found for this game, reutrn it
                         return gameConfig
@@ -81,66 +80,69 @@ export default class GameHelper {
                     binariesPathList.push(fileName);
                 }
             }
+
             return resolve(binariesPathList);
 
         })
     }
 
+    /**
+     * Try to find the game executable using the binaries list
+     */
+    public async findGameExecutable(): Promise<any> {
 
-    // if (this.gameData.binaries.length === 0) {
-    //     logWarn(
-    //         colors.yellow(
-    //             "No executable found in the folder for " +
-    //             colors.cyan(this.gameData.name) +
-    //             " it has been skipped"
-    //         )
-    //     );
-    //     return resolve(binariesPathList);
-    // }
+        return new Promise((resolve) => {
 
-    // // if there is only one binaries, set it by default
-    // if (this.gameData.binaries.length === 1) {
+            switch (this.gameData.binaries.length) {
+                // no binary found
+                case 0:
+                    logWarn(
+                        colors.yellow(
+                            "No executable found in the folder for " +
+                            colors.cyan(this.gameData.name) +
+                            " it has been skipped"
+                        )
+                    );
+                    return resolve();
+                // 1 binary found
+                case 1:
+                    if (this.gameData.launcher && this.config.launchers[this.gameData.launcher]) {
+                        const launcher = this.config.launchers[this.gameData.launcher];
 
-    //     if (this.gameData.launcher && this.config.launchers[this.gameData.launcher]) {
-    //         const launcher = this.config.launchers[this.gameData.launcher];
-    //         if (launcher.games) {
-    //             launcher.games[this.gameData.name] = this.gameData;
-    //         }
-    //     }
-    //     else {
-    //         logWarn("Launcher not found");
-    //         return;
-    //     }
+                        if (launcher.games) {
 
-    //     await this.manager.setBinaryForGame(
-    //         this.name,
-    //         gameItem.name,
-    //         binariesPathList[0],
-    //         false
-    //     );
-    //     this.games[gameItem.name].binaries = [binariesPathList[0]];
-    //     this.games[gameItem.name].userSet = true;
+                            launcher.games[this.gameData.name] = this.gameData;
+                        }
+                    }
+                    else {
+                        logWarn("Launcher not found");
+                        return resolve();
+                    }
+                    this.gameData.binaries = [this.gameData.binaries[0]];
+                    return resolve();
 
-    //     continue;
-    // }
+                // More than 1 binaries found
+                default:
+                    if (this.gameData.launcher && this.config.launchers[this.gameData.launcher]) {
+                        const launcher = this.config.launchers[this.gameData.launcher];
+                        if (launcher && launcher.games) {
+                            launcher.games[this.gameData.name] = this.gameData;
+                        }
+
+                    }
+
+                    /*
+                      Here, we will listen for an active process to have the same name than a binarie found in the game files
+                      add the game the the listener, things happend in "Scanner.ts"
+                    */
+                    log(`Watching ${colors.cyan(String(this.gameData.binaries.length))} executables for the game ${colors.cyan(this.gameData.name)}`);
+                    return resolve();
+            }
+
+        });
+
+    }
 
 
-    // TODO REDO
-    // if there is more than one binary, add the list the the listenners
-    // if (gameItem.binaries.length > 1) {
-    //     this.config.launchers[this.name].games[gameItem.name] = this.games[
-    //         gameItem.name
-    //     ];
 
-    //     /*
-    //       Here, we will listen for an active process to have the same name than a binarie found in the game files
-    //       add the game the the listener, things happend in "Scanner.ts"
-    //     */
-    //     log(
-    //         "Watching " +
-    //         colors.cyan("" + gameItem.binaries.length + "") +
-    //         " executable files for the game " +
-    //         colors.cyan(gameItem.name)
-    //     );
-    // }
 }

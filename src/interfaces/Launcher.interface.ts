@@ -16,7 +16,8 @@ export interface IInstallationState {
 export default interface ILauncher {
     name: string;
     exeName: string;
-    exePossibleLocations: string[],
-    gamesPossibleLocations?: IGameLocation[],
-    games?: IGamesCollection
+    exePossibleLocations: string[];
+    gamesPossibleLocations?: IGameLocation[];
+    games?: IGamesCollection;
+    exeLocation?: string;
 }
