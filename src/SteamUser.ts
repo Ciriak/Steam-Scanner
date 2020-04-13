@@ -82,7 +82,7 @@ export class SteamUser {
                 for (const launcherName in launchersList) {
                     if (launchersList.hasOwnProperty(launcherName)) {
                         const launcherConfig = launchersList[launcherName];
-                        const launcher = new Launcher(launcherConfig, this.scanner.launchersManager);
+                        const launcher = new Launcher(launcherConfig, this.scanner.launchersManager, this.scanner);
                         for (const gameName in launcher.games) {
                             if (launcher.games.hasOwnProperty(gameName)) {
                                 const game = launcher.games[gameName];

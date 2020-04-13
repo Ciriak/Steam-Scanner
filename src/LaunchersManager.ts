@@ -1,14 +1,11 @@
-
-import * as colors from "colors";
 import { app } from "electron";
-import * as fs from "fs-extra";
 import * as path from "path";
 import { Launcher } from "./Launcher";
 import SteamScanner from "./app";
 import { logError, log } from "./utils/helper.utils";
 import launchers from "./library/launchers/LaunchersList";
 import Config from "./Config";
-import ILauncher, { IInstallationState } from "./interfaces/Launcher.interface";
+import { IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
 
 // ===== Pattern for the config file =======
 // For the gamesProperties :
@@ -27,31 +24,37 @@ export class LaunchersManager {
     constructor(scanner: SteamScanner) {
         this.scanner = scanner;
         this.config = scanner.config;
-        this.getAllLaunchers();
     }
 
     /**
-     * Update the games list for all launchers
+     * Update the games list for all launchers and return all games
      */
-    public async getAllGames() {
-        // get games from all installed Launcher
-        for (const launcher of this.installedLaunchers) {
-
-            const isLibrary = launcher.name === "Library";
-            // await launcher.getGamesDirectories(isLibrary);
-            // await launcher.getGamesBinaries();
-        }
-
+    public async getAllGames(): Promise<IGamesCollection> {
         return new Promise((resolve) => {
-            resolve();
+            let gamesList: IGamesCollection = {};
+            // get games from all installed Launcher
+            const waitList: Promise<IGamesCollection>[] = [];
+            for (const launcher of this.installedLaunchers) {
+                const isLibrary = launcher.name === "Library";
+                waitList.push(launcher.getGames());
+            }
+
+            Promise.all(waitList).then((results) => {
+                for (const result of results) {
+                    gamesList = { ...result };
+                }
+                return resolve(gamesList);
+            });
         });
+
+
     }
 
     /**
      * Return a list of all found launchers (other than steam)
      * Also add a "Library" categorie for games founds from the library
      */
-    public async getAllLaunchers(): Promise<Launcher[]> {
+    public async detectAllLaunchers(): Promise<Launcher[]> {
         return new Promise((resolve) => {
 
             const checkList: Promise<IInstallationState>[] = [];
@@ -60,7 +63,7 @@ export class LaunchersManager {
             for (const launcherName in launchers) {
                 if (launchers.hasOwnProperty(launcherName)) {
                     const launcherConfig = launchers[launcherName];
-                    const launcher = new Launcher(launcherConfig, this);
+                    const launcher = new Launcher(launcherConfig, this, this.scanner);
                     // check installation except for "library"
                     // if (launcherName === "Library") {
                     //     // add lirbary to the launchers list anyway

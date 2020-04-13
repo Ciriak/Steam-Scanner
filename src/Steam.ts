@@ -21,42 +21,45 @@ export default class Steam {
     constructor(scanner: SteamScanner) {
         this.scanner = scanner;
         this.config = scanner.config;
-        this.checkInstallation();
     }
 
-    private async checkInstallation() {
-        log("Checking Steam location...");
+    /**
+     * Check if Steam is installed on the machine
+     */
+    public async checkInstallation() {
+        return new Promise(async (resolve) => {
 
-        // try to get steam directory from the config
-        this.config.steamDirectory = await this.getSteamDirectory();
+            log("Checking Steam location...");
 
-        log("Looking for Steam accounts...");
+            // try to get steam directory from the config
+            this.config.steamDirectory = await this.getSteamDirectory();
 
-        const userDirectories: string[] = [];
-        const usersDir = path.join(this.config.steamDirectory, "userdata");
-        const items = readdirSync(usersDir);
+            log("Looking for Steam accounts...");
 
-        // only keep the directories
-        for (const dir of items) {
-            const dirPath = path.join(usersDir, dir);
-            try {
-                if (lstatSync(dirPath).isDirectory()) {
-                    userDirectories.push(dirPath);
+            const userDirectories: string[] = [];
+            const usersDir = path.join(this.config.steamDirectory, "userdata");
+            const items = readdirSync(usersDir);
+
+            // only keep the directories
+            for (const dir of items) {
+                const dirPath = path.join(usersDir, dir);
+                try {
+                    if (lstatSync(dirPath).isDirectory()) {
+                        userDirectories.push(dirPath);
+                    }
+                } catch (e) {
+                    logError(e);
+                    continue;
                 }
-            } catch (e) {
-                logError(e);
-                continue;
             }
-        }
 
-        log(colors.cyan(userDirectories.length + " account(s) found"));
+            log(colors.cyan(userDirectories.length + " account(s) found"));
 
-        for (const userDir of userDirectories) {
-            const userId = path.basename(userDir);
-            const user = new SteamUser(userId, this.scanner);
-            this.steamUsers.push(user);
-        }
-        return new Promise((resolve) => {
+            for (const userDir of userDirectories) {
+                const userId = path.basename(userDir);
+                const user = new SteamUser(userId, this.scanner);
+                this.steamUsers.push(user);
+            }
             resolve();
         });
     }

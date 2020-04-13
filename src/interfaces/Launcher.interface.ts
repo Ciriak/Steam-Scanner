@@ -4,6 +4,10 @@ export interface IGameLocation {
     path: string;
 }
 
+export interface IGamesCollection {
+    [name: string]: IGame
+}
+
 export interface IInstallationState {
     launcher: Launcher;
     installed: boolean;
@@ -14,7 +18,5 @@ export default interface ILauncher {
     exeName: string;
     exePossibleLocations: string[],
     gamesPossibleLocations?: IGameLocation[],
-    games?: {
-        [name: string]: IGame
-    }
+    games?: IGamesCollection
 }

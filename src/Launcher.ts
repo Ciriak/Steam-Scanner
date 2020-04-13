@@ -1,30 +1,35 @@
 import colors from "colors";
 import * as fs from "fs-extra";
 import * as path from "path";
-// import * as recursive from "recursive-readdir";
 import Config from "./Config";
 import { LaunchersManager } from "./LaunchersManager";
-import ILauncher, { IGameLocation, IInstallationState } from "./interfaces/Launcher.interface";
+import ILauncher, { IGameLocation, IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
 import { addDrivesToPossibleLocations, log, logWarn, logError } from "./utils/helper.utils";
+import Game from "./GameHelper";
+import SteamScanner from "./app";
 
 export class Launcher implements ILauncher {
     private config: Config;
     public name: string;
+    private nameLabel: string;
     public exeName: string = "";
     public exeLocation: string = "";
 
     /**
      * List of games found for this launcher
      */
-    public games: { [name: string]: IGame } = {};
+    public games: IGamesCollection = {};
     private manager: LaunchersManager;
+    private scanner: SteamScanner;
     public exePossibleLocations: string[] = [];
     public gamesPossibleLocations?: IGameLocation[] = [];
 
-    constructor(launcherItem: ILauncher, manager: LaunchersManager) {
+    constructor(launcherItem: ILauncher, manager: LaunchersManager, scanner: SteamScanner) {
         this.manager = manager;
-        this.config = this.manager.scanner.config;
+        this.scanner = scanner;
+        this.config = scanner.config;
         this.name = launcherItem.name;
+        this.nameLabel = colors.cyan("[" + this.name + "]");
         this.exePossibleLocations = launcherItem.exePossibleLocations;
         this.gamesPossibleLocations = launcherItem.gamesPossibleLocations;
         this.exeName = launcherItem.exeName;
@@ -83,174 +88,101 @@ export class Launcher implements ILauncher {
     }
 
     /**
-     * Try to find games from the launcher propertie (ex: "Origin Games")
-     * @param isLibrary if this is the librarty launcher, only add the folders that are referenced in the games library
+     * Scan and return the games list of this launcher
      */
-    // public async getGamesDirectories(isLibrary: boolean): Promise<any> {
-    //     return new Promise((resolve) => {
+    public async getGames(): Promise<IGamesCollection> {
+        return new Promise(async (resolve) => {
+            await this.loadGamesDirectories();
+            await this.loadGamesBinaries();
+            return resolve(this.games);
+        })
 
-    //         // skip if no game directory registered for this launcher (ex: Battle.net)
-    //         if (!this.gamesPossibleLocations) {
-    //             return resolve();
-    //         }
-
-    //         log("[" + this.name + "] Looking for games directories...");
-
-    //         for (let possibleLocation of this.gamesPossibleLocations) {
-    //             possibleLocation.path = await addDrivesToPossibleLocations([
-    //                 possibleLocation.path
-    //             ]);
-    //             for (const locationPath of possibleLocation.path) {
-    //                 // Directory of games
-    //                 try {
-    //                     const items = fs.readdirSync(locationPath);
-
-    //                     for (const dir of items) {
-    //                         const currentGameDir = path.normalize(path.join(locationPath, dir));
-
-    //                         // skip if this is not a folder
-    //                         if (!fs.lstatSync(currentGameDir).isDirectory()) {
-    //                             continue;
-    //                         }
-
-    //                         // TODO probably need to better check here if the folder is indeed a game folder
-    //                         const parsedGameDir = path.parse(currentGameDir);
-    //                         // if this is the library launcher, only keep the folders that are referenced in the games library
-    //                         if (isLibrary) {
-    //                             this.checkLibraryGamesFolders(parsedGameDir);
-    //                         } else {
-    //                             // check if the game already exist in the list
-    //                             this.games[parsedGameDir.name] = {
-    //                                 name: parsedGameDir.name,
-    //                                 folderPath: currentGameDir,
-    //                                 binaries: [],
-    //                                 launcher: this.name
-    //                             };
-    //                         }
-    //                     }
-
-    //                     // skip if the possible game folder don't exist
-    //                 } catch (e) {
-    //                     continue;
-    //                 }
-    //             }
-    //         }
-
-    //         log(
-    //             "[" +
-    //             this.name +
-    //             "] " +
-    //             colors.cyan("" + this.games.length + "") +
-    //             " game folder(s) found..."
-    //         );
-
-    //         resolve();
-    //     });
-    // }
+    }
 
     /**
-     * Try to find the games main executables
-     * if there is more than one executable, add them to the watch list for the scanner
+     * Load the game directories into the class
      */
-    // public async getGamesBinaries() {
-    //     for (const gameName in this.games) {
-    //         if (this.games.hasOwnProperty(gameName)) {
-    //             const gameItem = this.games[gameName];
-    //             const binariesPathList = [];
-    //             let gameConfig: IGame | null = null;
-    //             if (this.config.launchers[this.name] && gameItem.name) {
-    //                 const launcher = this.config.launchers[this.name];
-    //                 if (launcher.games) {
-    //                     gameConfig = launcher.games[gameItem.name];
-    //                 }
-    //             }
+    private async loadGamesDirectories(): Promise<any> {
+
+        let count: number = 0;
+
+        return new Promise(async (resolve) => {
+
+            // skip if no game directory registered for this launcher (ex: Battle.net)
+            if (!this.gamesPossibleLocations) {
+                return resolve();
+            }
+
+            log(`${this.nameLabel} Looking for game directories...`);
+
+            for (const possibleLocation of this.gamesPossibleLocations) {
+                const locationPathList = await addDrivesToPossibleLocations([
+                    possibleLocation.path
+                ]);
 
 
-    //             // Check the config to see if the game and his binary are alkeary known
-    //             // if yes, skip it
-    //             if (
-    //                 gameConfig &&
-    //                 gameConfig.binaries &&
-    //                 gameConfig.binaries.length === 1
-    //             ) {
-    //                 continue;
-    //             }
 
-    //             const filesList = await recursive(gameItem.folderPath);
-    //             // Check all the files in the found directory
-    //             // if one of the file is contained in the game.binaries properties, it is set as the game default binary
-    //             filesListLoop: for (const fileName of filesList) {
-    //                 for (const binary of this.games[gameItem.name].binaries) {
-    //                     if (fileName.search(binary) > -1) {
-    //                         binariesPathList.push(fileName);
-    //                         log(colors.green(fileName + " FOUND !"));
-    //                         break filesListLoop; // stop everything, we found what we want, a known game executable
-    //                     }
-    //                 }
+                for (const locationPath of locationPathList) {
+                    // Directory of games
+                    try {
+                        const items = fs.readdirSync(locationPath);
 
-    //                 // reference all executables
-    //                 if (fileName.search(".exe") > -1) {
-    //                     binariesPathList.push(fileName);
-    //                 }
-    //             }
+                        for (const dir of items) {
+                            const currentGameDir = path.normalize(path.join(locationPath, dir));
 
-    //             gameItem.binaries = binariesPathList;
+                            // skip if this is not a folder
+                            if (!fs.lstatSync(currentGameDir).isDirectory()) {
+                                continue;
+                            }
 
-    //             if (gameItem.binaries.length === 0) {
-    //                 logWarn(
-    //                     colors.yellow(
-    //                         "No executable found in the folder for " +
-    //                         colors.cyan(gameItem.name) +
-    //                         " it has been skipped"
-    //                     )
-    //                 );
-    //                 continue;
-    //             }
+                            // TODO probably need to better check here if the folder is indeed a game folder
+                            const parsedGameDir = path.parse(currentGameDir);
+                            // check if the game already exist in the list
+                            this.games[parsedGameDir.name] = {
+                                name: parsedGameDir.name,
+                                folderPath: currentGameDir,
+                                binaries: [],
+                                launcher: this.name
+                            };
 
-    //             // if there is only one binaries, set it by default
-    //             if (gameItem.binaries.length === 1) {
-    //                 try {
-    //                     this.config.launchers[this.name].games[gameItem.name] = gameItem;
-    //                     this.config.save();
-    //                 } catch (error) {
-    //                     logError(error);
-    //                 }
+                            count++;
 
-    //                 await this.manager.setBinaryForGame(
-    //                     this.name,
-    //                     gameItem.name,
-    //                     binariesPathList[0],
-    //                     false
-    //                 );
-    //                 this.games[gameItem.name].binaries = [binariesPathList[0]];
-    //                 this.games[gameItem.name].userSet = true;
+                        }
 
-    //                 continue;
-    //             }
+                        // skip if the possible game folder don't exist
+                    } catch (e) {
+                        continue;
+                    }
+                }
+            }
 
-    //             // if there is more than one binary, add the list the the listenners
-    //             if (gameItem.binaries.length > 1) {
-    //                 config.launchers[this.name].games[gameItem.name] = this.games[
-    //                     gameItem.name
-    //                 ];
+            log(`${this.nameLabel} ${count} possible game folder(s) found`);
 
-    //                 /*
-    //                   Here, we will listen for an active process to have the same name than a binarie found in the game files
-    //                   add the game the the listener, things happend in "Scanner.ts"
-    //                 */
-    //                 log(
-    //                     "Watching " +
-    //                     colors.cyan("" + gameItem.binaries.length + "") +
-    //                     " executable files for the game " +
-    //                     colors.cyan(gameItem.name)
-    //                 );
-    //             }
-    //         }
-    //     }
-    //     return new Promise((resolve) => {
-    //         resolve();
-    //     });
-    // }
+            resolve();
+        });
+    }
+
+
+    /**
+     * Load the game binaries into the game instances
+     */
+    private async loadGamesBinaries(): Promise<any> {
+        return new Promise(async (resolve) => {
+            for (const gameName in this.games) {
+
+                if (this.games.hasOwnProperty(gameName)) {
+                    const gameInstance = new Game(this.games[gameName], this.scanner);
+                    this.games[gameName].binaries = await gameInstance.getBinaries();
+                }
+            }
+
+            resolve();
+
+        });
+
+    }
+
+
 
     /**
      * Check if a given folder correspond to a game referenced in the games library

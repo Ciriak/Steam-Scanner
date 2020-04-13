@@ -12,13 +12,15 @@ export default class SteamScanner {
         this.steam = new Steam(this);
         this.launchersManager = new LaunchersManager(this);
         this.trayManager = new Traymanager();
-        this.init();
+        this.scan();
     }
 
 
-    private async init() {
-
-    }
+    private async scan() {
+        await this.steam.checkInstallation();
+        await this.launchersManager.detectAllLaunchers();
+        await this.launchersManager.getAllGames();
+    };
 }
 
 // tslint:disable-next-line: no-unused-expression
