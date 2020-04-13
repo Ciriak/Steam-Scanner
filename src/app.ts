@@ -1,9 +1,22 @@
-import { app } from "electron";
-import { Scanner } from "./Scanner";
-let scanner: Scanner;
-app.on("ready", () => {
-  scanner = new Scanner();
-  scanner.scan();
-  // launch a scan every X seconds (wich are specified in the config)
-  setInterval(() => scanner.scan(), scanner.config.scanInterval);
-});
+import Traymanager from "./TrayManager";
+import Config from "./Config";
+import Steam from "./Steam";
+export default class SteamScanner {
+    trayManager: Traymanager;
+    config: Config;
+    steam: Steam;
+    constructor() {
+        this.config = new Config();
+        this.steam = new Steam(this.config);
+        this.trayManager = new Traymanager();
+        this.init();
+    }
+
+
+    private async init() {
+
+    }
+}
+
+// tslint:disable-next-line: no-unused-expression
+new SteamScanner();

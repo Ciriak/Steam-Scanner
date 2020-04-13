@@ -1,3 +1,6 @@
+/**
+ * Represent a game that has been identified
+ */
 interface IGame {
   /**
    * Name of the game

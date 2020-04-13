@@ -4,16 +4,14 @@
   "description": "Automatically add your game to you Steam library",
   "main": "app.js",
   "scripts": {
-    "postinstall": "./node_modules/.bin/electron-rebuild && gulp install",
-    "gulp": "gulp",
-    "dev": "gulp dev",
-    "build": "gulp build",
-    "clean": "gulp clean",
+    "dev": "webpack --mode=development --watch",
+    "build": "webpack --mode=production",
+    "electron": "electron dist/scanner.js",
     "doc": "typedoc --out ./doc"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nj-neer/Steam-Scanner.git"
+    "url": "git+https://github.com/Ciriak/Steam-Scanner.git"
   },
   "keywords": [
     "steam",
@@ -26,36 +24,27 @@
   "author": "Cyriaque DELAUNAY",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/nj-neer/Steam-Scanner/issues"
+    "url": "https://github.com/Ciriak/Steam-Scanner/issues"
   },
-  "homepage": "https://github.com/nj-neer/Steam-Scanner#readme",
+  "homepage": "https://github.com/Ciriak/Steam-Scanner#readme",
   "devDependencies": {
-    "del": "^3.0.0",
-    "electron": "^4.0.1",
-    "electron-packager": "^13.0.1",
-    "gulp": "^4.0.0",
-    "gulp-shell": "^0.6.5",
-    "gulp-sourcemaps": "^2.6.4",
-    "gulp-terser": "^1.1.7",
-    "gulp-typescript": "^5.0.0",
-    "tslint": "^5.12.1",
-    "typedoc": "^0.14.1",
-    "typescript": "^3.2.2"
+    "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "auto-launch": "^5.0.5",
-    "cli-spinner": "^0.2.8",
-    "colors": "^1.3.3",
-    "current-processes": "^0.2.1",
-    "drivelist": "^6.4.6",
-    "electron-is-dev": "^1.0.1",
-    "electron-log": "^2.2.17",
-    "electron-updater": "^4.0.6",
-    "fs-extra": "^7.0.1",
-    "lodash": "^4.17.11",
-    "node-notifier": "^5.3.0",
-    "object-path": "^0.11.4",
-    "recursive-readdir": "^2.2.2",
-    "steam-shortcut-editor": "^3.1.1"
+    "@types/fs-extra": "^8.1.0",
+    "@types/lodash": "^4.14.149",
+    "clean-webpack-plugin": "^3.0.0",
+    "colors": "^1.4.0",
+    "copy-webpack-plugin": "^5.1.1",
+    "electron": "^8.2.1",
+    "electron-log": "^4.1.1",
+    "file-loader": "^6.0.0",
+    "fs-extra": "^9.0.0",
+    "lodash": "^4.17.15",
+    "native-ext-loader": "^2.3.0",
+    "steam-shortcut-editor": "^3.1.1",
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.1"
   }
 }

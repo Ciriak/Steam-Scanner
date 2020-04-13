@@ -1,178 +1,115 @@
-declare const Promise: any;
-import * as autoLaunch from "auto-launch";
-import * as colors from "colors";
+import { defaultConfig } from "./utils/config.utils";
+import { readJsonSync, writeJsonSync, ensureDirSync } from "fs-extra";
+import IConfig from "./interfaces/Config.interface";
+import path from "path";
 import { app } from "electron";
-import * as isDev from "electron-is-dev";
-import * as electronLog from "electron-log";
-import * as fs from "fs-extra";
-import * as objectPath from "object-path";
-import * as path from "path";
-import { Launcher } from "./Launcher";
-import { Scanner } from "./Scanner";
-import { ScannerHelpers } from "./ScannerHelpers";
+import { log, logWarn, logError } from "./utils/helper.utils";
+const appName = "steam-scanner";
 
-const helper = new ScannerHelpers();
+/**
+ * Class that manage the config
+ */
+export default class Config {
+    private _enableNotifications: boolean = defaultConfig.enableNotifications;
+    private _launchOnStartup: boolean = defaultConfig.launchOnStartup;
+    private _steamDirectory: string = defaultConfig.steamDirectory;
+    private _launchers: object = defaultConfig.launchers;
 
-// log config
-electronLog.transports.file.level = "info";
-
-const configPath = path.normalize(
-  path.join(app.getPath("appData"), "Steam Scanner", "config.json")
-);
-
-const cleanConfig = {
-  steamDirectory: null,
-  launchers: {},
-  launchOnStartup: true,
-  enableNotifications: true,
-  minCPUFilter: 15
-};
-
-export class Config {
-  public steamDirectory: string;
-  public launchers: { [name: string]: Launcher } = {};
-  public launchOnStartup: boolean = true;
-  public enableNotifications: boolean = true;
-  public minCPUFilter: number = 15;
-  public scanInterval: number = 2 * 60 * 1000; // 2min;
-  public version: number;
-  public firstLaunch: boolean = true;
-  constructor() {
-    this.checkIntegrity();
-    // Read the package.json
-    try {
-      const pJson = fs.readJsonSync(path.join(__dirname, "package.json"));
-      this.version = pJson.version;
-    } catch (error) {
-      helper.error(error);
-      process.exit();
-    }
-  }
-
-  /**
-   * retrieve a propertie into the config
-   * key can be an object path
-   * @param key propertie target (launcher.games.Overwatch)
-   */
-  public get(key: string) {
-    try {
-      // be sure that the file exist
-      fs.ensureFileSync(configPath);
-      const parsedKey = key.split(".");
-      const configDataTarget = objectPath.get(this, parsedKey);
-      return configDataTarget;
-    } catch (e) {
-      helper.error(colors.red(e));
-      return false;
-    }
-  }
-
-  // Save the current config class into the json
-  public save() {
-    return true;
-    this.checkIntegrity();
-    const configData = fs.readJsonSync(configPath);
-    try {
-      fs.writeJsonSync(configPath, configData);
-    } catch (e) {
-      helper.error(colors.red(e));
-      return false;
-    }
-  }
-
-  // reset shortcuts & config
-  public async clean(scannerInstance: Scanner) {
-    // remove the shortcut file for each user
-    for (const steamUser of scannerInstance.steamUsers) {
-      try {
-        fs.removeSync(steamUser.shortcutsFilePath);
-      } catch (e) {
-        continue;
-      }
+    configPath = path.join(app.getPath("appData"), appName);
+    configFilePath = path.join(this.configPath, "config.json")
+    constructor() {
+        this.loadConfig();
     }
 
-    try {
-      fs.removeSync(configPath);
-    } catch (e) {
-      helper.error(colors.red(e));
+
+    get enableNotifications(): boolean {
+        return this._enableNotifications;
     }
 
-    helper.log(colors.yellow("=== Config and shortcuts cleaned ==="));
-
-    return new Promise((resolve) => {
-      resolve();
-    });
-  }
-
-  /**
-   * Read the config to find if the "launchOnStartup" option is enabled, if true, enable it
-   */
-  public updateLaunchOnStartup() {
-    const launcher = new autoLaunch({ name: "Steam Scanner" });
-    const launch = this.get("launchOnStartup");
-    if (isDev) {
-      helper.log(
-        colors.yellow("NOTICE : Dev build, launch on startup ignored")
-      );
-      return;
+    set enableNotifications(value: boolean) {
+        this._enableNotifications = value;
+        this.writeConfig();
     }
-    if (launch === false) {
-      launcher.disable();
-      this.launchOnStartup = false;
-      this.save();
-      helper.log("Disabled launch on startup");
-    } else {
-      launcher.enable();
-      this.launchOnStartup = true;
-      this.save();
-      helper.log("Enabled launch on startup");
+
+    get launchOnStartup(): boolean {
+        return this._launchOnStartup;
     }
-  }
 
-  /**
-   * Read the config to find if the "enableNotifications" option is enabled, if true, enable it
-   */
-  public updateNotifications() {
-    const notif = this.get("enableNotifications");
-    this.enableNotifications = notif;
-    this.save();
-    if (notif === true) {
-      helper.log("Notifications enabled");
-    } else {
-      helper.log("Notifications disabled");
+    set launchOnStartup(value: boolean) {
+        this._launchOnStartup = value;
+        this.writeConfig();
     }
-  }
 
-  /**
-   * Check if the configFile is valid or corrupted, and create a clean one if needed
-   */
-  private checkIntegrity() {
-    let data;
-    try {
-      // be sure that the file exist
-      fs.ensureFileSync(configPath);
-      data = fs.readJsonSync(configPath);
+    get steamDirectory(): string {
+        return this._steamDirectory;
+    }
 
-      // if there is a missing propertie in the saved config, reset it
-      for (const propertie in cleanConfig) {
-        if (!data[propertie]) {
-          data[propertie] = cleanConfig[propertie];
+    set steamDirectory(value: string) {
+        this._steamDirectory = value;
+        this.writeConfig();
+    }
+
+    get launchers(): object {
+        return this._launchers;
+    }
+
+    set launchers(value: object) {
+        this._launchers = value;
+        this.writeConfig();
+    }
+
+    /**
+     * Retrieve the current saved config and assign it to the class
+     *
+     * If unable to load the config, it will generate a clean one
+     */
+    private loadConfig(): IConfig {
+        try {
+            const config = readJsonSync(this.configFilePath) as IConfig;
+            log("Config loaded");
+            return config;
+        } catch (error) {
+            logWarn("Unable to load the config");
+            return this.writeDefaultConfig();
         }
-      }
-    } catch (e) {
-      // create a clean config file if don't exist or is corrupted
-      // this also happend for the first launch, so we add a notification
-      helper.log(colors.yellow("NOTICE - creating a clean config file..."));
-      data = this.getCleanConfig();
     }
-    // write a parsed and validated config file
-    fs.writeJsonSync(configPath, data);
-  }
 
-  /**
-   * Return a clean config object
-   */
-  private getCleanConfig() {
-    return cleanConfig;
-  }
+    /**
+     * Write the current config to the config file
+     */
+    private writeConfig() {
+
+        const configToWrite: IConfig = {
+            launchOnStartup: this._launchOnStartup,
+            steamDirectory: this._steamDirectory,
+            launchers: this._launchers,
+            enableNotifications: this._enableNotifications
+        }
+        try {
+            writeJsonSync(this.configFilePath, configToWrite);
+        } catch (error) {
+            logError(error);
+            logError("Unable to write the config !");
+        }
+    }
+
+    /**
+     * Write a default config file
+     * @return Written config data
+     */
+    private writeDefaultConfig(): IConfig {
+
+        try {
+            ensureDirSync(this.configPath);
+            writeJsonSync(this.configFilePath, defaultConfig);
+            log("The config has been reset");
+            return defaultConfig;
+        } catch (error) {
+            // Unable to write the config, should crash
+            logError(error);
+            logError("Unable to write a config file, this is critical !!!\nThe process will now close")
+            process.exit(0);
+        }
+    }
+
 }
