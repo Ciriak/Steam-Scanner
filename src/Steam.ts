@@ -21,10 +21,10 @@ export default class Steam {
     constructor(scanner: SteamScanner) {
         this.scanner = scanner;
         this.config = scanner.config;
-        this.checkInstalation();
+        this.checkInstallation();
     }
 
-    private async checkInstalation() {
+    private async checkInstallation() {
         log("Checking Steam location...");
 
         // try to get steam directory from the config

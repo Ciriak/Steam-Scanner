@@ -1,12 +1,10 @@
-declare const Promise: any;
-import * as colors from "colors";
+import colors from "colors";
 import * as fs from "fs-extra";
-import * as _ from "lodash";
 import * as path from "path";
 // import * as recursive from "recursive-readdir";
 import Config from "./Config";
 import { LaunchersManager } from "./LaunchersManager";
-import ILauncher, { IGameLocation } from "./interfaces/Launcher.interface";
+import ILauncher, { IGameLocation, IInstallationState } from "./interfaces/Launcher.interface";
 import { addDrivesToPossibleLocations, log, logWarn, logError } from "./utils/helper.utils";
 
 export class Launcher implements ILauncher {
@@ -32,8 +30,13 @@ export class Launcher implements ILauncher {
         this.exeName = launcherItem.exeName;
     }
 
-    public async checkInstallation(): Promise<any> {
-        return new Promise(async (resolve: any) => {
+    /**
+     * Check if the launcher is installed on the machine
+     * @return Promise with a boolean
+     */
+    public async checkInstallation(): Promise<IInstallationState> {
+        log("Checking installation for " + this.name);
+        return new Promise(async (resolve) => {
             let launcherConfig: any = this.config.launchers[this.name];
             // if the binary location is not defined, try to find it
             if (!launcherConfig || !launcherConfig.exeLocation) {
@@ -62,14 +65,20 @@ export class Launcher implements ILauncher {
             }
 
             if (this.exeLocation) {
-                log(
-                    colors.green(this.name + " located at " + this.exeLocation)
-                );
+                log(`${colors.green(this.name + " found")} in ${this.exeLocation}`);
+                return resolve({
+                    launcher: this,
+                    installed: true
+                });
             } else {
-                log(colors.yellow(this.name + " not found"));
+                logWarn(this.name + " not found");
+                return resolve({
+                    launcher: this,
+                    installed: false
+                });
             }
 
-            resolve();
+
         });
     }
 

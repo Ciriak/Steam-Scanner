@@ -8,6 +8,7 @@ import SteamScanner from "./app";
 import { logError, log } from "./utils/helper.utils";
 import launchers from "./library/launchers/LaunchersList";
 import Config from "./Config";
+import ILauncher, { IInstallationState } from "./interfaces/Launcher.interface";
 
 // ===== Pattern for the config file =======
 // For the gamesProperties :
@@ -16,14 +17,8 @@ import Config from "./Config";
 
 export class LaunchersManager {
     private config: Config;
-    public detectedLaunchers: Launcher[] = [];
+    public installedLaunchers: Launcher[] = [];
     public scanner: SteamScanner;
-
-    private launchersConfigFilesLocation = path.join(
-        __dirname,
-        "library",
-        "launchers"
-    );
 
     /**
      * retrieve the supported launchers list from library (not an actual scan)
@@ -32,6 +27,7 @@ export class LaunchersManager {
     constructor(scanner: SteamScanner) {
         this.scanner = scanner;
         this.config = scanner.config;
+        this.getAllLaunchers();
     }
 
     /**
@@ -39,7 +35,7 @@ export class LaunchersManager {
      */
     public async getAllGames() {
         // get games from all installed Launcher
-        for (const launcher of this.detectedLaunchers) {
+        for (const launcher of this.installedLaunchers) {
 
             const isLibrary = launcher.name === "Library";
             // await launcher.getGamesDirectories(isLibrary);
@@ -55,38 +51,44 @@ export class LaunchersManager {
      * Return a list of all found launchers (other than steam)
      * Also add a "Library" categorie for games founds from the library
      */
-    public async getAllLaunchers() {
-        // list installed LauncherS
-        log("Checking installed Launchers...");
-        for (const launcherName in launchers) {
-            if (launchers.hasOwnProperty(launcherName)) {
-                const launcherConfig = launchers[launcherName];
-                const launcher = new Launcher(launcherConfig, this);
-                // check instalation except for "library"
-                // if (launcherName === "Library") {
-                //     // add lirbary to the launchers list anyway
-                //     this.detectedLaunchers.push(launcher);
-                //     this.scanner.config.launchers[launcher.name] = launcher;
-                //     continue;
-                // }
+    public async getAllLaunchers(): Promise<Launcher[]> {
+        return new Promise((resolve) => {
 
-                try {
-                    await launcher.checkInstallation();
-                    // exeLocation has been set, add it to the list
-                    if (launcher.exeLocation) {
-                        this.detectedLaunchers.push(launcher);
-                    }
-                } catch (error) {
-                    // launcher not installed
-                    continue;
+            const checkList: Promise<IInstallationState>[] = [];
+            // list installed LauncherS
+            log("Checking installed Launchers...");
+            for (const launcherName in launchers) {
+                if (launchers.hasOwnProperty(launcherName)) {
+                    const launcherConfig = launchers[launcherName];
+                    const launcher = new Launcher(launcherConfig, this);
+                    // check installation except for "library"
+                    // if (launcherName === "Library") {
+                    //     // add lirbary to the launchers list anyway
+                    //     this.detectedLaunchers.push(launcher);
+                    //     this.scanner.config.launchers[launcher.name] = launcher;
+                    //     continue;
+                    // }
+                    checkList.push(launcher.checkInstallation())
                 }
             }
-        }
+
+            const installedLaunchers: Launcher[] = [];
+            Promise.all(checkList).then((status) => {
+                for (const state of status) {
+                    if (state.installed) {
+                        installedLaunchers.push(state.launcher);
+                    }
+                }
+                // Set the launchers list
+                this.installedLaunchers = installedLaunchers;
+                resolve(installedLaunchers);
+            });
 
 
-        return new Promise((resolve) => {
-            resolve();
-        });
+        })
+
+
+
     }
 
     /**
