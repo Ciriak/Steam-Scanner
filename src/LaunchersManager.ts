@@ -1,0 +1,203 @@
+
+import * as colors from "colors";
+import { app } from "electron";
+import * as fs from "fs-extra";
+import * as path from "path";
+import { Launcher } from "./Launcher";
+import SteamScanner from "./app";
+import { logError, log } from "./utils/helper.utils";
+import launchers from "./library/launchers/LaunchersList";
+import Config from "./Config";
+
+// ===== Pattern for the config file =======
+// For the gamesProperties :
+// %pattern% :getPath method of Electron => https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
+// $this.xxx = a propertie of the current item (ex : name)
+
+export class LaunchersManager {
+    private config: Config;
+    public detectedLaunchers: Launcher[] = [];
+    public scanner: SteamScanner;
+
+    private launchersConfigFilesLocation = path.join(
+        __dirname,
+        "library",
+        "launchers"
+    );
+
+    /**
+     * retrieve the supported launchers list from library (not an actual scan)
+     * retrieve the "unique" games config from the library
+     */
+    constructor(scanner: SteamScanner) {
+        this.scanner = scanner;
+        this.config = scanner.config;
+    }
+
+    /**
+     * Update the games list for all launchers
+     */
+    public async getAllGames() {
+        // get games from all installed Launcher
+        for (const launcher of this.detectedLaunchers) {
+
+            const isLibrary = launcher.name === "Library";
+            // await launcher.getGamesDirectories(isLibrary);
+            // await launcher.getGamesBinaries();
+        }
+
+        return new Promise((resolve) => {
+            resolve();
+        });
+    }
+
+    /**
+     * Return a list of all found launchers (other than steam)
+     * Also add a "Library" categorie for games founds from the library
+     */
+    public async getAllLaunchers() {
+        // list installed LauncherS
+        log("Checking installed Launchers...");
+        for (const launcherName in launchers) {
+            if (launchers.hasOwnProperty(launcherName)) {
+                const launcherConfig = launchers[launcherName];
+                const launcher = new Launcher(launcherConfig, this);
+                // check instalation except for "library"
+                // if (launcherName === "Library") {
+                //     // add lirbary to the launchers list anyway
+                //     this.detectedLaunchers.push(launcher);
+                //     this.scanner.config.launchers[launcher.name] = launcher;
+                //     continue;
+                // }
+
+                try {
+                    await launcher.checkInstallation();
+                    // exeLocation has been set, add it to the list
+                    if (launcher.exeLocation) {
+                        this.detectedLaunchers.push(launcher);
+                    }
+                } catch (error) {
+                    // launcher not installed
+                    continue;
+                }
+            }
+        }
+
+
+        return new Promise((resolve) => {
+            resolve();
+        });
+    }
+
+    /**
+     * set the given binary the main one for the given game and save it
+     * @param launcherName
+     * @param gameName
+     * @param binaryPath
+     * @param userSet has been set manually buy the user ?
+     */
+    public async setBinaryForGame(
+        launcherName: string,
+        gameName: string,
+        binaryPath: string,
+        userSet: boolean // manually set by the user, wont apply the other rules
+    ) {
+        try {
+            // set the binary
+            if (this.config.launchers[launcherName]) {
+                const launcher = this.config.launchers[launcherName];
+                if (launcher.games && launcher.games[gameName]) {
+                    launcher.games[gameName].binaries = [
+                        binaryPath
+                    ];
+                    // set the userSet propertie if given
+                    if (userSet) {
+                        launcher.games[gameName].userSet = true
+                    }
+                }
+            }
+        } catch (error) {
+            logError(error);
+        }
+
+        // retrieve the icon and generate a file
+        await this.generateGameIcon(binaryPath, launcherName, gameName);
+
+        return new Promise((resolve) => {
+            resolve();
+        });
+    }
+
+    /**
+     * Try to retrieve the game icon from his found binaries
+     */
+    private async generateGameIcon(
+        binaryPath: string,
+        launcherName: string,
+        gameName: string
+    ) {
+        const iconBasePath = path.join(
+            app.getPath("appData"),
+            "Steam Scanner",
+            "icons"
+        );
+
+        const smallIconFilePath = path.join(iconBasePath, gameName, "16X16.png");
+        const mediumIconFilePath = path.join(iconBasePath, gameName, "32X32.png");
+
+        // find associate icon
+
+        // try {
+        //   //small icon
+        //   fs.ensureFileSync(smallIconFilePath);
+
+        //   fs.ensureFileSync(mediumIconFilePath);
+
+        //   //dirty af :(
+        //   getIconForPath(binaryPath, ICON_SIZE_EXTRA_SMALL, function(
+        //     err,
+        //     smallIconData
+        //   ) {
+        //     if (err) {
+        //      logError(err);
+        //     }
+        //     fs.writeFileSync(smallIconFilePath, smallIconData);
+        //     getIconForPath(binaryPath, ICON_SIZE_SMALL, function(
+        //       err,
+        //       mediumIconData
+        //     ) {
+        //       if (err) {
+        //        logError(err);
+        //       }
+        //       fs.writeFileSync(mediumIconFilePath, mediumIconData);
+        //     });
+        //   });
+        // } catch (err) {
+        //  logError(err);
+        //   return new Promise((resolve) => {
+        //     resolve();
+        //   });
+        // }
+
+        // save it into the config
+
+        try {
+
+            if (this.config.launchers[launcherName]) {
+                const launcher = this.config.launchers[launcherName];
+                if (launcher.games && launcher.games[gameName]) {
+                    launcher.games[gameName].iconPath = {
+                        16: smallIconFilePath,
+                        32: mediumIconFilePath
+                    }
+                }
+            }
+        } catch (error) {
+            logError(error);
+        }
+
+        return new Promise((resolve) => {
+            resolve();
+        });
+    }
+}

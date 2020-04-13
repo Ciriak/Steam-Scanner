@@ -4,7 +4,9 @@ import IConfig from "./interfaces/Config.interface";
 import path from "path";
 import { app } from "electron";
 import { log, logWarn, logError } from "./utils/helper.utils";
+import ILauncher from "./interfaces/Launcher.interface";
 const appName = "steam-scanner";
+import launchers from "./library/launchers/LaunchersList";
 
 /**
  * Class that manage the config
@@ -13,7 +15,7 @@ export default class Config {
     private _enableNotifications: boolean = defaultConfig.enableNotifications;
     private _launchOnStartup: boolean = defaultConfig.launchOnStartup;
     private _steamDirectory: string = defaultConfig.steamDirectory;
-    private _launchers: object = defaultConfig.launchers;
+    private _launchers: typeof launchers = defaultConfig.launchers;
 
     configPath = path.join(app.getPath("appData"), appName);
     configFilePath = path.join(this.configPath, "config.json")
@@ -49,11 +51,11 @@ export default class Config {
         this.writeConfig();
     }
 
-    get launchers(): object {
+    get launchers(): typeof launchers {
         return this._launchers;
     }
 
-    set launchers(value: object) {
+    set launchers(value: typeof launchers) {
         this._launchers = value;
         this.writeConfig();
     }

@@ -1,6 +1,5 @@
 import * as elcLog from "electron-log";
 import colors from "colors";
-import drivelist from "drivelist";
 import path from "path"
 /**
  * Log a message

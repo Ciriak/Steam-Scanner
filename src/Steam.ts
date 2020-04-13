@@ -3,6 +3,8 @@ import Config from "./Config";
 import path from "path";
 import { lstatSync, readdirSync } from "fs-extra";
 import { SteamUser } from "./SteamUser";
+import SteamScanner from "./app";
+import colors from "colors";
 /**
  * manage the interactions with Steam
  */
@@ -14,9 +16,11 @@ export default class Steam {
     ];
 
     private config: Config;
+    private scanner: SteamScanner;
     public steamUsers: SteamUser[] = [];
-    constructor(config: Config) {
-        this.config = config;
+    constructor(scanner: SteamScanner) {
+        this.scanner = scanner;
+        this.config = scanner.config;
         this.checkInstalation();
     }
 
@@ -45,11 +49,11 @@ export default class Steam {
             }
         }
 
-        log(userDirectories.length + " user(s) found");
+        log(colors.cyan(userDirectories.length + " account(s) found"));
 
         for (const userDir of userDirectories) {
             const userId = path.basename(userDir);
-            const user = new SteamUser(userId, this.config);
+            const user = new SteamUser(userId, this.scanner);
             this.steamUsers.push(user);
         }
         return new Promise((resolve) => {
@@ -77,7 +81,7 @@ export default class Steam {
                 try {
                     const dir = path.join(loc, "userdata");
                     readdirSync(dir);
-                    log("Steam directory located :\n" + dir);
+                    log("Steam directory located : " + colors.cyan(dir));
                     return resolve(dir.replace("userdata", ""));
                 } catch (e) {
                     continue;
