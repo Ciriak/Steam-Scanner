@@ -13,10 +13,14 @@
       "windows": {
         "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
       },
-      "args": [
-        "dist/scanner.js"
+      "runtimeArgs": [
+        "${workspaceRoot}/dist/scanner.js",
+        // this args for attaching render process
+        "--remote-debugging-port=9222"
       ],
-      "outputCapture": "std"
+      "skipFiles": [
+        "<node_internals>/**/*.js"
+      ]
     }
   ]
 }

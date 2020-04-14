@@ -4,6 +4,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 module.exports = {
     entry: './src/app.ts',
     target: "electron-main",
+    devtool: "inline-source-map",
     module: {
         rules: [
             {
