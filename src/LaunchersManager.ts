@@ -2,8 +2,8 @@ import { app } from "electron";
 import * as path from "path";
 import { Launcher } from "./Launcher";
 import SteamScanner from "./app";
-import { logError, log } from "./utils/helper.utils";
-import launchers from "./library/launchers/LaunchersList";
+import { logError, log, logWarn } from "./utils/helper.utils";
+import launchers from "./library/LaunchersList";
 import Config from "./Config";
 import ILauncher, { IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
 
@@ -60,9 +60,9 @@ export class LaunchersManager {
             const checkList: Promise<IInstallationState>[] = [];
             // list installed LauncherS
             log("Checking installed Launchers...");
-            for (const launcherName in launchers) {
+            for (const launcherName in this.config.launchers) {
                 if (launchers.hasOwnProperty(launcherName)) {
-                    const launcherConfig = launchers[launcherName];
+                    const launcherConfig = { ...this.config.launchers[launcherName], ...launchers[launcherName] }; // use the config copy of the launcher
                     const launcher = new Launcher(launcherConfig, this, this.scanner);
                     // check installation except for "library"
                     // if (launcherName === "Library") {
@@ -122,33 +122,32 @@ export class LaunchersManager {
      * @param userSet has been set manually buy the user ?
      */
     public async setBinaryForGame(
-        launcherName: string,
-        gameName: string,
-        binaryPath: string,
-        userSet: boolean // manually set by the user, wont apply the other rules
-    ) {
-        try {
+        gameData: IGame,
+        userSet?: boolean // manually set by the user, wont apply the other rules
+    ): Promise<void> {
+        return new Promise(async (resolve) => {
+
             // set the binary
-            if (this.config.launchers[launcherName]) {
-                const launcher = this.config.launchers[launcherName];
-                if (launcher.games && launcher.games[gameName]) {
-                    launcher.games[gameName].binaries = [
-                        binaryPath
-                    ];
-                    // set the userSet propertie if given
-                    if (userSet) {
-                        launcher.games[gameName].userSet = true
-                    }
+            if (!this.config.launchers[gameData.launcher]) {
+                logWarn(`Cannot continue, launcher ${gameData.launcher} not found !`);
+                return resolve();
+            }
+            const launcher = this.config.launchers[gameData.launcher];
+
+            if (launcher.games && launcher.games[gameData.name]) {
+                launcher.games[gameData.name].binaries = gameData.binaries;
+                // set the userSet propertie if given
+                if (userSet) {
+                    launcher.games[gameData.name].userSet = true
                 }
             }
-        } catch (error) {
-            logError(error);
-        }
+            // retrieve the icon and generate a file
+            await this.generateGameIcon(gameData.binaries[0], gameData.launcher, gameData.name);
 
-        // retrieve the icon and generate a file
-        await this.generateGameIcon(binaryPath, launcherName, gameName);
+            // commit the changes
+            this.config.launchers[gameData.launcher] = launcher;
+            this.config.launchers = { ...this.config.launchers };
 
-        return new Promise((resolve) => {
             resolve();
         });
     }

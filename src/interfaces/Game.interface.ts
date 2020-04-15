@@ -19,7 +19,7 @@ interface IGame {
   /**
    * Name of the launcher associated to this game
    */
-  launcher?: string;
+  launcher: string;
   /**
    * Path to the folder containing the game files
    */
@@ -31,6 +31,10 @@ interface IGame {
     16: string;
     32: string;
   };
+  /**
+   * Tell if the game binary has been found and set
+   */
+  binarySet?: boolean;
   /**
    * True if the binary has been manually set by the user, the scanner won't override it
    */

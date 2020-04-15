@@ -4,6 +4,7 @@ import Config from "./Config";
 import recursive from "recursive-readdir";
 import colors from "colors";
 import path from "path";
+import exeBlackList from "./library/ExeBlackList";
 
 /**
  * Provide utilities for game manipulations
@@ -49,7 +50,7 @@ export default class GameHelper {
 
             const binariesPathList: string[] = [];
 
-            log(`Searching the executable of a possible game named "${this.gameData.name}"...`);
+            log(`Searching the executable of a possible game named ${colors.cyan(this.gameData.name)}...`);
 
 
             // Check the config to see if the game and his binary are alreary known
@@ -63,7 +64,10 @@ export default class GameHelper {
                 return resolve(binariesPathList);
             }
 
-            const filesList: string[] = await recursive(this.gameData.folderPath);
+            let filesList: string[] = await recursive(this.gameData.folderPath);
+
+            filesList = this.filterFromBlackList(filesList);
+
             // Check all the files in the found directory
             // if one of the file is contained in the game.binaries properties, it is set as the game default binary
             filesListLoop: for (const fileName of filesList) {
@@ -91,7 +95,7 @@ export default class GameHelper {
      */
     public async findGameExecutable(): Promise<any> {
 
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
 
             switch (this.gameData.binaries.length) {
                 // no binary found
@@ -110,15 +114,17 @@ export default class GameHelper {
                         const launcher = this.config.launchers[this.gameData.launcher];
 
                         if (launcher.games) {
-
-                            launcher.games[this.gameData.name] = this.gameData;
+                            this.gameData.binaries = [this.gameData.binaries[0]];
+                            this.gameData.binarySet = true;
+                            log(colors.green("Found the executable of " + colors.cyan(this.gameData.name) + " at ") + this.gameData.binaries[0]);
+                            this.scanner.launchersManager.setBinaryForGame(this.gameData);
                         }
                     }
                     else {
                         logWarn("Launcher not found");
                         return resolve();
                     }
-                    this.gameData.binaries = [this.gameData.binaries[0]];
+
                     return resolve();
 
                 // More than 1 binaries found
@@ -143,6 +149,25 @@ export default class GameHelper {
 
     }
 
-
+    /**
+     * Remove the blacklisted executables from a executables list
+     * @param list list of file path
+     */
+    private filterFromBlackList(list: string[]) {
+        const parsedList: string[] = [];
+        for (const filePath of list) {
+            let valid = true;
+            for (const blacklistedExe of exeBlackList) {
+                if (filePath.search(blacklistedExe) > -1) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid) {
+                parsedList.push(filePath);
+            }
+        }
+        return parsedList;
+    }
 
 }

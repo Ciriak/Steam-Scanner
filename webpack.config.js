@@ -28,7 +28,7 @@ module.exports = {
                 }]
             },
             {
-                test: /\.(png|svg|jpg|gif)$/,
+                test: /\.(png|svg|jpg|gif|ico)$/,
                 use: [
                     'file-loader'
                 ]
@@ -45,7 +45,7 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(),
         new CopyPlugin([
-            { from: 'src/assets', to: 'assets' },
+            // { from: './src/assets/**/*', to: 'assets' },
         ]),
     ],
 };

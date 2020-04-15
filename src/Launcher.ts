@@ -5,7 +5,7 @@ import Config from "./Config";
 import { LaunchersManager } from "./LaunchersManager";
 import ILauncher, { IGameLocation, IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
 import { addDrivesToPossibleLocations, log, logWarn, logError } from "./utils/helper.utils";
-import Game from "./GameHelper";
+import GameHelper from "./GameHelper";
 import SteamScanner from "./app";
 
 export class Launcher implements ILauncher {
@@ -32,6 +32,7 @@ export class Launcher implements ILauncher {
         this.nameLabel = colors.cyan("[" + this.name + "]");
         this.exePossibleLocations = launcherItem.exePossibleLocations;
         this.gamesPossibleLocations = launcherItem.gamesPossibleLocations;
+        this.games = launcherItem.games || {};
         this.exeName = launcherItem.exeName;
     }
 
@@ -143,7 +144,13 @@ export class Launcher implements ILauncher {
 
                             // TODO probably need to better check here if the folder is indeed a game folder
                             const parsedGameDir = path.parse(currentGameDir);
+
                             // check if the game already exist in the list
+                            // skip if this is the case
+                            if (this.games[parsedGameDir.name]) {
+                                continue;
+                            }
+
                             this.games[parsedGameDir.name] = {
                                 name: parsedGameDir.name,
                                 folderPath: currentGameDir,
@@ -175,9 +182,9 @@ export class Launcher implements ILauncher {
     private async loadGamesBinaries(): Promise<any> {
         return new Promise(async (resolve) => {
             for (const gameName in this.games) {
-
-                if (this.games.hasOwnProperty(gameName)) {
-                    const gameInstance = new Game(this.games[gameName], this.scanner);
+                // only search if binary is not set yet
+                if (this.games.hasOwnProperty(gameName) && !this.games[gameName].binarySet) {
+                    const gameInstance = new GameHelper(this.games[gameName], this.scanner);
                     this.games[gameName].binaries = await gameInstance.getBinaries();
                     await gameInstance.findGameExecutable();
                 }

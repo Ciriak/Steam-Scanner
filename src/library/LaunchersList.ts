@@ -1,4 +1,5 @@
-import ILauncher from "../../interfaces/Launcher.interface";
+import ILauncher from "../interfaces/Launcher.interface";
+
 
 /**
  * BATTLENET

@@ -4,9 +4,9 @@ import IConfig from "./interfaces/Config.interface";
 import path from "path";
 import { app } from "electron";
 import { log, logWarn, logError } from "./utils/helper.utils";
-import ILauncher from "./interfaces/Launcher.interface";
 const appName = "steam-scanner";
-import launchers from "./library/launchers/LaunchersList";
+import launchers from "./library/LaunchersList";
+import ILauncher from "./interfaces/Launcher.interface";
 
 /**
  * Class that manage the config
@@ -56,24 +56,29 @@ export default class Config {
         this.writeConfig();
     }
 
+    constructor() {
+        this.load();
+    }
+
     /**
      * Retrieve the current saved config and assign it to the class
      *
      * If unable to load the config, it will generate a clean one
      */
-    public async load(): Promise<IConfig> {
-        return new Promise((resolve) => {
-            try {
-                const config = readJsonSync(this.configFilePath) as IConfig;
-                log("Config loaded");
-                return resolve(config)
-            } catch (error) {
-                logWarn("Unable to load the config");
-                const config = this.writeDefaultConfig();
-                return resolve(config);
-            }
-        })
+    private load() {
+        try {
+            const config = readJsonSync(this.configFilePath) as IConfig;
+            this.enableNotifications = config.enableNotifications;
+            this.launchers = config.launchers;
+            this.launchOnStartup = config.launchOnStartup;
+            this.steamDirectory = config.steamDirectory;
+        } catch (error) {
+            logWarn("Unable to load the config");
+            const config = this.writeDefaultConfig();
+            return config;
+        }
     }
+
 
     /**
      * Write the current config to the config file

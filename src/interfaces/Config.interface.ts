@@ -1,4 +1,4 @@
-import launchers from "../library/launchers/LaunchersList";
+import launchers from "../library/LaunchersList";
 
 export default interface IConfig {
   steamDirectory: string;

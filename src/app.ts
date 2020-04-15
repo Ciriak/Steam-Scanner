@@ -11,10 +11,8 @@ export default class SteamScanner {
         this.config = new Config();
         this.steam = new Steam(this);
         this.launchersManager = new LaunchersManager(this);
-        this.trayManager = new Traymanager();
-        this.config.load().then(() => {
-            this.scan();
-        })
+        this.trayManager = new Traymanager(this);
+        this.scan();
 
     }
 
@@ -22,7 +20,9 @@ export default class SteamScanner {
     private async scan() {
         await this.steam.checkInstallation();
         await this.launchersManager.detectAllLaunchers();
-        await this.launchersManager.getAllGames();
+        await this.launchersManager.getAllGames().then(() => {
+            this.trayManager.setTray();
+        })
     };
 }
 
