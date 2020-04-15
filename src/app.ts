@@ -2,16 +2,19 @@ import Traymanager from "./TrayManager";
 import Config from "./Config";
 import Steam from "./Steam";
 import { LaunchersManager } from "./LaunchersManager";
+import NotificationsManager from "./Notification";
 export default class SteamScanner {
     trayManager: Traymanager;
     config: Config;
     steam: Steam;
     launchersManager: LaunchersManager;
+    notificationsManager: NotificationsManager;
     constructor() {
         this.config = new Config();
         this.steam = new Steam(this);
         this.launchersManager = new LaunchersManager(this);
         this.trayManager = new Traymanager(this);
+        this.notificationsManager = new NotificationsManager(this);
         this.scan();
 
     }
