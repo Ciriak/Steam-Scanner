@@ -1,11 +1,16 @@
 import { app, Menu, Tray, MenuItem } from "electron";
 import trayIconData from "./assets/scanner.ico";
 import defaultGameIconData from "./assets/unknown-game.png";
+import defaultExeIcon from "./assets/exe.png";
+
+
 const trayIcon = trayIconData;
 const defaultGameIcon = defaultGameIconData;
 import path from "path"
 import SteamScanner from "./app";
 import Config from "./Config";
+import ILauncher from "./interfaces/Launcher.interface";
+import launchers from "./library/LaunchersList";
 export default class Traymanager {
     tray?: Tray;
     scanner: SteamScanner;
@@ -14,13 +19,19 @@ export default class Traymanager {
         this.scanner = scanner;
         this.config = scanner.config;
         app.on("ready", () => {
+            this.tray = new Tray(path.join(app.getAppPath(), trayIcon));
             this.setTray();
         });
 
     }
 
     public setTray() {
-        this.tray = new Tray(path.join(app.getAppPath(), trayIcon));
+
+        // stop if the tray is not ready yet
+        if (!this.tray) {
+            return;
+        }
+
         const header = new MenuItem({
             label: "Steam Scanner v0.1",
             enabled: false,
@@ -29,59 +40,24 @@ export default class Traymanager {
             type: "separator"
         });
 
+        const launchersMenuItems: MenuItem[] = this.generateLaunchersList();
 
-        const gameMenu = Menu.buildFromTemplate([
-            {
-                label: "toto.exe",
-                icon: path.join(app.getAppPath(), defaultGameIcon)
-            }
-        ])
-
-        const launchers: MenuItem[] = this.generateLaunchersList();
 
         const contextMenu = Menu.buildFromTemplate([
             header,
             separator
-        ].concat(launchers));
+        ].concat(launchersMenuItems));
 
         this.tray.setContextMenu(contextMenu)
     }
 
     private generateLaunchersList(): MenuItem[] {
-        const menuItems: MenuItem[] = [];
+        let menuItems: MenuItem[] = [];
         for (const launcherName in this.config.launchers) {
             if (this.config.launchers.hasOwnProperty(launcherName)) {
                 const launcher = this.config.launchers[launcherName];
-                const launcherMenuItems: MenuItem[] = [
-                    new MenuItem({
-                        label: launcherName,
-                        icon: path.join(app.getAppPath(), defaultGameIcon)
-                    })
-                ];
-
-                for (const gameName in launcher.games) {
-                    if (launcher.games.hasOwnProperty(gameName)) {
-                        let gameMenu: MenuItem;
-                        const game = launcher.games[gameName];
-                        if (game.binarySet) {
-                            gameMenu = new MenuItem({
-                                label: gameName,
-                                icon: path.join(app.getAppPath(), defaultGameIcon)
-                            })
-                        }
-                        else {
-                            gameMenu = new MenuItem({
-                                label: gameName,
-                                icon: path.join(app.getAppPath(), defaultGameIcon)
-                            })
-                        }
-
-                        launcherMenuItems.push(gameMenu);
-                    }
-
-                }
-                menuItems.concat(launcherMenuItems);
-
+                const launcherMenuItems = this.generateGamesListForLauncher(launcher);
+                menuItems = menuItems.concat(launcherMenuItems);
             }
 
         }
@@ -97,5 +73,84 @@ export default class Traymanager {
         //     }),
         // ]
         return menuItems;
+    }
+
+    private generateGamesListForLauncher(launcher: ILauncher): MenuItem[] {
+        const menu: MenuItem[] = [
+            new MenuItem({
+                label: launcher.name,
+                icon: path.join(app.getAppPath(), launchers[launcher.name].icon),
+                enabled: false
+            }),
+            new MenuItem({
+                type: "separator"
+            })
+        ];
+
+        const gamesMenu: MenuItem[] = [];
+
+        for (const gameName in launcher.games) {
+            if (launcher.games.hasOwnProperty(gameName)) {
+                let gameMenu: MenuItem;
+                const game = launcher.games[gameName];
+                // if the game is already known and ready to use
+                if (game.binarySet) {
+                    gameMenu = new MenuItem({
+                        label: gameName,
+                        icon: path.join(app.getAppPath(), defaultGameIcon)
+                    })
+                }
+                // if we don't know the game exe yet
+                else {
+                    gameMenu = new MenuItem({
+                        label: gameName,
+                        icon: path.join(app.getAppPath(), defaultGameIcon),
+                        sublabel: "Select the game .exe",
+                        submenu: this.generateGameExeList(game)
+                    })
+                }
+
+                gamesMenu.push(gameMenu);
+            }
+
+        }
+
+        // add a label if no game found for this launcher
+        if (gamesMenu.length === 0) {
+            gamesMenu.push(new MenuItem({
+                label: "No game found",
+                enabled: false,
+                role: "about"
+            }))
+        }
+
+        // add the final separator
+        gamesMenu.push(new MenuItem({
+            type: "separator"
+        }));
+
+
+        return menu.concat(gamesMenu);
+    }
+
+    private generateGameExeList(game: IGame): Menu {
+
+        const menuItems: MenuItem[] = [];
+        for (const binary of game.binaries) {
+
+
+
+            menuItems.push(new MenuItem({
+                label: path.basename(binary),
+                icon: path.join(app.getAppPath(), defaultExeIcon),
+                click: () => {
+                    game.binaries = [binary];
+                    this.scanner.launchersManager.setBinaryForGame(game, true)
+                }
+            }));
+        }
+
+        return Menu.buildFromTemplate(menuItems);
+
     }
 }

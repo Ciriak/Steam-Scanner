@@ -108,7 +108,8 @@ export class LaunchersManager {
                 name: launcher.name,
                 games: launcher.games,
                 gamesPossibleLocations: launcher.gamesPossibleLocations,
-                exeLocation: launcher.exeLocation
+                exeLocation: launcher.exeLocation,
+                icon: launcher.icon
             }
         }
         this.config.launchers = parsedLaunchers;
@@ -140,6 +141,7 @@ export class LaunchersManager {
                 if (userSet) {
                     launcher.games[gameData.name].userSet = true
                 }
+                launcher.games[gameData.name].binarySet = true
             }
             // retrieve the icon and generate a file
             await this.generateGameIcon(gameData.binaries[0], gameData.launcher, gameData.name);

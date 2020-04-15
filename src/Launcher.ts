@@ -23,6 +23,7 @@ export class Launcher implements ILauncher {
     private scanner: SteamScanner;
     public exePossibleLocations: string[] = [];
     public gamesPossibleLocations?: IGameLocation[] = [];
+    public icon: string;
 
     constructor(launcherItem: ILauncher, manager: LaunchersManager, scanner: SteamScanner) {
         this.scanner = scanner;
@@ -34,6 +35,7 @@ export class Launcher implements ILauncher {
         this.gamesPossibleLocations = launcherItem.gamesPossibleLocations;
         this.games = launcherItem.games || {};
         this.exeName = launcherItem.exeName;
+        this.icon = launcherItem.icon;
     }
 
     /**

@@ -5,6 +5,10 @@ module.exports = {
     entry: './src/app.ts',
     target: "electron-main",
     devtool: "inline-source-map",
+    node: {
+        __filename: true,
+        __dirname: true
+    },
     module: {
         rules: [
             {

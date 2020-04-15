@@ -20,4 +20,5 @@ export default interface ILauncher {
     gamesPossibleLocations?: IGameLocation[];
     games?: IGamesCollection;
     exeLocation?: string;
+    icon: string;
 }

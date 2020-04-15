@@ -1,5 +1,9 @@
 import ILauncher from "../interfaces/Launcher.interface";
-
+import uplayIcon from "../assets/launchers/uplay.png";
+import originIcon from "../assets/launchers/origin.png";
+import epicIcon from "../assets/launchers/epic.png";
+import steamIcon from "../assets/launchers/steam.png";
+import battlenetIcon from "../assets/launchers/battlenet.png";
 
 /**
  * BATTLENET
@@ -10,7 +14,8 @@ const BattleNet: ILauncher = {
     exePossibleLocations: [
         "$drive\\Program Files (x86)\\Battle.net",
         "$drive\\Programmes\\Battle.net"
-    ]
+    ],
+    icon: battlenetIcon
 }
 
 /**
@@ -30,7 +35,8 @@ const Origin: ILauncher = {
         {
             "path": "$drive\\Programmes\\Origin Games"
         }
-    ]
+    ],
+    icon: originIcon
 }
 
 /**
@@ -50,7 +56,8 @@ const Uplay: ILauncher = {
         {
             "path": "$drive\\Programmes\\Ubisoft\\Ubisoft Game Launcher\\games"
         }
-    ]
+    ],
+    icon: uplayIcon
 }
 
 const EpicGameLauncher: ILauncher = {
@@ -67,7 +74,8 @@ const EpicGameLauncher: ILauncher = {
         {
             "path": "$drive\\Programmes\\Epic Games"
         }
-    ]
+    ],
+    icon: epicIcon
 }
 
 // export const Library: ILauncher = {

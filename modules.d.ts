@@ -1,5 +1,4 @@
 declare module 'steam-shortcut-editor';
-
 declare module "*.png" {
     const value: any;
     export default value;

@@ -6,6 +6,7 @@ import colors from "colors";
 import path from "path";
 import exeBlackList from "./library/ExeBlackList";
 
+
 /**
  * Provide utilities for game manipulations
  */
@@ -117,6 +118,8 @@ export default class GameHelper {
                             this.gameData.binaries = [this.gameData.binaries[0]];
                             this.gameData.binarySet = true;
                             log(colors.green("Found the executable of " + colors.cyan(this.gameData.name) + " at ") + this.gameData.binaries[0]);
+
+
                             this.scanner.launchersManager.setBinaryForGame(this.gameData);
                         }
                     }
@@ -141,7 +144,12 @@ export default class GameHelper {
                       Here, we will listen for an active process to have the same name than a binarie found in the game files
                       add the game the the listener, things happend in "Scanner.ts"
                     */
-                    log(`Watching ${colors.cyan(String(this.gameData.binaries.length))} executables for the game ${colors.cyan(this.gameData.name)}`);
+                    log(`Found ${colors.cyan(String(this.gameData.binaries.length))} possible executable(s) for the game ${colors.cyan(this.gameData.name)}`);
+                    // notifier.notify({
+                    //     title: "Game found",
+                    //     message: `We have found ${this.gameData.binaries.length} files that can be the game executable, please select one`
+                    // })
+
                     return resolve();
             }
 
