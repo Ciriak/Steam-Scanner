@@ -6,7 +6,7 @@ import { logError, log, logWarn } from "./utils/helper.utils";
 import launchers from "./library/LaunchersList";
 import Config from "./Config";
 import ILauncher, { IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
-
+import colors from "colors";
 // ===== Pattern for the config file =======
 // For the gamesProperties :
 // %pattern% :getPath method of Electron => https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
@@ -60,8 +60,13 @@ export class LaunchersManager {
             const checkList: Promise<IInstallationState>[] = [];
             // list installed LauncherS
             log("Checking installed Launchers...");
-            for (const launcherName in this.config.launchers) {
+
+            console.log(this.config.launchers.length);
+
+            for (const launcherName in launchers) {
+
                 if (launchers.hasOwnProperty(launcherName)) {
+
                     const launcherConfig = { ...this.config.launchers[launcherName], ...launchers[launcherName] }; // use the config copy of the launcher
                     const launcher = new Launcher(launcherConfig, this, this.scanner);
                     // check installation except for "library"
@@ -150,8 +155,54 @@ export class LaunchersManager {
             this.config.launchers[gameData.launcher] = launcher;
             this.config.launchers = { ...this.config.launchers };
 
+            log(`${colors.cyan(gameData.name)} executable has been set as : ${colors.green(gameData.binaries[0])}`)
+
             resolve();
         });
+    }
+
+    /**
+     * Hide and ignore this game in the future
+     * @param game
+     */
+    public ignoreGame(gameData: IGame) {
+
+        if (!this.config.launchers[gameData.launcher]) {
+            logWarn(`Cannot continue, launcher ${gameData.launcher} not found !`);
+            return;
+        }
+        const launcher = this.config.launchers[gameData.launcher];
+
+        if (launcher.games && launcher.games[gameData.name]) {
+            // set the ignore propertie
+            launcher.games[gameData.name].hidden = true
+            // commit the changes
+            this.config.launchers[gameData.launcher] = launcher;
+            this.config.launchers = { ...this.config.launchers };
+            log(`${colors.cyan(gameData.name)} has been added to the ignore list`)
+        }
+    }
+
+    /**
+     * Hide and ignore this game in the future
+     * @param game
+     */
+    public resetGame(gameData: IGame) {
+
+        if (!this.config.launchers[gameData.launcher]) {
+            logWarn(`Cannot continue, launcher ${gameData.launcher} not found !`);
+            return;
+        }
+        const launcher = this.config.launchers[gameData.launcher];
+
+        if (launcher.games && launcher.games[gameData.name]) {
+            // remove the game from the launcher list
+            delete launcher.games[gameData.name]
+            // commit the changes
+            this.config.launchers[gameData.launcher] = launcher;
+            this.config.launchers = { ...this.config.launchers };
+            log(`${colors.cyan(gameData.name)} infos have been cleaned`)
+        }
     }
 
     /**

@@ -54,12 +54,10 @@ export default class GameHelper {
             log(`Searching the executable of a possible game named ${colors.cyan(this.gameData.name)}...`);
 
 
-            // Check the config to see if the game and his binary are alreary known
-            // if yes, skip it
+            // Check if the game binary has been set already
+            // or if the game should be skipped
             if (
-
-                this.gameData.binaries &&
-                this.gameData.binaries.length === 1
+                this.gameData.binarySet || this.gameData.hidden
             ) {
                 // skip the game
                 return resolve(binariesPathList);

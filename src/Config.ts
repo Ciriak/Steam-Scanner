@@ -6,7 +6,7 @@ import { app } from "electron";
 import { log, logWarn, logError } from "./utils/helper.utils";
 const appName = "steam-scanner";
 import launchers from "./library/LaunchersList";
-import ILauncher from "./interfaces/Launcher.interface";
+import SteamScanner from "./app";
 
 /**
  * Class that manage the config
@@ -16,7 +16,7 @@ export default class Config {
     private _launchOnStartup: boolean = defaultConfig.launchOnStartup;
     private _steamDirectory: string = defaultConfig.steamDirectory;
     private _launchers: typeof launchers = defaultConfig.launchers;
-
+    private scanner: SteamScanner;
     configPath = path.join(app.getPath("appData"), appName);
     configFilePath = path.join(this.configPath, "config.json")
 
@@ -56,7 +56,8 @@ export default class Config {
         this.writeConfig();
     }
 
-    constructor() {
+    constructor(scanner: SteamScanner) {
+        this.scanner = scanner;
         this.load();
     }
 
@@ -93,6 +94,11 @@ export default class Config {
         }
         try {
             writeJsonSync(this.configFilePath, configToWrite);
+            // reload the system tray
+            if (this.scanner.trayManager) {
+                this.scanner.trayManager.setTray();
+            }
+
         } catch (error) {
             logError(error);
             logError("Unable to write the config !");

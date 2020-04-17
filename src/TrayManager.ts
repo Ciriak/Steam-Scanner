@@ -2,7 +2,8 @@ import { app, Menu, Tray, MenuItem } from "electron";
 import trayIconData from "./assets/scanner.ico";
 import defaultGameIconData from "./assets/unknown-game.png";
 import defaultExeIcon from "./assets/exe.png";
-
+import ignoreGameIcon from "./assets/ignore.png"
+import resetIcon from "./assets/reset.png";
 
 const trayIcon = trayIconData;
 const defaultGameIcon = defaultGameIconData;
@@ -25,6 +26,9 @@ export default class Traymanager {
 
     }
 
+    /**
+     * Refresh the tray instance with updated data
+     */
     public setTray() {
 
 
@@ -94,11 +98,16 @@ export default class Traymanager {
             if (launcher.games.hasOwnProperty(gameName)) {
                 let gameMenu: MenuItem;
                 const game = launcher.games[gameName];
+                if (game.hidden) {  // ignore hidden game
+                    continue;
+                }
                 // if the game is already known and ready to use
                 if (game.binarySet) {
                     gameMenu = new MenuItem({
                         label: gameName,
-                        icon: path.join(app.getAppPath(), defaultGameIcon)
+                        icon: path.join(app.getAppPath(), defaultGameIcon),
+                        sublabel: "In your Steam library",
+                        submenu: this.generateGameOptionsMenu(game)
                     })
                 }
                 // if we don't know the game exe yet
@@ -136,10 +145,19 @@ export default class Traymanager {
 
     private generateGameExeList(game: IGame): Menu {
 
-        const menuItems: MenuItem[] = [];
+        const menuItems: MenuItem[] = [
+            new MenuItem({
+                icon: path.join(app.getAppPath(), ignoreGameIcon),
+                label: "Ignore this game",
+                click: () => {
+                    this.scanner.launchersManager.ignoreGame(game)
+                }
+            }),
+            new MenuItem({
+                type: "separator"
+            })
+        ];
         for (const binary of game.binaries) {
-
-
 
             menuItems.push(new MenuItem({
                 label: path.basename(binary),
@@ -153,5 +171,18 @@ export default class Traymanager {
 
         return Menu.buildFromTemplate(menuItems);
 
+    }
+
+    private generateGameOptionsMenu(game: IGame): Menu {
+        const menuItems: MenuItem[] = [
+            new MenuItem({
+                icon: path.join(app.getAppPath(), resetIcon),
+                label: "Reset the game infos",
+                click: () => {
+                    this.scanner.launchersManager.resetGame(game);
+                }
+            })
+        ];
+        return Menu.buildFromTemplate(menuItems);
     }
 }

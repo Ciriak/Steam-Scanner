@@ -10,7 +10,7 @@ export default class SteamScanner {
     launchersManager: LaunchersManager;
     notificationsManager: NotificationsManager;
     constructor() {
-        this.config = new Config();
+        this.config = new Config(this);
         this.steam = new Steam(this);
         this.launchersManager = new LaunchersManager(this);
         this.trayManager = new Traymanager(this);

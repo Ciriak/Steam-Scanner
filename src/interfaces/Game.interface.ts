@@ -39,4 +39,9 @@ interface IGame {
    * True if the binary has been manually set by the user, the scanner won't override it
    */
   userSet?: boolean;
+
+  /**
+   * If true, the game won't appear
+   */
+  hidden?: boolean;
 }

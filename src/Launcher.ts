@@ -185,8 +185,14 @@ export class Launcher implements ILauncher {
         return new Promise(async (resolve) => {
             for (const gameName in this.games) {
                 // only search if binary is not set yet
-                if (this.games.hasOwnProperty(gameName) && !this.games[gameName].binarySet) {
+                if (this.games.hasOwnProperty(gameName)) {
+                    const gameData = this.games[gameName];
+                    // stop if we should ignore the game
+                    if (gameData.binarySet || gameData.hidden) {
+                        continue;
+                    }
                     const gameInstance = new GameHelper(this.games[gameName], this.scanner);
+
                     this.games[gameName].binaries = await gameInstance.getBinaries();
                     await gameInstance.findGameExecutable();
                 }
