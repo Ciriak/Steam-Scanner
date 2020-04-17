@@ -1,6 +1,6 @@
 import { BrowserWindow, app, screen, ipcMain } from "electron";
 import SteamScanner from "./app";
-import { INotificationOptions } from "./interfaces/Notification.interface";
+import { INotificationOptions, NotificationEvents } from "./interfaces/Notification.interface";
 import path from "path";
 const notificationSize = {
     width: 400,
@@ -8,7 +8,7 @@ const notificationSize = {
     margin: 10
 };
 
-const notificationDelay = 5000;
+const notificationDelay = 8000;
 
 /**
  * Manage the notifications
@@ -35,21 +35,28 @@ export default class NotificationsManager {
                 skipTaskbar: true,
                 show: false,
                 hasShadow: false,
+                webPreferences: {
+                    nodeIntegration: true
+                }
             });
-            this.browserWindow.loadURL(path.join(app.getAppPath(), "views/notifications/index.html"));
-        })
+            this.browserWindow.webContents.openDevTools({
+                mode: "detach"
+            });
+            console.log(path.join(app.getAppPath(), "views/notification/index.html"))
+            this.browserWindow.loadURL(path.join(app.getAppPath(), "notification.html"));
+        });
 
 
-        setTimeout(() => {
-            this.notification({
-                message: "hello"
-            })
-        }, 1500)
+
+        ipcMain.on(NotificationEvents.CLOSE_NOTIFICATION, () => {
+            this.close();
+        });
     }
     notification(options: INotificationOptions) {
-
         // send the options to the notification window
-        ipcMain.emit("setNotification", options);
+        this.browserWindow?.webContents.send(NotificationEvents.SET_NOTIFICATION, options)
+
+
 
         // show the window
         this.browserWindow?.show();
@@ -61,13 +68,16 @@ export default class NotificationsManager {
 
         // set a timeout
         this.hideTimeout = setTimeout(() => {
-            this.hide();
+            this.close();
         }, notificationDelay);
 
 
     }
 
-    hide() {
+    close() {
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+        }
         this.browserWindow?.hide();
     }
 }

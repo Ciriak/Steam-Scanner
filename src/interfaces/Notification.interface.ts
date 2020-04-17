@@ -3,3 +3,8 @@ export interface INotificationOptions {
     message: string,
     icon?: string
 }
+
+export enum NotificationEvents {
+    SET_NOTIFICATION = "setNotification",
+    CLOSE_NOTIFICATION = "closeNotification"
+}
