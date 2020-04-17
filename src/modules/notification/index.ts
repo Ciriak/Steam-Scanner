@@ -21,9 +21,19 @@ ipcRenderer.on(NotificationEvents.SET_NOTIFICATION, (event, options: INotificati
 });
 
 declare let window: any;
+
 /**
  * Notify the main process to close the window
  */
 window.closeNotification = () => {
     ipcRenderer.send(NotificationEvents.CLOSE_NOTIFICATION);
+}
+
+window.onload = () => {
+    const content = document.getElementById("notification-content");
+    if (content) {
+        content.addEventListener("click", () => {
+            ipcRenderer.send(NotificationEvents.CLICK_NOTIFICATION);
+        })
+    }
 }

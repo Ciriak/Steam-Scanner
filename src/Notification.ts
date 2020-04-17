@@ -17,6 +17,7 @@ export default class NotificationsManager {
     private browserWindow?: BrowserWindow;
     private scanner: SteamScanner;
     private hideTimeout?: NodeJS.Timeout;
+    private activeNotification?: INotificationOptions;
 
     constructor(scanner: SteamScanner) {
         this.scanner = scanner;
@@ -39,20 +40,41 @@ export default class NotificationsManager {
                     nodeIntegration: true
                 }
             });
-            this.browserWindow.webContents.openDevTools({
-                mode: "detach"
-            });
-            console.log(path.join(app.getAppPath(), "views/notification/index.html"))
+            // this.browserWindow.webContents.openDevTools({
+            //     mode: "detach"
+            // });
             this.browserWindow.loadURL(path.join(app.getAppPath(), "notification.html"));
         });
 
 
+        // setTimeout(() => {
+        //     this.notification({
+        //         message: "ddd",
+        //         title: "dddd",
+        //         shouldOpenMenu: true
+
+        //     })
+        // }, 1500)
 
         ipcMain.on(NotificationEvents.CLOSE_NOTIFICATION, () => {
             this.close();
         });
+
+        ipcMain.on(NotificationEvents.CLICK_NOTIFICATION, () => {
+
+            if (this.activeNotification && this.activeNotification.shouldOpenMenu) {
+                this.scanner.trayManager.tray?.popUpContextMenu();
+                this.close();
+            }
+
+        });
+
+
     }
     notification(options: INotificationOptions) {
+
+        this.activeNotification = options;
+
         // send the options to the notification window
         this.browserWindow?.webContents.send(NotificationEvents.SET_NOTIFICATION, options)
 
@@ -75,6 +97,7 @@ export default class NotificationsManager {
     }
 
     close() {
+        delete this.activeNotification;
         if (this.hideTimeout) {
             clearTimeout(this.hideTimeout);
         }

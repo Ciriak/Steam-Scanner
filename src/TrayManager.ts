@@ -27,6 +27,7 @@ export default class Traymanager {
 
     public setTray() {
 
+
         // stop if the tray is not ready yet
         if (!this.tray) {
             return;
