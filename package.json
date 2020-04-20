@@ -74,7 +74,6 @@
     },
     "win": {
       "target": "nsis",
-      "publish": "github",
       "icon": "src/assets/scanner.ico"
     },
     "nsis": {
@@ -91,7 +90,6 @@
       "publish": false,
       "category": "Development",
       "artifactName": "${productName}-${version}.${ext}"
-    },
-    "publish": "never"
+    }
   }
 }
