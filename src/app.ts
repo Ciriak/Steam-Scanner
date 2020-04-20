@@ -5,7 +5,9 @@ import { app } from "electron";
 import { LaunchersManager } from "./LaunchersManager";
 import NotificationsManager from "./Notification";
 import Updater from "./Updater";
-import { logError } from "./utils/helper.utils";
+import { logError, log } from "./utils/helper.utils";
+import isDev from "electron-is-dev";
+import autoLaunch from "auto-launch";
 
 const autoScanInterval = 5 * 60 * 1000;
 
@@ -24,6 +26,7 @@ export default class SteamScanner {
         this.notificationsManager = new NotificationsManager(this);
         this.updater = new Updater(this);
         this.handleSingleInstance();
+        this.handleAutoLaunch();
         this.scan();
         setTimeout(() => {
             this.scan();
@@ -51,8 +54,26 @@ export default class SteamScanner {
             logError("Another active instance of steam scanner has been detected, quitting...");
             app.quit();
         }
+    }
 
+    /**
+     * If this is a packed app, set it to launch on system start
+     */
+    private async handleAutoLaunch() {
+        // stop if dev mode
+        if (isDev) {
+            return;
+        }
 
+        const autoLauncher = new autoLaunch({
+            name: 'Steam Scanner'
+        });
+
+        const enabled = autoLauncher.isEnabled;
+        if (!enabled) {
+            log("Auto launch entry added !")
+            autoLauncher.enable();
+        }
     }
 }
 

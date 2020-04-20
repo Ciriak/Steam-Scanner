@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/Ciriak/Steam-Scanner#readme",
   "devDependencies": {
+    "@types/auto-launch": "^5.0.1",
     "@types/fs-extra": "^8.1.0",
     "@types/lodash": "^4.14.150",
     "@types/node-notifier": "^6.0.1",
@@ -53,7 +54,9 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
+    "auto-launch": "^5.0.5",
     "colors": "^1.4.0",
+    "electron-is-dev": "^1.2.0",
     "electron-log": "^4.1.1",
     "electron-updater": "^4.2.5",
     "fs-extra": "^9.0.0",
