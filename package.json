@@ -5,8 +5,9 @@
   "main": "scanner.js",
   "scripts": {
     "dev": "webpack --mode=development --watch",
-    "build": "webpack --mode=production && electron-builder",
+    "build": "npm run clean && webpack --mode=production && electron-builder",
     "electron": "electron dist/scanner.js",
+    "clean": "node ./tools/clean.js",
     "doc": "typedoc --out ./doc",
     "release": "node ./tools/release.js"
   },

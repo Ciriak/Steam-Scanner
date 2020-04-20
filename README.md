@@ -64,6 +64,10 @@ Run the compiled app from the **`dist`** folder
 
 Build the app and a setup executable
 
+### `npm run clean`
+
+Clean the **`dist`** and **`build`** folders
+
 
 ## Launch parameters (WIP)
 
