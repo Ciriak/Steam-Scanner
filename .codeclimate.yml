@@ -1,0 +1,4 @@
+- exclude_patterns: 
+  - "webpack.config.json"
+  - "./tools/**/*"
+  - "./.vscode/**/*"
