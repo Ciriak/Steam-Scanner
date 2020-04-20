@@ -9,7 +9,7 @@
     "electron": "electron dist/scanner.js",
     "clean": "node ./tools/clean.js",
     "doc": "typedoc --out ./doc",
-    "release": "node ./tools/release.js"
+    "release-gh": "node ./tools/release.js"
   },
   "repository": {
     "type": "git",
