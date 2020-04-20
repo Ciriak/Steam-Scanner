@@ -67,6 +67,9 @@ export default class NotificationsManager {
                 this.scanner.trayManager.tray?.popUpContextMenu();
                 this.close();
             }
+            else {
+                this.close();
+            }
 
         });
 
