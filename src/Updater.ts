@@ -40,7 +40,7 @@ export default class Updater {
      * Quit the process and install the update
      */
     public installUpdate() {
-        autoUpdater.quitAndInstall();
+        autoUpdater.quitAndInstall(true, true);
     }
 
     private registerEvents() {
