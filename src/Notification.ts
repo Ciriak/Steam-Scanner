@@ -36,6 +36,7 @@ export default class NotificationsManager {
                 skipTaskbar: true,
                 show: false,
                 hasShadow: false,
+                resizable: false,
                 webPreferences: {
                     nodeIntegration: true
                 }
