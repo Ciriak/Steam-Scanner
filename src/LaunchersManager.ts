@@ -64,8 +64,6 @@ export class LaunchersManager {
             // list installed LauncherS
             log("Checking installed Launchers...");
 
-            console.log(this.config.launchers.length);
-
             for (const launcherName in launchers) {
 
                 if (launchers.hasOwnProperty(launcherName)) {

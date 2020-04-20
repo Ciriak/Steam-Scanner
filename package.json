@@ -2,12 +2,13 @@
   "name": "steam-scanner",
   "version": "0.1.1",
   "description": "Automatically add your game to you Steam library",
-  "main": "app.js",
+  "main": "scanner.js",
   "scripts": {
     "dev": "webpack --mode=development --watch",
-    "build": "webpack --mode=production",
+    "build": "webpack --mode=production && electron-builder",
     "electron": "electron dist/scanner.js",
-    "doc": "typedoc --out ./doc"
+    "doc": "typedoc --out ./doc",
+    "release": "node ./tools/release.js"
   },
   "repository": {
     "type": "git",
@@ -31,7 +32,8 @@
     "sass": "^1.26.3",
     "sass-loader": "^8.0.2",
     "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.11",
+    "electron": "^8.2.1"
   },
   "dependencies": {
     "@types/fs-extra": "^8.1.0",
@@ -42,7 +44,6 @@
     "colors": "^1.4.0",
     "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.5.2",
-    "electron": "^8.2.1",
     "electron-log": "^4.1.1",
     "file-loader": "^6.0.0",
     "fs-extra": "^9.0.0",
@@ -54,5 +55,34 @@
     "ts-loader": "^6.2.2",
     "typescript": "^3.8.3",
     "url-loader": "^4.1.0"
+  },
+  "build": {
+    "appId": "com.ciriak.steamscanner",
+    "productName": "steam-scanner",
+    "npmRebuild": true,
+    "directories": {
+      "app": "dist",
+      "output": "build"
+    },
+    "win": {
+      "target": "nsis",
+      "publish": "github",
+      "icon": "src/assets/scanner.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "artifactName": "${productName}-setup-${version}.${ext}",
+      "installerIcon": "src/assets/scanner.ico",
+      "differentialPackage": false,
+      "deleteAppDataOnUninstall": true
+    },
+    "asar": {
+      "smartUnpack": false
+    },
+    "appImage": {
+      "publish": false,
+      "category": "Development",
+      "artifactName": "${productName}-${version}.${ext}"
+    }
   }
 }

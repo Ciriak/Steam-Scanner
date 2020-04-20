@@ -1,117 +1,157 @@
 const path = require('path');
-const CopyPlugin = require('copy-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const fs = require('fs-extra');
+// const CopyPlugin = require('copy-webpack-plugin');
+// const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-module.exports = [
+module.exports = (env, argv) => {
 
-    /**
-     * Main process
-     */
+    if (argv.mode === 'production') {
+        console.log("[Production mode]");
+        generatePackageJson();
+    }
 
-    {
-        entry: './src/app.ts',
-        target: "electron-main",
-        devtool: "inline-source-map",
-        node: {
-            __filename: true,
-            __dirname: true
-        },
-        module: {
-            rules: [
-                {
-                    test: /\.tsx?$/,
-                    use: 'ts-loader',
-                    exclude: /node_modules/,
-                },
-                {
-                    test: /\.node$/,
-                    loader: 'native-ext-loader',
-                    //use: 'node-addon-loader',
-                    //use: 'node-loader',
-                    options: {
-                        //rewritePath: path.resolve(__dirname, 'dist')
+    return [
+
+        /**
+         * Main process
+         */
+
+        {
+            entry: './src/app.ts',
+            target: "electron-main",
+            devtool: "inline-source-map",
+            node: {
+                __filename: true,
+                __dirname: true
+            },
+            module: {
+                rules: [
+                    {
+                        test: /\.tsx?$/,
+                        use: 'ts-loader',
+                        exclude: /node_modules/,
                     },
-                },
-                {
-                    test: /\.(png|svg|jpg|gif|ico)$/,
-                    use: [
-                        'file-loader'
-                    ]
-                },
+                    {
+                        test: /\.node$/,
+                        loader: 'native-ext-loader',
+                        //use: 'node-addon-loader',
+                        //use: 'node-loader',
+                        options: {
+                            //rewritePath: path.resolve(__dirname, 'dist')
+                        },
+                    },
+                    {
+                        test: /\.(png|svg|jpg|gif|ico)$/,
+                        use: [
+                            'file-loader'
+                        ]
+                    },
 
 
+                ],
+            },
+            resolve: {
+                extensions: ['.tsx', '.ts', '.js'],
+            },
+            output: {
+                filename: 'scanner.js',
+                path: path.resolve(__dirname, 'dist'),
+            },
+            plugins: [
+                // new CleanWebpackPlugin(),
             ],
         },
-        resolve: {
-            extensions: ['.tsx', '.ts', '.js'],
-        },
-        output: {
-            filename: 'scanner.js',
-            path: path.resolve(__dirname, 'dist'),
-        },
-        plugins: [
-            // new CleanWebpackPlugin(),
-        ],
-    },
-    /**
-     * Notification
-     */
-    {
-        entry: './src/modules/notification/index.ts',
-        target: "electron-renderer",
-        devtool: "inline-source-map",
-        module: {
-            rules: [
-                {
-                    test: /\.tsx?$/,
-                    use: 'ts-loader',
-                    exclude: /node_modules/,
-                },
+        /**
+         * Notification
+         */
+        {
+            entry: './src/modules/notification/index.ts',
+            target: "electron-renderer",
+            devtool: "inline-source-map",
+            module: {
+                rules: [
+                    {
+                        test: /\.tsx?$/,
+                        use: 'ts-loader',
+                        exclude: /node_modules/,
+                    },
 
-                {
-                    test: /\.html/,
-                    use: [{
-                        loader: 'file-loader'
-                    }]
-                },
-                {
-                    test: /\.(png|svg|jpg|gif|ico)$/,
-                    use: [
-                        'file-loader'
-                    ]
-                },
-                {
-                    test: /\.(woff|woff2|eot|ttf|otf)$/,
-                    use: [
-                        'file-loader',
-                    ],
-                },
-                {
-                    test: /\.s[ac]ss$/i,
-                    use: [
-                        // Creates `style` nodes from JS strings
-                        'style-loader',
-                        // Translates CSS into CommonJS
-                        'css-loader',
-                        // Compiles Sass to CSS
-                        'sass-loader',
-                    ],
-                },
+                    {
+                        test: /\.html/,
+                        use: [{
+                            loader: 'file-loader'
+                        }]
+                    },
+                    {
+                        test: /\.(png|svg|jpg|gif|ico)$/,
+                        use: [
+                            'file-loader'
+                        ]
+                    },
+                    {
+                        test: /\.(woff|woff2|eot|ttf|otf)$/,
+                        use: [
+                            'file-loader',
+                        ],
+                    },
+                    {
+                        test: /\.s[ac]ss$/i,
+                        use: [
+                            // Creates `style` nodes from JS strings
+                            'style-loader',
+                            // Translates CSS into CommonJS
+                            'css-loader',
+                            // Compiles Sass to CSS
+                            'sass-loader',
+                        ],
+                    },
+                ],
+            },
+            resolve: {
+                extensions: ['.tsx', '.ts', '.js'],
+            },
+            output: {
+                filename: 'notification.js',
+                path: path.resolve(__dirname, 'dist'),
+            },
+            plugins: [
+                // new CleanWebpackPlugin(),
+                new HtmlWebpackPlugin({
+                    filename: 'notification.html',
+                    title: 'Notification',
+                    template: './src/modules/notification/index.ejs',
+                }),
             ],
-        },
-        resolve: {
-            extensions: ['.tsx', '.ts', '.js'],
-        },
-        output: {
-            filename: 'notification.js',
-            path: path.resolve(__dirname, 'dist'),
-        },
-        plugins: [
-            // new CleanWebpackPlugin(),
-            new HtmlWebpackPlugin({
-                filename: 'notification.html',
-                title: 'Notification',
-                template: './src/modules/notification/index.ejs',
-            }),
-        ],
-    }];
+        }];
+}
+
+/**
+ * Generate a clean package JSOn for the build process
+ */
+function generatePackageJson() {
+    console.log("Generating production package json...");
+    try {
+        const data = fs.readJsonSync("./package.json");
+        const pjson = {
+            name: data.name,
+            productName: data.productName,
+            version: data.version,
+            author: data.author,
+            repository: data.repository,
+            description: data.description,
+            main: data.main,
+            engine: data.engine,
+            dependencies: data.dependencies,
+            homepage: data.homepage,
+            bugs: data.bugs,
+            keywords: data.keywords
+        }
+        fs.ensureDirSync("dist");
+        fs.writeJsonSync("dist/package.json", pjson);
+        console.log("...done");
+    } catch (error) {
+        console.error(error.message);
+        process.exit();
+    }
+
+}
