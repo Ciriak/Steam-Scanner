@@ -167,6 +167,8 @@ export class LaunchersManager {
                 message: gameData.name + " has been added to your Steam library",
             });
 
+            this.scanner.steam.updateShortcuts();
+
 
 
             resolve();

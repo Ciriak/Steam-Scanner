@@ -18,7 +18,10 @@ export default class GameHelper {
         this.scanner = scanner;
         this.config = scanner.config;
         this.gameData = this.checkGameData(gameData);
+
     }
+
+
 
     /**
      * Check if some data already saved exist
@@ -175,5 +178,7 @@ export default class GameHelper {
         }
         return parsedList;
     }
+
+
 
 }

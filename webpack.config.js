@@ -39,6 +39,7 @@ module.exports = [
                     ]
                 },
 
+
             ],
         },
         resolve: {
@@ -78,6 +79,12 @@ module.exports = [
                     use: [
                         'file-loader'
                     ]
+                },
+                {
+                    test: /\.(woff|woff2|eot|ttf|otf)$/,
+                    use: [
+                        'file-loader',
+                    ],
                 },
                 {
                     test: /\.s[ac]ss$/i,

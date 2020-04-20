@@ -7,6 +7,7 @@ import { logWarn, logError, log } from "./utils/helper.utils";
 import { unlinkSync } from "fs-extra";
 import { Launcher } from "./Launcher";
 import SteamScanner from "./app";
+import colors from "colors";
 
 export class SteamUser {
     public userId: string;
@@ -48,11 +49,12 @@ export class SteamUser {
      *
      * @param clean if true : clear all shortcuts added by steam scanner
      */
-    public async updateShortcuts(isFirstInstance: boolean, clean: boolean) {
+    public async updateShortcuts(isFirstInstance?: boolean, clean?: boolean) {
 
         return new Promise((resolve, reject) => {
 
             // if clean mode, only remove the short
+            // TODO only remove items added by SS
             if (clean) {
                 logWarn("Removing the shortcut file");
                 try {
@@ -93,7 +95,7 @@ export class SteamUser {
                                 }
 
                                 log(
-                                    "Looking the " + gameName + " in the shortcut file..."
+                                    "Looking the " + colors.cyan(gameName) + " in the shortcut file..."
                                 );
 
                                 // check if the game is already in the steam shortcuts
@@ -114,7 +116,7 @@ export class SteamUser {
                                     }
                                 }
 
-                                //// the game shortcut already exist, skip
+                                // the game shortcut already exist, skip
                                 if (gameCount > 0) {
 
                                     log("Shortcut already exist for " + gameName);
@@ -133,25 +135,27 @@ export class SteamUser {
                                         log(
                                             "Removed " +
                                             unwantedIndexList.length +
-                                            " unwanted shortcuts"
+                                            " unwanted shortcut(s)"
                                         );
                                         updatedShortcuts = true;
                                     }
                                 } else {
                                     // shortcut don't already exist, add it
-                                    // add the new shortcut
                                     shortcutData.shortcuts.push({
-                                        exe: game.binaries[0],
-                                        tags: [launcher.name],
-                                        appName: game.name,
-                                        StartDir: game.folderPath
+                                        Exe: game.binaries[0],
+                                        tags: [launcher.name, "Steam Scanner"],
+                                        AppName: game.name,
+                                        StartDir: game.folderPath,
+                                        steamScanner: true,
+                                        AllowDesktopConfig: true,
+                                        AlowOverlay: true,
                                     });
                                     updatedShortcuts = true;
                                     addedShortcuts++;
 
                                     // notify if this is the first instance (and notification are enabled)
                                     if (isFirstInstance) {
-                                        log("Added a shortcut for " + game.name + " => " + game.binaries[0]);
+                                        log("Added a shortcut for " + colors.cyan(game.name) + " => " + game.binaries[0]);
                                     }
                                 }
                             }
@@ -168,9 +172,10 @@ export class SteamUser {
 
                             return resolve();
                         }
+                        log(colors.cyan(String(addedShortcuts)) + " shortcut(s) added, Steam restart required !");
                     });
 
-                    log(addedShortcuts + " shortcut(s) added, Steam restart required !");
+
                 }
 
                 return resolve();

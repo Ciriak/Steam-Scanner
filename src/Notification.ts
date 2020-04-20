@@ -31,8 +31,7 @@ export default class NotificationsManager {
                 x: screenSize.width - notificationSize.width - notificationSize.margin,
                 y: screenSize.height - notificationSize.height - notificationSize.margin,
                 alwaysOnTop: true,
-                transparent: false,
-                backgroundColor: "#212121",
+                transparent: true,
                 skipTaskbar: true,
                 show: false,
                 hasShadow: false,
@@ -41,9 +40,9 @@ export default class NotificationsManager {
                     nodeIntegration: true
                 }
             });
-            // this.browserWindow.webContents.openDevTools({
-            //     mode: "detach"
-            // });
+            this.browserWindow.webContents.openDevTools({
+                mode: "detach"
+            });
             this.browserWindow.loadURL(path.join(app.getAppPath(), "notification.html"));
         });
 
@@ -80,6 +79,11 @@ export default class NotificationsManager {
         // stop if notifications not enabled
         if (!this.scanner.config.enableNotifications) {
             return;
+        }
+
+        // set notification duration if not specified
+        if (!options.duration) {
+            options.duration = notificationDelay;
         }
 
         this.activeNotification = options;

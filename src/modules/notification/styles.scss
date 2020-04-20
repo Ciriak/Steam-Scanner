@@ -3,19 +3,30 @@
     -webkit-user-drag: none;
 }
 
+@font-face {
+    font-family: "Motiva Sans";
+    src: url("../../assets//fonts//MotivaSans-Regular.ttf");
+   }
+
 body{
     margin: 0;
     padding: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    color: rgb(241, 241, 241);
-    background-color: #212121;
+    font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
+    color: #c6d4df;
+    
     overflow: hidden;
 
     .content{
+        position: absolute;
+        right: -400px;
+        background-color: #141414;
+        border-radius: 10px;
+        overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
+        transition-duration: 0.5s;
         .close-btn{
             position: absolute;
             top: 0;
@@ -40,18 +51,27 @@ body{
            
         }
         .notification-text{
+            height: 100%;
             padding: 10px;
             flex: 1;
             h1{
                 margin: 0;
-                font-size: 20vh;
-                margin-bottom: 10px;
+                font-size: 18vh;
+                margin-bottom: 5px;
+                font-family: "Motiva Sans", Sans-serif;
+                font-weight: bold;
             }
             p{
                 color: #ccc;
-                font-size: 14vh;
+                font-size: 12vh;
                 margin: 0;
+                font-family: "Motiva Sans", Sans-serif;
+                font-weight: 300;
             }
+        }
+
+        &.active{
+            right: 0px;
         }
     }
 }

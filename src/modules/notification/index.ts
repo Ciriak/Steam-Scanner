@@ -4,6 +4,8 @@ import { ipcRenderer } from "electron"
 import { NotificationEvents, INotificationOptions } from "../../interfaces/Notification.interface";
 import defaultIcon from "../../assets/scanner.png";
 
+let hideTimeout: any;
+const transitionDuration = 500;
 
 ipcRenderer.on(NotificationEvents.SET_NOTIFICATION, (event, options: INotificationOptions) => {
     // tslint:disable-next-line: no-console
@@ -17,6 +19,18 @@ ipcRenderer.on(NotificationEvents.SET_NOTIFICATION, (event, options: INotificati
 
     const imageContent: HTMLImageElement = document.getElementById("notification-icon") as HTMLImageElement;
     imageContent.src = options.icon || defaultIcon;
+
+    const contentElement: HTMLElement = document.getElementById("notification-content") as HTMLElement;
+    contentElement.classList.add("active");
+
+    if (hideTimeout) {
+        clearTimeout(hideTimeout);
+    }
+
+    hideTimeout = setTimeout(() => {
+        contentElement.classList.remove("active");
+        clearTimeout(hideTimeout);
+    }, (options.duration || 10000) - transitionDuration);
 
 });
 

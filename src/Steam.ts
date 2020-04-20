@@ -53,7 +53,7 @@ export default class Steam {
                 }
             }
 
-            log(colors.cyan(userDirectories.length + " account(s) found"));
+            log(colors.cyan(userDirectories.length + " Steam account(s) found"));
 
             for (const userDir of userDirectories) {
                 const userId = path.basename(userDir);
@@ -99,4 +99,16 @@ export default class Steam {
 
     }
 
+    public async updateShortcuts(): Promise<void> {
+        return new Promise(async (resolve) => {
+            let first = true;
+            for (const user of this.steamUsers) {
+                await user.updateShortcuts(first);
+                if (first) {
+                    first = false;
+                }
+            }
+            return resolve();
+        })
+    }
 }

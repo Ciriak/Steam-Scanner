@@ -138,7 +138,6 @@ export default class Traymanager {
                     gameMenu = new MenuItem({
                         label: gameName,
                         icon: path.join(app.getAppPath(), defaultGameIcon),
-                        sublabel: "In your Steam library",
                         submenu: this.generateGameOptionsMenu(game)
                     })
                 }
