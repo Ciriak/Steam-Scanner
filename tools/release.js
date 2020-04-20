@@ -113,7 +113,7 @@ async function deleteRelease(id) {
 function getToken() {
     console.log("Retrieving Github Token...");
     try {
-        return fs.readFileSync(path.resolve(".gh_token"), { encoding: "utf-8" });
+        return fs.readFileSync(path.resolve(".gh-token"), { encoding: "utf-8" });
     } catch (error) {
         console.error(error.message);
         process.exit(1);
@@ -131,7 +131,7 @@ function copyBuilds() {
         const files = [
             "latest.yml",
             `${pjson.build.productName}-setup-${pjson.version}.exe`,
-            `${pjson.build.productName}-setup-${pjson.version}.exe.blockmap`
+            `${pjson.build.productName}-setup-${pjson.version}.exe`
         ];
 
         files.forEach(file => {
