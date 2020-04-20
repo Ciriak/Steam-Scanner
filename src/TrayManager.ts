@@ -1,176 +1,264 @@
-import * as path from "path";
-const colors = require("colors");
+import { app, Menu, Tray, MenuItem } from "electron";
+import trayIconData from "./assets/tray/tray.png";
+import defaultGameIconData from "./assets/tray/unknown-game.png";
+import defaultExeIcon from "./assets/tray/exe.png";
+import ignoreGameIcon from "./assets/tray/ignore.png"
+import resetIcon from "./assets/tray/reset.png";
+import scanIcon from "./assets/tray/reset.png";
+import quitIcon from "./assets/tray/quit.png";
 
-const { Menu, Tray, dialog } = require("electron");
-import { Config } from "./Config";
-import { LaunchersManager } from "./LaunchersManager";
-import { Scanner } from "./Scanner";
-import { ScannerHelpers } from "./ScannerHelpers";
+const trayIcon = trayIconData;
+const defaultGameIcon = defaultGameIconData;
+import path from "path"
+import SteamScanner from "./app";
+import Config from "./Config";
+import ILauncher from "./interfaces/Launcher.interface";
+import launchers from "./library/LaunchersList";
+export default class Traymanager {
+    tray?: Tray;
+    scanner: SteamScanner;
+    config: Config;
+    gameNeedExeSelectList: IGame[] = [];
+    constructor(scanner: SteamScanner) {
+        this.scanner = scanner;
+        this.config = scanner.config;
+        app.on("ready", () => {
+            this.tray = new Tray(path.join(app.getAppPath(), trayIcon));
+            this.setTray();
+        });
 
-const helper = new ScannerHelpers();
-export class TrayManager {
-  private tray: any;
-  private scanner: Scanner;
-
-  constructor(scanner: Scanner) {
-    this.scanner = scanner;
-    this.tray = new Tray(path.join(__dirname, "assets/tray.png"));
-    this.update(scanner);
-  }
-
-  /**
-   * Refresh the tray icon and menu
-   * @param scanner Scanner instance
-   */
-  public update(scanner: Scanner) {
-    const launchOnStartup: any = this.scanner.config.launchOnStartup;
-    const enableNotifications: any = this.scanner.config.enableNotifications;
-
-    const scanTemplate = this.generateScanButton(scanner);
-    const gamesListTemplate = this.generateGamesListTemplate();
-    // todo remove that
-    const trayRef = this;
-    const contextMenu = [
-      { label: this.scanner.versionLabel, type: "normal", enabled: false },
-      { type: "separator" },
-      scanTemplate,
-      {
-        label: "Display notifications",
-        type: "checkbox",
-        checked: enableNotifications,
-        click() {
-          this.config.updateNotifications();
-        }
-      },
-      {
-        label: "Launch on startup",
-        type: "checkbox",
-        checked: launchOnStartup,
-        click() {
-          trayRef.scanner.config.updateLaunchOnStartup();
-        }
-      },
-      {
-        label: "Quit",
-        type: "normal",
-        click() {
-          helper.quitApp();
-        }
-      }
-    ];
-
-    // fuze the games list with the menu
-    for (const game of gamesListTemplate) {
-      contextMenu.splice(2, 0, game);
     }
 
-    this.tray.setToolTip(this.scanner.versionLabel);
-    this.tray.setContextMenu(Menu.buildFromTemplate(contextMenu));
-  }
+    /**
+     * Refresh the tray instance with updated data
+     */
+    public setTray() {
 
-  /**
-   * Generate the game menu list with their options depending of their status
-   * @param scanner Scanner instance
-   */
-  private generateGamesListTemplate() {
-    const accessor = this;
-    const gamesListTemplate: any = [];
-    const launchersManager = this.scanner.launchersManager;
-    let gamesCount = 0;
 
-    const launchersList = this.scanner.config.launchers;
-    for (const launcherName in launchersList) {
-      if (launchersList.hasOwnProperty(launcherName)) {
-        const launcher = launchersList[launcherName];
-        // aLl games of a drm
-        for (const gameName in launcher.games) {
-          if (launcher.games.hasOwnProperty(gameName)) {
-            const game = launcher.games[gameName];
-            let gameMenuLabel;
-            let startPath;
-            const icon = path.join(__dirname, "assets", "unknown-game.png");
+        // stop if the tray is not ready yet
+        if (!this.tray) {
+            return;
+        }
 
-            if (game.binaries && game.binaries[0]) {
-              gameMenuLabel = "Change the executable of ";
-              startPath = game.binaries[0];
-            } else {
-              gameMenuLabel = "Select the executable of ";
-              startPath = game.folderPath;
+        const header = new MenuItem({
+            label: "Steam Scanner v" + this.config.version,
+            enabled: false,
+        });
+        const separator = new MenuItem({
+            type: "separator"
+        });
+
+        const notificationsOption = new MenuItem({
+            type: "checkbox",
+            label: "Display notifications",
+            checked: this.config.enableNotifications,
+            click: () => {
+                this.config.enableNotifications = !this.config.enableNotifications
             }
-            gamesCount++;
-            // if (game.icon && game.icon["16"]) {
-            //   icon = game.icon["16"];
-            // }
-            gamesListTemplate.push({
-              icon: icon,
-              label: gameName,
-              submenu: [
-                {
-                  label: gameMenuLabel + gameName,
-                  click() {
-                    // the user select a executable for the game
-                    dialog.showOpenDialog(
-                      {
-                        title: gameMenuLabel + gameName,
-                        defaultPath: startPath
-                      },
-                      function(filePath) {
-                        if (!filePath || !filePath[0]) {
-                          return;
-                        }
-                        launchersManager.setBinaryForGame(
-                          launcherName,
-                          gameName,
-                          filePath[0],
-                          true
-                        );
-                        accessor.scanner.updateShortcuts();
-                        helper.log(
-                          colors.cyan("Binary updated for " + gameName + " =>")
-                        );
-                        helper.log(filePath[0]);
-                        accessor.update(accessor.scanner);
-                      }
-                    );
-                  } /* <== lol */
+        });
+
+        const scanButton = new MenuItem({
+            label: "Scan games",
+            icon: path.join(app.getAppPath(), scanIcon),
+            click: () => {
+                this.scanner.scan();
+            }
+        });
+
+        const quitButton = new MenuItem({
+            label: "Quit",
+            icon: path.join(app.getAppPath(), quitIcon),
+            click: () => {
+                app.quit();
+            }
+        });
+
+        const launchersMenuItems: MenuItem[] = this.generateLaunchersList();
+
+
+        const contextMenu = Menu.buildFromTemplate([
+            header,
+            separator,
+            scanButton,
+            notificationsOption,
+            separator
+        ].concat(launchersMenuItems));
+
+        // quit button
+        contextMenu.append(separator);
+        contextMenu.append(quitButton);
+
+
+        this.tray.setContextMenu(contextMenu);
+
+        // show context menu even on normal click
+        this.tray.on("click", () => {
+            this.tray?.popUpContextMenu();
+        })
+
+        // title and tooltip
+        this.tray.setTitle("Steam Scanner");
+        this.tray.setToolTip("Steam Scanner");
+
+        // show a notification if some game need an exe selection
+
+        // only one game
+        if (this.gameNeedExeSelectList.length === 1) {
+            this.scanner.notificationsManager.notification({
+                title: "Manual exe selection needed",
+                message: `We found various possible executables for ${this.gameNeedExeSelectList[0].name}, click on this notification to select the correct one`,
+                shouldOpenMenu: true
+            })
+        }
+        // more than one game
+        if (this.gameNeedExeSelectList.length > 1) {
+            this.scanner.notificationsManager.notification({
+                title: "Manual exe selection needed",
+                message: `We found various possible executables for ${this.gameNeedExeSelectList.length} games, click on this notification to select the correct one`,
+                shouldOpenMenu: true
+            })
+        }
+
+    }
+
+    private generateLaunchersList(): MenuItem[] {
+        this.gameNeedExeSelectList = [];    // reset the count
+        let menuItems: MenuItem[] = [];
+        for (const launcherName in this.config.launchers) {
+            if (this.config.launchers.hasOwnProperty(launcherName)) {
+                const launcher = this.config.launchers[launcherName];
+                const launcherMenuItems = this.generateGamesListForLauncher(launcher);
+                menuItems = menuItems.concat(launcherMenuItems);
+            }
+
+        }
+
+
+        // [
+        //     new MenuItem({
+
+        //         label: "Apex Legends",
+        //         sublabel: "Select the correct executable",
+        //         icon: path.join(app.getAppPath(), defaultGameIcon)
+        //         , submenu: gameMenu
+        //     }),
+        // ]
+        return menuItems;
+    }
+
+    private generateGamesListForLauncher(launcher: ILauncher): MenuItem[] {
+        const menu: MenuItem[] = [
+            new MenuItem({
+                label: launcher.name,
+                icon: path.join(app.getAppPath(), launchers[launcher.name].icon),
+                enabled: false
+            }),
+            new MenuItem({
+                type: "separator"
+            })
+        ];
+
+        const gamesMenu: MenuItem[] = [];
+
+        for (const gameName in launcher.games) {
+            if (launcher.games.hasOwnProperty(gameName)) {
+                let gameMenu: MenuItem;
+                const game = launcher.games[gameName];
+                if (game.hidden) {  // ignore hidden game
+                    continue;
                 }
-              ]
-            });
-          }
+                // if the game is already known and ready to use
+                if (game.binarySet) {
+                    gameMenu = new MenuItem({
+                        label: gameName,
+                        icon: path.join(app.getAppPath(), defaultGameIcon),
+                        submenu: this.generateGameOptionsMenu(game)
+                    })
+                }
+                // if we don't know the game exe yet
+                else {
+                    this.gameNeedExeSelectList.push(game);  // increment the game exe needed count
+                    gameMenu = new MenuItem({
+                        label: gameName,
+                        icon: path.join(app.getAppPath(), defaultGameIcon),
+                        sublabel: "Select the game .exe",
+                        submenu: this.generateGameExeList(game)
+                    })
+                }
+
+                gamesMenu.push(gameMenu);
+            }
+
         }
-      }
-    }
 
-    // add a separator if games were found
-    if (gamesCount > 0) {
-      gamesListTemplate.unshift({ type: "separator" });
-    }
-
-    return gamesListTemplate;
-  }
-
-  /**
-   * @returns the proper scan button / label depending of the scanner status
-   * @param scanner scanner instance
-   */
-  private generateScanButton(scanner: Scanner) {
-    let scanTemplate;
-    // generate the "scanning"
-    if (scanner.isScanning === true) {
-      scanTemplate = {
-        label: "Scanning games ...",
-        type: "normal",
-        enabled: false
-      };
-    } else {
-      scanTemplate = {
-        label: "Scan games now",
-        type: "normal",
-        click() {
-          scanner.scan();
+        // add a label if no game found for this launcher
+        if (gamesMenu.length === 0) {
+            gamesMenu.push(new MenuItem({
+                label: "No game found",
+                enabled: false,
+                role: "about"
+            }))
         }
-      };
+
+        // add the final separator
+        gamesMenu.push(new MenuItem({
+            type: "separator"
+        }));
+
+
+        return menu.concat(gamesMenu);
     }
-    return scanTemplate;
-  }
+
+    private generateGameExeList(game: IGame): Menu {
+
+        const menuItems: MenuItem[] = [
+            new MenuItem({
+                icon: path.join(app.getAppPath(), ignoreGameIcon),
+                label: "Ignore this game",
+                click: () => {
+                    this.scanner.launchersManager.ignoreGame(game)
+                }
+            }),
+            new MenuItem({
+                type: "separator"
+            })
+        ];
+        for (const binary of game.binaries) {
+
+            menuItems.push(new MenuItem({
+                label: path.basename(binary),
+                icon: path.join(app.getAppPath(), defaultExeIcon),
+                click: () => {
+                    game.binaries = [binary];
+                    this.scanner.launchersManager.setBinaryForGame(game, true)
+                }
+            }));
+        }
+
+        return Menu.buildFromTemplate(menuItems);
+
+    }
+
+    private generateGameOptionsMenu(game: IGame): Menu {
+        const menuItems: MenuItem[] = [
+            new MenuItem({
+                type: "checkbox",
+                enabled: false,
+                checked: true,
+                label: "In your Steam library",
+
+            }),
+            new MenuItem({
+                type: "separator"
+            }),
+            new MenuItem({
+                icon: path.join(app.getAppPath(), resetIcon),
+                label: "Reset the game infos",
+                click: () => {
+                    this.scanner.launchersManager.resetGame(game);
+                }
+            })
+        ];
+        return Menu.buildFromTemplate(menuItems);
+    }
 }

@@ -1,0 +1,6 @@
+# Almost complete rework of the codebase
+
+- Support for the new Steam library
+- Auto scan just didn't worked, from now, if we have a doubt, we will ask the user to select the correct exe file
+- New notification system
+- Complete Tray redesign

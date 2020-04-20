@@ -1,19 +1,19 @@
 {
   "name": "steam-scanner",
-  "version": "1.0.1",
+  "version": "0.1.1",
   "description": "Automatically add your game to you Steam library",
-  "main": "app.js",
+  "main": "scanner.js",
   "scripts": {
-    "postinstall": "./node_modules/.bin/electron-rebuild && gulp install",
-    "gulp": "gulp",
-    "dev": "gulp dev",
-    "build": "gulp build",
-    "clean": "gulp clean",
-    "doc": "typedoc --out ./doc"
+    "dev": "webpack --mode=development --watch",
+    "build": "npm run clean && webpack --mode=production && electron-builder",
+    "electron": "electron dist/scanner.js",
+    "clean": "node ./tools/clean.js",
+    "doc": "typedoc --out ./doc",
+    "release": "node ./tools/release.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nj-neer/Steam-Scanner.git"
+    "url": "git+https://github.com/Ciriak/Steam-Scanner.git"
   },
   "keywords": [
     "steam",
@@ -26,36 +26,70 @@
   "author": "Cyriaque DELAUNAY",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/nj-neer/Steam-Scanner/issues"
+    "url": "https://github.com/Ciriak/Steam-Scanner/issues"
   },
-  "homepage": "https://github.com/nj-neer/Steam-Scanner#readme",
+  "homepage": "https://github.com/Ciriak/Steam-Scanner#readme",
   "devDependencies": {
-    "del": "^3.0.0",
-    "electron": "^4.0.1",
-    "electron-packager": "^13.0.1",
-    "gulp": "^4.0.0",
-    "gulp-shell": "^0.6.5",
-    "gulp-sourcemaps": "^2.6.4",
-    "gulp-terser": "^1.1.7",
-    "gulp-typescript": "^5.0.0",
-    "tslint": "^5.12.1",
-    "typedoc": "^0.14.1",
-    "typescript": "^3.2.2"
+    "@types/auto-launch": "^5.0.1",
+    "@types/fs-extra": "^8.1.0",
+    "@types/lodash": "^4.14.150",
+    "@types/node-notifier": "^6.0.1",
+    "@types/recursive-readdir": "^2.2.0",
+    "axios": "^0.19.2",
+    "clean-webpack-plugin": "^3.0.0",
+    "copy-webpack-plugin": "^5.1.1",
+    "css-loader": "^3.5.2",
+    "electron": "^8.2.3",
+    "file-loader": "^6.0.0",
+    "html-webpack-plugin": "^4.2.0",
+    "mime": "^2.4.4",
+    "native-ext-loader": "^2.3.0",
+    "sass": "^1.26.3",
+    "sass-loader": "^8.0.2",
+    "style-loader": "^1.1.4",
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.8.3",
+    "url-loader": "^4.1.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   },
   "dependencies": {
     "auto-launch": "^5.0.5",
-    "cli-spinner": "^0.2.8",
-    "colors": "^1.3.3",
-    "current-processes": "^0.2.1",
-    "drivelist": "^6.4.6",
-    "electron-is-dev": "^1.0.1",
-    "electron-log": "^2.2.17",
-    "electron-updater": "^4.0.6",
-    "fs-extra": "^7.0.1",
-    "lodash": "^4.17.11",
-    "node-notifier": "^5.3.0",
-    "object-path": "^0.11.4",
+    "colors": "^1.4.0",
+    "electron-is-dev": "^1.2.0",
+    "electron-log": "^4.1.1",
+    "electron-updater": "^4.2.5",
+    "fs-extra": "^9.0.0",
     "recursive-readdir": "^2.2.2",
     "steam-shortcut-editor": "^3.1.1"
+  },
+  "build": {
+    "appId": "com.ciriak.steamscanner",
+    "productName": "steam-scanner",
+    "npmRebuild": true,
+    "directories": {
+      "app": "dist",
+      "output": "build"
+    },
+    "win": {
+      "target": "nsis",
+      "publish": "github",
+      "icon": "src/assets/scanner.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "artifactName": "${productName}-setup-${version}.${ext}",
+      "installerIcon": "src/assets/scanner.ico",
+      "differentialPackage": false,
+      "deleteAppDataOnUninstall": true
+    },
+    "asar": {
+      "smartUnpack": false
+    },
+    "appImage": {
+      "publish": false,
+      "category": "Development",
+      "artifactName": "${productName}-${version}.${ext}"
+    }
   }
 }

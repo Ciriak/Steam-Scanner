@@ -1,351 +1,318 @@
-declare const Promise: any;
-import * as colors from "colors";
+import colors from "colors";
 import * as fs from "fs-extra";
-import * as _ from "lodash";
 import * as path from "path";
-import * as recursive from "recursive-readdir";
-import { Config } from "./Config";
+import Config from "./Config";
 import { LaunchersManager } from "./LaunchersManager";
-import { ScannerHelpers } from "./ScannerHelpers";
+import ILauncher, { IGameLocation, IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
+import { addDrivesToPossibleLocations, log, logWarn, logError } from "./utils/helper.utils";
+import GameHelper from "./GameHelper";
+import SteamScanner from "./app";
 
-const helper: ScannerHelpers = new ScannerHelpers();
-let config: Config;
-export class Launcher {
-  public name: string;
-  public binaryName?: string;
-  public binaryLocation?: string;
+export class Launcher implements ILauncher {
+    private config: Config;
+    public name: string;
+    private nameLabel: string;
+    public exeName: string = "";
+    public exeLocation?: string = "";
 
-  /**
-   * List of games found for this launcher
-   */
-  public games: { [name: string]: IGame };
-  private manager: LaunchersManager;
-  private binaryPossibleLocations: string[] = [];
-  private gamesPossibleLocations: any[] = [];
+    /**
+     * List of games found for this launcher
+     */
+    public games: IGamesCollection = {};
+    private manager: LaunchersManager;
+    private scanner: SteamScanner;
+    public exePossibleLocations: string[] = [];
+    public gamesPossibleLocations?: IGameLocation[] = [];
+    public icon: string;
 
-  constructor(launcherItem: Launcher, manager: LaunchersManager) {
-    this.manager = manager;
-    this.name = launcherItem.name;
-    this.binaryPossibleLocations = launcherItem.binaryPossibleLocations;
-    this.gamesPossibleLocations = launcherItem.gamesPossibleLocations;
-    this.binaryName = launcherItem.binaryName;
-    config = this.manager.config;
-  }
-
-  public async checkInstallation() {
-    let launcherConfig: any = config.launchers[this.name];
-    // if the binary location is not defined, try to find it
-    if (!launcherConfig || !launcherConfig.binaryLocation) {
-      const parsedPossibleLocations: string[] = await helper.addDrivesToPossibleLocations(
-        this.binaryPossibleLocations
-      );
-
-      // first we locate the drm directory
-      for (let loc of parsedPossibleLocations) {
-        loc = path.normalize(path.join(loc, this.binaryName));
-        // try to list all the users in the userdata folder of steam
-        if (fs.existsSync(loc)) {
-          this.binaryLocation = loc;
-
-          try {
-            launcherConfig = this;
-            config.save();
-          } catch (error) {
-            helper.error(error);
-          }
-          break;
-        }
-      }
-    } else {
-      this.binaryLocation = launcherConfig.binaryLocation;
+    constructor(launcherItem: ILauncher, manager: LaunchersManager, scanner: SteamScanner) {
+        this.scanner = scanner;
+        this.config = scanner.config;
+        this.manager = manager;
+        this.name = launcherItem.name;
+        this.nameLabel = colors.cyan("[" + this.name + "]");
+        this.exePossibleLocations = launcherItem.exePossibleLocations;
+        this.gamesPossibleLocations = launcherItem.gamesPossibleLocations;
+        this.games = launcherItem.games || {};
+        this.exeName = launcherItem.exeName;
+        this.icon = launcherItem.icon;
     }
 
-    if (this.binaryLocation) {
-      helper.log(
-        colors.green(this.name + " located at " + this.binaryLocation)
-      );
-    } else {
-      helper.log(colors.yellow(this.name + " not found"));
-    }
-    return new Promise((resolve) => {
-      resolve();
-    });
-  }
+    /**
+     * Check if the launcher is installed on the machine
+     * @return Promise with a boolean
+     */
+    public async checkInstallation(): Promise<IInstallationState> {
+        log("Checking installation for " + this.name);
+        return new Promise(async (resolve) => {
+            let launcherConfig = this.config.launchers[this.name];
+            // if the binary location is not defined, try to find it
+            if (launcherConfig && launcherConfig.exeName && launcherConfig.exeLocation) {
+                this.exeLocation = launcherConfig.exeLocation;
 
-  /**
-   * Try to find games from the launcher propertie (ex: "Origin Games")
-   * @param isLibrary if this is the librarty launcher, only add the folders that are referenced in the games library
-   */
-  public async getGamesDirectories(isLibrary: boolean) {
-    // skip if no game directory registered for this launcher (ex: Battle.net)
-    if (!this.gamesPossibleLocations) {
-      return new Promise((resolve) => {
-        resolve();
-      });
-    }
-
-    helper.log("[" + this.name + "] Looking for games directories...");
-
-    for (const possibleLocation of this.gamesPossibleLocations) {
-      possibleLocation.path = await helper.addDrivesToPossibleLocations([
-        possibleLocation.path
-      ]);
-      for (const locationPath of possibleLocation.path) {
-        // Directory of games
-        try {
-          const items = fs.readdirSync(locationPath);
-
-          for (const dir of items) {
-            const currentGameDir = path.normalize(path.join(locationPath, dir));
-
-            // skip if this is not a folder
-            if (!fs.lstatSync(currentGameDir).isDirectory()) {
-              continue;
+                return resolve({
+                    launcher: this,
+                    installed: true
+                });
             }
 
-            // TODO probably need to better check here if the folder is indeed a game folder
-            const parsedGameDir = path.parse(currentGameDir);
-            // if this is the library launcher, only keep the folders that are referenced in the games library
-            if (isLibrary) {
-              this.checkLibraryGamesFolders(parsedGameDir);
+            const parsedPossibleLocations: string[] = await addDrivesToPossibleLocations(
+                this.exePossibleLocations
+            );
+
+            // first we locate the drm directory
+            for (let loc of parsedPossibleLocations) {
+                loc = path.normalize(path.join(loc, this.exeName));
+                // try to list all the users in the userdata folder of steam
+                if (fs.existsSync(loc)) {
+                    this.exeLocation = loc;
+
+                    try {
+                        launcherConfig = this;
+                        // this.config.save();
+                    } catch (error) {
+                        logError(error);
+                    }
+                    break;
+                }
+            }
+
+            if (this.exeLocation) {
+                log(`${colors.green(this.name + " found")} in ${this.exeLocation}`);
+                return resolve({
+                    launcher: this,
+                    installed: true
+                });
+
             } else {
-              // check if the game already exist in the list
-              this.games[parsedGameDir.name] = {
-                name: parsedGameDir.name,
-                folderPath: currentGameDir,
-                binaries: [],
-                launcher: this.name
-              };
+                logWarn(this.name + " not found");
+                return resolve({
+                    launcher: this,
+                    installed: false
+                });
             }
-          }
 
-          // skip if the possible game folder don't exist
-        } catch (e) {
-          continue;
-        }
-      }
+
+        });
     }
 
-    helper.log(
-      "[" +
-        this.name +
-        "] " +
-        colors.cyan("" + this.games.length + "") +
-        " game folder(s) found..."
-    );
+    /**
+     * Scan and return the games list of this launcher
+     */
+    public async getGames(): Promise<IGamesCollection> {
+        return new Promise(async (resolve) => {
+            await this.loadGamesDirectories();
+            await this.loadGamesBinaries();
+            return resolve(this.games);
+        })
 
-    return new Promise((resolve) => {
-      resolve();
-    });
-  }
+    }
 
-  /**
-   * Try to find the games main executables
-   * if there is more than one executable, add them to the watch list for the scanner
-   */
-  public async getGamesBinaries() {
-    for (const gameName in this.games) {
-      if (this.games.hasOwnProperty(gameName)) {
-        const gameItem = this.games[gameName];
-        const binariesPathList = [];
+    /**
+     * Load the game directories into the class
+     */
+    private async loadGamesDirectories(): Promise<any> {
 
-        const gameConfig: any = config.get(
-          "launcher." + this.name + ".games." + gameItem.name
-        );
+        let count: number = 0;
 
-        // Check the config to see if the game and his binary are alkeary known
-        // if yes, skip it
-        if (
-          gameConfig &&
-          gameConfig.binaries &&
-          gameConfig.binaries.length === 1
-        ) {
-          continue;
-        }
+        return new Promise(async (resolve) => {
 
-        const filesList = await recursive(gameItem.folderPath);
-        // Check all the files in the found directory
-        // if one of the file is contained in the game.binaries properties, it is set as the game default binary
-        filesListLoop: for (const fileName of filesList) {
-          for (const binary of this.games[gameItem.name].binaries) {
-            if (fileName.search(binary) > -1) {
-              binariesPathList.push(fileName);
-              helper.log(colors.green(fileName + " FOUND !"));
-              break filesListLoop; // stop everything, we found what we want, a known game executable
+            // skip if no game directory registered for this launcher (ex: Battle.net)
+            if (!this.gamesPossibleLocations) {
+                return resolve();
             }
-          }
 
-          // reference all executables
-          if (fileName.search(".exe") > -1) {
-            binariesPathList.push(fileName);
-          }
-        }
+            log(`${this.nameLabel} Looking for game directories...`);
 
-        gameItem.binaries = binariesPathList;
+            for (const possibleLocation of this.gamesPossibleLocations) {
+                const locationPathList = await addDrivesToPossibleLocations([
+                    possibleLocation.path
+                ]);
 
-        if (gameItem.binaries.length === 0) {
-          helper.warn(
-            colors.yellow(
-              "No executable found in the folder for " +
-                colors.cyan(gameItem.name) +
-                " it has been skipped"
-            )
-          );
-          continue;
-        }
 
-        // if there is only one binaries, set it by default
-        if (gameItem.binaries.length === 1) {
-          try {
-            config.launchers[this.name].games[gameItem.name] = gameItem;
-            config.save();
-          } catch (error) {
-            helper.error(error);
-          }
 
-          await this.manager.setBinaryForGame(
-            this.name,
-            gameItem.name,
-            binariesPathList[0],
-            false
-          );
-          this.games[gameItem.name].binaries = [binariesPathList[0]];
-          this.games[gameItem.name].userSet = true;
+                for (const locationPath of locationPathList) {
+                    // Directory of games
+                    try {
+                        const items = fs.readdirSync(locationPath);
 
-          continue;
-        }
+                        for (const dir of items) {
+                            const currentGameDir = path.normalize(path.join(locationPath, dir));
 
-        // if there is more than one binary, add the list the the listenners
-        if (gameItem.binaries.length > 1) {
-          config.launchers[this.name].games[gameItem.name] = this.games[
-            gameItem.name
-          ];
+                            // skip if this is not a folder
+                            if (!fs.lstatSync(currentGameDir).isDirectory()) {
+                                continue;
+                            }
 
-          /*
-            Here, we will listen for an active process to have the same name than a binarie found in the game files
-            add the game the the listener, things happend in "Scanner.ts"
-          */
-          helper.log(
-            "Watching " +
-              colors.cyan("" + gameItem.binaries.length + "") +
-              " executable files for the game " +
-              colors.cyan(gameItem.name)
-          );
-        }
-      }
-    }
-    return new Promise((resolve) => {
-      resolve();
-    });
-  }
+                            // TODO probably need to better check here if the folder is indeed a game folder
+                            const parsedGameDir = path.parse(currentGameDir);
 
-  /**
-   * Check if a given folder correspond to a game referenced in the games library
-   * If true, try to find the associated launcher
-   * @param checkedDirName name of the current checked directory
-   */
-  private checkLibraryGamesFolders(parsedDirectory: path.ParsedPath) {
-    const checkIndex = _.indexOf(this.manager.scanner.libraryGames, {
-      folderPath: parsedDirectory.name
-    });
-    for (
-      let libraryGameIndex = 0;
-      libraryGameIndex < this.manager.scanner.libraryGames.length;
-      libraryGameIndex++
-    ) {
-      const libraryGame = this.manager.scanner.libraryGames[libraryGameIndex];
-      if (
-        libraryGame.folderName === parsedDirectory.name ||
-        libraryGame.name === parsedDirectory.name
-      ) {
-        helper.log(
-          "The game " +
-            colors.cyan(libraryGame.name) +
-            " has been detected, validating ..."
-        );
-        // The game is referenced in the library, add it to his launcher if it exist on this system
-        if (this.checkIfgameCanBeAdded(parsedDirectory, libraryGame)) {
-          libraryGame.folderPath = path.join(
-            parsedDirectory.dir,
-            parsedDirectory.base
-          );
-          libraryGame.binaries = [
-            path.join(libraryGame.folderPath, libraryGame.binaries[0])
-          ];
-          // all check passed, add it to the corresponding launcher
-          try {
-            config.launchers[libraryGame.launcher].games[
-              libraryGame.name
-            ] = libraryGame;
-          } catch (error) {
-            helper.error(error);
-            return false;
-          }
-        }
+                            // check if the game already exist in the list
+                            // skip if this is the case
+                            if (this.games[parsedGameDir.name]) {
+                                continue;
+                            }
 
-        break;
-      }
-    }
-  }
+                            this.games[parsedGameDir.name] = {
+                                name: parsedGameDir.name,
+                                folderPath: currentGameDir,
+                                binaries: [],
+                                launcher: this.name
+                            };
 
-  private checkIfgameCanBeAdded(
-    parsedDirectory: path.ParsedPath,
-    libraryGame: IGame
-  ): boolean {
-    // TODO Allow games without launchers
+                            count++;
 
-    // refused because the game dont have a known launcher
-    if (!libraryGame.launcher) {
-      helper.warn(
-        "Unable to add " +
-          colors.cyan(libraryGame.name) +
-          " : no launcher referenced ..."
-      );
-      return false;
-    }
-    // refused because the game launcher doesn't exist in this system
-    if (!config.launchers[libraryGame.launcher]) {
-      helper.warn(
-        "Unable to add " +
-          colors.cyan(libraryGame.name) +
-          " : " +
-          libraryGame.launcher +
-          " is not detected on this system ..."
-      );
-      return false;
+                        }
+
+                        // skip if the possible game folder don't exist
+                    } catch (e) {
+                        continue;
+                    }
+                }
+            }
+
+            log(`${this.nameLabel} ${count} possible game folder(s) found`);
+
+            resolve();
+        });
     }
 
-    // refused because the game doesn't have a valid binary target
-    if (!libraryGame.binaries || !libraryGame.binaries[0]) {
-      helper.warn(
-        "Unable to add " +
-          colors.cyan(libraryGame.name) +
-          " : " +
-          " No binary referenced ..."
-      );
-      return false;
+
+    /**
+     * Load the game binaries into the game instances
+     */
+    private async loadGamesBinaries(): Promise<any> {
+        return new Promise(async (resolve) => {
+            for (const gameName in this.games) {
+                // only search if binary is not set yet
+                if (this.games.hasOwnProperty(gameName)) {
+                    const gameData = this.games[gameName];
+                    // stop if we should ignore the game
+                    if (gameData.binarySet || gameData.hidden) {
+                        continue;
+                    }
+                    const gameInstance = new GameHelper(this.games[gameName], this.scanner);
+
+                    this.games[gameName].binaries = await gameInstance.getBinaries();
+                    await gameInstance.findGameExecutable();
+                }
+            }
+
+            resolve();
+
+        });
+
     }
 
-    // check if the binary referenced in the library exist in this system
-    const checkBinaryPath = path.join(
-      parsedDirectory.dir,
-      parsedDirectory.base,
-      libraryGame.binaries[0]
-    );
 
-    // refused because the binary referenced doesn't exist in the target folder
-    if (!fs.existsSync(checkBinaryPath)) {
-      helper.warn(
-        "Unable to add " +
-          colors.cyan(libraryGame.name) +
-          " : " +
-          " The file " +
-          checkBinaryPath +
-          " doesn't exist ..."
-      );
-      return false;
-    }
 
-    return true;
-  }
+    /**
+     * Check if a given folder correspond to a game referenced in the games library
+     * If true, try to find the associated launcher
+     * @param checkedDirName name of the current checked directory
+     */
+    // private checkLibraryGamesFolders(parsedDirectory: path.ParsedPath) {
+    //     const checkIndex = _.indexOf(this.manager.scanner.libraryGames, {
+    //         folderPath: parsedDirectory.name
+    //     });
+    //     for (
+    //         let libraryGameIndex = 0;
+    //         libraryGameIndex < this.manager.scanner.libraryGames.length;
+    //         libraryGameIndex++
+    //     ) {
+    //         const libraryGame = this.manager.scanner.libraryGames[libraryGameIndex];
+    //         if (
+    //             libraryGame.folderName === parsedDirectory.name ||
+    //             libraryGame.name === parsedDirectory.name
+    //         ) {
+    //             log(
+    //                 "The game " +
+    //                 colors.cyan(libraryGame.name) +
+    //                 " has been detected, validating ..."
+    //             );
+    //             // The game is referenced in the library, add it to his launcher if it exist on this system
+    //             if (this.checkIfgameCanBeAdded(parsedDirectory, libraryGame)) {
+    //                 libraryGame.folderPath = path.join(
+    //                     parsedDirectory.dir,
+    //                     parsedDirectory.base
+    //                 );
+    //                 libraryGame.binaries = [
+    //                     path.join(libraryGame.folderPath, libraryGame.binaries[0])
+    //                 ];
+    //                 // all check passed, add it to the corresponding launcher
+    //                 try {
+    //                     config.launchers[libraryGame.launcher].games[
+    //                         libraryGame.name
+    //                     ] = libraryGame;
+    //                 } catch (error) {
+    //                     logError(error);
+    //                     return false;
+    //                 }
+    //             }
+
+    //             break;
+    //         }
+    //     }
+    // }
+
+    // private checkIfgameCanBeAdded(
+    //     parsedDirectory: path.ParsedPath,
+    //     libraryGame: IGame
+    // ): boolean {
+    //     // TODO Allow games without launchers
+
+    //     // refused because the game dont have a known launcher
+    //     if (!libraryGame.launcher) {
+    //         logWarn(
+    //             "Unable to add " +
+    //             colors.cyan(libraryGame.name) +
+    //             " : no launcher referenced ..."
+    //         );
+    //         return false;
+    //     }
+    //     // refused because the game launcher doesn't exist in this system
+    //     if (!config.launchers[libraryGame.launcher]) {
+    //         logWarn(
+    //             "Unable to add " +
+    //             colors.cyan(libraryGame.name) +
+    //             " : " +
+    //             libraryGame.launcher +
+    //             " is not detected on this system ..."
+    //         );
+    //         return false;
+    //     }
+
+    //     // refused because the game doesn't have a valid binary target
+    //     if (!libraryGame.binaries || !libraryGame.binaries[0]) {
+    //         logWarn(
+    //             "Unable to add " +
+    //             colors.cyan(libraryGame.name) +
+    //             " : " +
+    //             " No binary referenced ..."
+    //         );
+    //         return false;
+    //     }
+
+    //     // check if the binary referenced in the library exist in this system
+    //     const checkBinaryPath = path.join(
+    //         parsedDirectory.dir,
+    //         parsedDirectory.base,
+    //         libraryGame.binaries[0]
+    //     );
+
+    //     // refused because the binary referenced doesn't exist in the target folder
+    //     if (!fs.existsSync(checkBinaryPath)) {
+    //         logWarn(
+    //             "Unable to add " +
+    //             colors.cyan(libraryGame.name) +
+    //             " : " +
+    //             " The file " +
+    //             checkBinaryPath +
+    //             " doesn't exist ..."
+    //         );
+    //         return false;
+    //     }
+
+    //     return true;
+    // }
 }

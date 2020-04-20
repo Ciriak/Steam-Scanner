@@ -8,13 +8,19 @@
       "name": "Debug Main Process",
       "type": "node",
       "request": "launch",
-      "cwd": "${workspaceRoot}",
-      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
       "windows": {
-        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
+        "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
       },
-      "args": [],
-      "program": "${workspaceRoot}/dist/app.js"
+      "runtimeArgs": [
+        "${workspaceRoot}/dist/scanner.js",
+        // this args for attaching render process
+        "--remote-debugging-port=9222"
+      ],
+      "skipFiles": [
+        "<node_internals>/**/*.js"
+      ]
     }
   ]
 }

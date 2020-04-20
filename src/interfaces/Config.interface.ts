@@ -1,7 +1,8 @@
-interface IConfig {
+import launchers from "../library/LaunchersList";
+
+export default interface IConfig {
   steamDirectory: string;
-  launchers: object;
+  launchers: typeof launchers;
   launchOnStartup: boolean;
   enableNotifications: boolean;
-  minCPUFilter: number;
 }
