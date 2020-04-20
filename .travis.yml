@@ -1,0 +1,16 @@
+matrix:
+  include:
+    - os: windows
+     language: node_js
+     node_js: "latest"
+
+cache:
+  directories:
+    - node_modules
+    - $HOME/.cache/electron
+    - $HOME/.cache/electron-builder
+
+script:
+  - |
+      npm install;
+      npm run build;
