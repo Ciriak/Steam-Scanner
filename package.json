@@ -90,6 +90,7 @@
       "publish": false,
       "category": "Development",
       "artifactName": "${productName}-${version}.${ext}"
-    }
+    },
+    "publish": "never"
   }
 }
