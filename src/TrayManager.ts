@@ -1,9 +1,9 @@
 import { app, Menu, Tray, MenuItem } from "electron";
 import trayIconData from "./assets/scanner.ico";
-import defaultGameIconData from "./assets/unknown-game.png";
-import defaultExeIcon from "./assets/exe.png";
-import ignoreGameIcon from "./assets/ignore.png"
-import resetIcon from "./assets/reset.png";
+import defaultGameIconData from "./assets/tray/unknown-game.png";
+import defaultExeIcon from "./assets/tray/exe.png";
+import ignoreGameIcon from "./assets/tray/ignore.png"
+import resetIcon from "./assets/tray/reset.png";
 
 const trayIcon = trayIconData;
 const defaultGameIcon = defaultGameIconData;
@@ -16,6 +16,7 @@ export default class Traymanager {
     tray?: Tray;
     scanner: SteamScanner;
     config: Config;
+    gameNeedExeSelectList: IGame[] = [];
     constructor(scanner: SteamScanner) {
         this.scanner = scanner;
         this.config = scanner.config;
@@ -53,10 +54,31 @@ export default class Traymanager {
             separator
         ].concat(launchersMenuItems));
 
-        this.tray.setContextMenu(contextMenu)
+        this.tray.setContextMenu(contextMenu);
+
+        // show a notification if some game need an exe selection
+
+        // only one game
+        if (this.gameNeedExeSelectList.length === 1) {
+            this.scanner.notificationsManager.notification({
+                title: "Manual exe selection needed",
+                message: `We found various possible executables for ${this.gameNeedExeSelectList[0].name}, click on this notification to select the correct one`,
+                shouldOpenMenu: true
+            })
+        }
+        // more than one game
+        if (this.gameNeedExeSelectList.length > 1) {
+            this.scanner.notificationsManager.notification({
+                title: "Manual exe selection needed",
+                message: `We found various possible executables for ${this.gameNeedExeSelectList.length} games, click on this notification to select the correct one`,
+                shouldOpenMenu: true
+            })
+        }
+
     }
 
     private generateLaunchersList(): MenuItem[] {
+        this.gameNeedExeSelectList = [];    // reset the count
         let menuItems: MenuItem[] = [];
         for (const launcherName in this.config.launchers) {
             if (this.config.launchers.hasOwnProperty(launcherName)) {
@@ -112,6 +134,7 @@ export default class Traymanager {
                 }
                 // if we don't know the game exe yet
                 else {
+                    this.gameNeedExeSelectList.push(game);  // increment the game exe needed count
                     gameMenu = new MenuItem({
                         label: gameName,
                         icon: path.join(app.getAppPath(), defaultGameIcon),

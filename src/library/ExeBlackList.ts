@@ -10,6 +10,9 @@ const exeBlackList: string[] = [
     "crashmsg.exe",
     "crashhandler.exe",
     "vcredist_x86.exe",
+    "vcredist120.exe",
+    "vcredist120_x64.exe",
+    "vcredist120_x86.exe",
     "DXSETUP.exe",
     "dxsetup.exe"
 ];

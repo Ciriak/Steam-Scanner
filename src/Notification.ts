@@ -8,7 +8,7 @@ const notificationSize = {
     margin: 10
 };
 
-const notificationDelay = 8000;
+const notificationDelay = 10000;
 
 /**
  * Manage the notifications

@@ -7,6 +7,9 @@ import launchers from "./library/LaunchersList";
 import Config from "./Config";
 import ILauncher, { IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
 import colors from "colors";
+import notificatioReset from "./assets/notification/reset.png";
+
+
 // ===== Pattern for the config file =======
 // For the gamesProperties :
 // %pattern% :getPath method of Electron => https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
@@ -155,7 +158,16 @@ export class LaunchersManager {
             this.config.launchers[gameData.launcher] = launcher;
             this.config.launchers = { ...this.config.launchers };
 
-            log(`${colors.cyan(gameData.name)} executable has been set as : ${colors.green(gameData.binaries[0])}`)
+            log(`${colors.cyan(gameData.name)} executable has been set as : ${colors.green(gameData.binaries[0])}`);
+
+            // show notification
+
+            this.scanner.notificationsManager.notification({
+                title: "Game added",
+                message: gameData.name + " has been added to your Steam library",
+            });
+
+
 
             resolve();
         });
@@ -202,7 +214,21 @@ export class LaunchersManager {
             this.config.launchers[gameData.launcher] = launcher;
             this.config.launchers = { ...this.config.launchers };
             log(`${colors.cyan(gameData.name)} infos have been cleaned`)
+
+            this.scanner.notificationsManager.notification({
+                title: "Game info reset",
+                message: gameData.name + " infos have been reset",
+                icon: notificatioReset
+            });
+
+            // relaunch a scan process
+            this.getAllGames().then(() => {
+                this.scanner.trayManager.setTray();
+            })
+
         }
+
+
     }
 
     /**
