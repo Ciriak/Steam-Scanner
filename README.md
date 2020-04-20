@@ -6,10 +6,20 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/la08lmcifr0q6r9q?svg=true)](https://ci.appveyor.com/project/Cyriaqu3/steam-scanner)
 <a href="https://codeclimate.com/github/nj-neer/Steam-Scanner/maintainability"><img src="https://api.codeclimate.com/v1/badges/6e18e92248d930d4d7d5/maintainability" /></a>
 
+</center>
+
+<center>
+
+### Get all you games on Steam ! 
+
+</center>
 
 
-### Get all you games on Steam ! Steam Scanner run as a background process, grab games from others launchers and add them to your Steam library.
+Steam Scanner run as a background process, grab games from others launchers and add them to your Steam library.
+
 It is available from the system tray
+
+<center>
 
 ![](./src/assets/screen-tray.png)
 
