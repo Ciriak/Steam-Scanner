@@ -1,6 +1,7 @@
 import Traymanager from "./TrayManager";
 import Config from "./Config";
 import Steam from "./Steam";
+import { app } from "electron";
 import { LaunchersManager } from "./LaunchersManager";
 import NotificationsManager from "./Notification";
 import Updater from "./Updater";
@@ -21,6 +22,7 @@ export default class SteamScanner {
         this.trayManager = new Traymanager(this);
         this.notificationsManager = new NotificationsManager(this);
         this.updater = new Updater(this);
+        this.handleSingleInstance();
         this.scan();
         setTimeout(() => {
             this.scan();
@@ -35,6 +37,21 @@ export default class SteamScanner {
             this.trayManager.setTray();
         })
     };
+
+    /**
+     * Check if another instance is running
+     *
+     * if so, quit
+     */
+    private handleSingleInstance() {
+        const lock = app.requestSingleInstanceLock();
+        // another instance is running => quit
+        if (!lock) {
+            app.quit();
+        }
+
+
+    }
 }
 
 // tslint:disable-next-line: no-unused-expression
