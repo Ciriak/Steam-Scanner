@@ -1,0 +1,18 @@
+image: Node.js
+
+platform:
+  - x64
+
+cache:
+  - node_modules
+  - '%USERPROFILE%\.electron'
+
+init:
+  - git config --global core.autocrlf input
+
+install:
+  - ps: Install-Product node 8 x64
+  - npm i
+
+build_script:
+  - npm run build
