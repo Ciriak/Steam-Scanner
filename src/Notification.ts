@@ -40,9 +40,9 @@ export default class NotificationsManager {
                     nodeIntegration: true
                 }
             });
-            this.browserWindow.webContents.openDevTools({
-                mode: "detach"
-            });
+            // this.browserWindow.webContents.openDevTools({
+            //     mode: "detach"
+            // });
             this.browserWindow.loadURL(path.join(app.getAppPath(), "notification.html"));
         });
 

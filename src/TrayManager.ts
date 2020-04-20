@@ -1,9 +1,10 @@
 import { app, Menu, Tray, MenuItem } from "electron";
-import trayIconData from "./assets/scanner.ico";
+import trayIconData from "./assets/tray/tray.png";
 import defaultGameIconData from "./assets/tray/unknown-game.png";
 import defaultExeIcon from "./assets/tray/exe.png";
 import ignoreGameIcon from "./assets/tray/ignore.png"
 import resetIcon from "./assets/tray/reset.png";
+import scanIcon from "./assets/tray/reset.png";
 
 const trayIcon = trayIconData;
 const defaultGameIcon = defaultGameIconData;
@@ -39,12 +40,13 @@ export default class Traymanager {
         }
 
         const header = new MenuItem({
-            label: "Steam Scanner v0.1",
+            label: "Steam Scanner",
             enabled: false,
         });
         const separator = new MenuItem({
             type: "separator"
         });
+
         const notificationsOption = new MenuItem({
             type: "checkbox",
             label: "Display notifications",
@@ -54,17 +56,35 @@ export default class Traymanager {
             }
         });
 
+        const scanButton = new MenuItem({
+            label: "Scan games",
+            icon: path.join(app.getAppPath(), scanIcon),
+            click: () => {
+                this.scanner.scan();
+            }
+        });
+
         const launchersMenuItems: MenuItem[] = this.generateLaunchersList();
 
 
         const contextMenu = Menu.buildFromTemplate([
             header,
             separator,
+            scanButton,
             notificationsOption,
             separator
         ].concat(launchersMenuItems));
 
         this.tray.setContextMenu(contextMenu);
+
+        // show context menu even on normal click
+        this.tray.on("click", () => {
+            this.tray?.popUpContextMenu();
+        })
+
+        // title and tooltip
+        this.tray.setTitle("Steam Scanner");
+        this.tray.setToolTip("Steam Scanner");
 
         // show a notification if some game need an exe selection
 
@@ -207,6 +227,16 @@ export default class Traymanager {
 
     private generateGameOptionsMenu(game: IGame): Menu {
         const menuItems: MenuItem[] = [
+            new MenuItem({
+                type: "checkbox",
+                enabled: false,
+                checked: true,
+                label: "In your Steam library",
+
+            }),
+            new MenuItem({
+                type: "separator"
+            }),
             new MenuItem({
                 icon: path.join(app.getAppPath(), resetIcon),
                 label: "Reset the game infos",

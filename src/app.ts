@@ -20,7 +20,7 @@ export default class SteamScanner {
     }
 
 
-    private async scan() {
+    public async scan() {
         await this.steam.checkInstallation();
         await this.launchersManager.detectAllLaunchers();
         await this.launchersManager.getAllGames().then(() => {

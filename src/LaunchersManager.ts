@@ -163,7 +163,7 @@ export class LaunchersManager {
             // show notification
 
             this.scanner.notificationsManager.notification({
-                title: "Game added",
+                title: gameData.name + " added",
                 message: gameData.name + " has been added to your Steam library",
             });
 
