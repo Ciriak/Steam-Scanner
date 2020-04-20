@@ -1,10 +1,9 @@
 
 import { autoUpdater } from "electron-updater";
-import Config from "./Config";
 import SteamScanner from "./app";
-import { logError, log } from "./utils/helper.utils";
+import { logError, log, logWarn } from "./utils/helper.utils";
 import { IUpdaterState } from "./interfaces/Updater.interface";
-import ElectronLog from "electron-log";
+const updateCheckInterval = 10 * 60 * 1000; // 10min
 
 export default class Updater {
     private scanner: SteamScanner;
@@ -16,9 +15,13 @@ export default class Updater {
         this.scanner = scanner;
         autoUpdater.autoDownload = true;
         autoUpdater.autoInstallOnAppQuit = true;
-        autoUpdater.logger = ElectronLog;
         this.registerEvents();
         this.checkForUpdates();
+
+        // auto check every x minutes
+        setInterval(() => {
+            this.checkForUpdates();
+        }, updateCheckInterval);
     }
 
     /**
@@ -73,8 +76,8 @@ export default class Updater {
                 status: "noUpdate"
             });
 
-            logError("Error while checking for updates");
-            logError(err.message);
+            logWarn("Error while checking for updates");
+            logWarn(err.message);
         });
 
         autoUpdater.on("download-progress", (progressObj) => {
