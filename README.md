@@ -2,9 +2,9 @@
 
 <img src="./src/assets/scanner.png" width="128px" height="128px">
 
-[![GitHub version](https://badge.fury.io/gh/nj-neer%2FSteam-Scanner.svg)](https://github.com/nj-neer/Steam-Scanner/releases/latest)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/Ciriak/Steam-Scanner)
 [![Build status](https://ci.appveyor.com/api/projects/status/la08lmcifr0q6r9q?svg=true)](https://ci.appveyor.com/project/Cyriaqu3/steam-scanner)
-<a href="https://codeclimate.com/github/nj-neer/Steam-Scanner/maintainability"><img src="https://api.codeclimate.com/v1/badges/6e18e92248d930d4d7d5/maintainability" /></a>
+[![Maintainability](https://api.codeclimate.com/v1/badges/ec238fbc7d3ea45dc251/maintainability)](https://codeclimate.com/github/Ciriak/Steam-Scanner/maintainability)
 
 ### Get all you games on Steam ! 
 
