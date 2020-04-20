@@ -3,6 +3,9 @@ import Config from "./Config";
 import Steam from "./Steam";
 import { LaunchersManager } from "./LaunchersManager";
 import NotificationsManager from "./Notification";
+
+const autoScanInterval = 5 * 60 * 1000;
+
 export default class SteamScanner {
     trayManager: Traymanager;
     config: Config;
@@ -16,7 +19,9 @@ export default class SteamScanner {
         this.trayManager = new Traymanager(this);
         this.notificationsManager = new NotificationsManager(this);
         this.scan();
-
+        setTimeout(() => {
+            this.scan();
+        }, autoScanInterval)
     }
 
 
