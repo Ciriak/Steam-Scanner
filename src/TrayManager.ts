@@ -45,12 +45,22 @@ export default class Traymanager {
         const separator = new MenuItem({
             type: "separator"
         });
+        const notificationsOption = new MenuItem({
+            type: "checkbox",
+            label: "Display notifications",
+            checked: this.config.enableNotifications,
+            click: () => {
+                this.config.enableNotifications = !this.config.enableNotifications
+            }
+        });
 
         const launchersMenuItems: MenuItem[] = this.generateLaunchersList();
 
 
         const contextMenu = Menu.buildFromTemplate([
             header,
+            separator,
+            notificationsOption,
             separator
         ].concat(launchersMenuItems));
 

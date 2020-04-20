@@ -77,6 +77,11 @@ export default class NotificationsManager {
     }
     notification(options: INotificationOptions) {
 
+        // stop if notifications not enabled
+        if (!this.scanner.config.enableNotifications) {
+            return;
+        }
+
         this.activeNotification = options;
 
         // send the options to the notification window
