@@ -1,5 +1,5 @@
 import { defaultConfig } from "./utils/config.utils";
-import { readJsonSync, writeJsonSync, ensureDirSync } from "fs-extra";
+import { readJsonSync, writeJsonSync, ensureDirSync, readJSONSync } from "fs-extra";
 import IConfig from "./interfaces/Config.interface";
 import path from "path";
 import { app } from "electron";
@@ -17,6 +17,7 @@ export default class Config {
     private _steamDirectory: string = defaultConfig.steamDirectory;
     private _launchers: typeof launchers = defaultConfig.launchers;
     private scanner: SteamScanner;
+    version: string = "0.0.0";
     configPath = path.join(app.getPath("appData"), appName);
     configFilePath = path.join(this.configPath, "config.json")
 
@@ -58,6 +59,7 @@ export default class Config {
 
     constructor(scanner: SteamScanner) {
         this.scanner = scanner;
+        this.version = this.getVersion();
         this.load();
     }
 
@@ -103,6 +105,24 @@ export default class Config {
             logError(error);
             logError("Unable to write the config !");
         }
+    }
+
+    /**
+     * Retrieve the version number from the package json file
+     */
+    private getVersion(): string {
+        try {
+            const data = readJSONSync(path.join(app.getAppPath(), "package.json"));
+            if (!data || !data.version) {
+                throw new Error("Unable to read version number, this is critical !");
+            }
+            return data.version;
+        } catch (error) {
+            logError(error);
+            app.quit();
+            return this.version;
+        }
+
     }
 
     /**

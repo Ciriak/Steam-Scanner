@@ -5,6 +5,7 @@ import { app } from "electron";
 import { LaunchersManager } from "./LaunchersManager";
 import NotificationsManager from "./Notification";
 import Updater from "./Updater";
+import { logError } from "./utils/helper.utils";
 
 const autoScanInterval = 5 * 60 * 1000;
 
@@ -47,6 +48,7 @@ export default class SteamScanner {
         const lock = app.requestSingleInstanceLock();
         // another instance is running => quit
         if (!lock) {
+            logError("Another active instance of steam scanner has been detected, quitting...");
             app.quit();
         }
 

@@ -5,6 +5,7 @@ import defaultExeIcon from "./assets/tray/exe.png";
 import ignoreGameIcon from "./assets/tray/ignore.png"
 import resetIcon from "./assets/tray/reset.png";
 import scanIcon from "./assets/tray/reset.png";
+import quitIcon from "./assets/tray/quit.png";
 
 const trayIcon = trayIconData;
 const defaultGameIcon = defaultGameIconData;
@@ -40,7 +41,7 @@ export default class Traymanager {
         }
 
         const header = new MenuItem({
-            label: "Steam Scanner",
+            label: "Steam Scanner v" + this.config.version,
             enabled: false,
         });
         const separator = new MenuItem({
@@ -64,6 +65,14 @@ export default class Traymanager {
             }
         });
 
+        const quitButton = new MenuItem({
+            label: "Quit",
+            icon: path.join(app.getAppPath(), quitIcon),
+            click: () => {
+                app.quit();
+            }
+        });
+
         const launchersMenuItems: MenuItem[] = this.generateLaunchersList();
 
 
@@ -74,6 +83,11 @@ export default class Traymanager {
             notificationsOption,
             separator
         ].concat(launchersMenuItems));
+
+        // quit button
+        contextMenu.append(separator);
+        contextMenu.append(quitButton);
+
 
         this.tray.setContextMenu(contextMenu);
 
