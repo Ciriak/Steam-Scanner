@@ -128,7 +128,9 @@ export default class Traymanager {
             if (this.config.launchers.hasOwnProperty(launcherName)) {
                 const launcher = this.config.launchers[launcherName];
                 const launcherMenuItems = this.generateGamesListForLauncher(launcher);
-                menuItems = menuItems.concat(launcherMenuItems);
+                if (launcherMenuItems) {
+                    menuItems = menuItems.concat(launcherMenuItems);
+                }
             }
 
         }
@@ -146,10 +148,13 @@ export default class Traymanager {
         return menuItems;
     }
 
-    private generateGamesListForLauncher(launcher: ILauncher): MenuItem[] {
+    private generateGamesListForLauncher(launcher: ILauncher): MenuItem[] | undefined {
+        if (!launchers[launcher.name]) {
+            return;
+        }
         const menu: MenuItem[] = [
             new MenuItem({
-                label: launcher.name,
+                label: launcher.label,
                 icon: path.join(app.getAppPath(), launchers[launcher.name].icon),
                 enabled: false
             }),
@@ -191,13 +196,9 @@ export default class Traymanager {
 
         }
 
-        // add a label if no game found for this launcher
+        // Hide the launcher if no game found
         if (gamesMenu.length === 0) {
-            gamesMenu.push(new MenuItem({
-                label: "No game found",
-                enabled: false,
-                role: "about"
-            }))
+            return;
         }
 
         // add the final separator

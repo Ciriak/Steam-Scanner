@@ -5,9 +5,8 @@ import { app } from "electron";
 import { LaunchersManager } from "./LaunchersManager";
 import NotificationsManager from "./Notification";
 import Updater from "./Updater";
-import { logError, log } from "./utils/helper.utils";
+import { logError, log, logWarn } from "./utils/helper.utils";
 import isDev from "electron-is-dev";
-import autoLaunch from "auto-launch";
 
 const autoScanInterval = 5 * 60 * 1000;
 
@@ -60,20 +59,19 @@ export default class SteamScanner {
      * If this is a packed app, set it to launch on system start
      */
     private async handleAutoLaunch() {
+        log("Checking auto-launch...");
+
         // stop if dev mode
         if (isDev) {
+            logWarn("Auto-launch check ignored since we are in dev mode");
             return;
         }
 
-        const autoLauncher = new autoLaunch({
-            name: 'Steam Scanner'
+        app.setLoginItemSettings({
+            openAtLogin: true
         });
 
-        const enabled = autoLauncher.isEnabled;
-        if (!enabled) {
-            log("Auto launch entry added !")
-            autoLauncher.enable();
-        }
+        log("Auto launch ready and set !");
     }
 }
 

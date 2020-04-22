@@ -1,8 +1,17 @@
 import { Launcher } from "../Launcher";
 
 export interface IGameLocation {
-    path: string;
-}
+    /**
+     * path that have to be scanned
+     */
+    include: string[],
+    /**
+     * Folders that should be ignored
+     *
+     * @example DirectXRedist
+     */
+    exclude?: string[]
+};
 
 export interface IGamesCollection {
     [name: string]: IGame
@@ -15,9 +24,13 @@ export interface IInstallationState {
 
 export default interface ILauncher {
     name: string;
+    label: string;
     exeName: string;
     exePossibleLocations: string[];
-    gamesPossibleLocations?: IGameLocation[];
+    /**
+     * List of potentiel location of games
+     */
+    gamesPossibleLocations?: IGameLocation;
     games?: IGamesCollection;
     exeLocation?: string;
     icon: string;

@@ -1,6 +1,6 @@
 {
   "name": "steam-scanner",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Automatically add your game to you Steam library",
   "main": "scanner.js",
   "scripts": {
@@ -8,6 +8,7 @@
     "build": "npm run clean && webpack --mode=production && electron-builder",
     "electron": "electron dist/scanner.js",
     "clean": "node ./tools/clean.js",
+    "test": "mocha -r ts-node/register test/scripts.ts",
     "doc": "typedoc --out ./doc",
     "release": "node ./tools/release.js"
   },
@@ -31,8 +32,10 @@
   "homepage": "https://github.com/Ciriak/Steam-Scanner#readme",
   "devDependencies": {
     "@types/auto-launch": "^5.0.1",
+    "@types/chai": "^4.2.11",
     "@types/fs-extra": "^8.1.0",
     "@types/lodash": "^4.14.150",
+    "@types/mocha": "^7.0.2",
     "@types/node-notifier": "^6.0.1",
     "@types/recursive-readdir": "^2.2.0",
     "axios": "^0.19.2",
@@ -44,18 +47,20 @@
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.2.0",
     "mime": "^2.4.4",
+    "mocha": "^7.1.1",
     "native-ext-loader": "^2.3.0",
+    "nyc": "^15.0.1",
     "sass": "^1.26.3",
     "sass-loader": "^8.0.2",
     "style-loader": "^1.1.4",
     "ts-loader": "^6.2.2",
+    "ts-node": "^8.9.0",
     "typescript": "^3.8.3",
     "url-loader": "^4.1.0",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "auto-launch": "^5.0.5",
     "colors": "^1.4.0",
     "electron-is-dev": "^1.2.0",
     "electron-log": "^4.1.1",
