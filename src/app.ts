@@ -66,13 +66,16 @@ export default class SteamScanner {
         }
 
         const autoLauncher = new autoLaunch({
-            name: 'Steam Scanner'
+            name: 'SteamScanner'
         });
 
         const enabled = autoLauncher.isEnabled;
         if (!enabled) {
-            log("Auto launch entry added !")
-            autoLauncher.enable();
+            autoLauncher.enable().then(() => {
+                log("Auto launch entry added !")
+            }).catch((e: Error) => {
+                logError(e.message);
+            });
         }
     }
 }
