@@ -216,7 +216,7 @@ export class LaunchersManager {
                 icon: notificatioReset
             });
 
-            this.scanner.steam.updateShortcuts();
+            this.scanner.steam.removeShortcut(gameData);
 
             // relaunch a scan process
             this.getAllGames().then(() => {

@@ -115,11 +115,33 @@ export default class Steam {
         });
     }
 
+    /**
+     * Update the shortcuts for EACH user
+     */
     public async updateShortcuts(): Promise<void> {
         return new Promise(async (resolve) => {
             let first = true;
             for (const user of this.steamUsers) {
                 await user.updateShortcuts(first);
+                if (first) {
+                    first = false;
+                }
+            }
+
+            this.restartSteam();
+
+            return resolve();
+        })
+    }
+
+    /**
+     * Update a shortcut for EACH user
+     */
+    public async removeShortcut(game: IGame): Promise<void> {
+        return new Promise(async (resolve) => {
+            let first = true;
+            for (const user of this.steamUsers) {
+                await user.removeShortcut(game, first);
                 if (first) {
                     first = false;
                 }
