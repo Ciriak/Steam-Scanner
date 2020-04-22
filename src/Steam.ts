@@ -1,10 +1,12 @@
 import { log, logError, addDrivesToPossibleLocations } from "./utils/helper.utils";
 import Config from "./Config";
 import path from "path";
-import { lstatSync, readdirSync } from "fs-extra";
+import { lstatSync, readdirSync, exists, existsSync } from "fs-extra";
 import { SteamUser } from "./SteamUser";
 import SteamScanner from "./app";
 import colors from "colors";
+import { exec, execFile } from "child_process";
+import { app } from "electron";
 /**
  * manage the interactions with Steam
  */
@@ -31,8 +33,9 @@ export default class Steam {
 
             log("Checking Steam location...");
 
-            // try to get steam directory from the config
+            // try to get steam directory
             this.config.steamDirectory = await this.getSteamDirectory();
+            this.config.steamExe = await this.getSteamExecutable();
 
             log("Looking for Steam accounts...");
 
@@ -99,6 +102,22 @@ export default class Steam {
 
     }
 
+    public async getSteamExecutable(): Promise<string> {
+        const exePath = path.join(this.config.steamDirectory, "steam.exe");
+        return new Promise((resolve) => {
+            if (existsSync(exePath)) {
+                return resolve(exePath);
+            }
+            else {
+                logError("FATAL error, unable to locate the Steam executable !");
+                app.quit();
+            }
+        });
+    }
+
+    /**
+     * Update the shortcuts for EACH user
+     */
     public async updateShortcuts(): Promise<void> {
         return new Promise(async (resolve) => {
             let first = true;
@@ -108,7 +127,43 @@ export default class Steam {
                     first = false;
                 }
             }
+
+            this.restartSteam();
+
             return resolve();
         })
+    }
+
+    /**
+     * Update a shortcut for EACH user
+     */
+    public async removeShortcut(game: IGame): Promise<void> {
+        return new Promise(async (resolve) => {
+            let first = true;
+            for (const user of this.steamUsers) {
+                await user.removeShortcut(game, first);
+                if (first) {
+                    first = false;
+                }
+            }
+
+            this.restartSteam();
+
+            return resolve();
+        })
+    }
+
+    /**
+     * Restart the steam client process
+     */
+    public restartSteam() {
+        log(colors.magenta("Retarting the Steam client..."));
+        this.getSteamDirectory()
+        // kill the active steam process
+        exec('taskkill /f /IM "steam.exe"');
+        // launch the exe
+        execFile("steam.exe", null, {
+            cwd: this.config.steamDirectory
+        });
     }
 }

@@ -14,7 +14,10 @@ const exeBlackList: string[] = [
     "vcredist120_x64.exe",
     "vcredist120_x86.exe",
     "DXSETUP.exe",
-    "dxsetup.exe"
+    "dxsetup.exe",
+    "Touchup.exe",
+    "touchup.exe",
+    "pbsvc.exe"
 ];
 
 export default exeBlackList;

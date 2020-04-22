@@ -5,7 +5,7 @@ import recursive from "recursive-readdir";
 import colors from "colors";
 import path from "path";
 import exeBlackList from "./library/ExeBlackList";
-
+import { findIndex } from "lodash";
 
 /**
  * Provide utilities for game manipulations
@@ -67,7 +67,7 @@ export default class GameHelper {
             }
 
             let filesList: string[] = await recursive(this.gameData.folderPath);
-
+            filesList = this.removeDuplicatedFiles(filesList);
             filesList = this.filterFromBlackList(filesList);
 
             // Check all the files in the found directory
@@ -177,6 +177,37 @@ export default class GameHelper {
             }
         }
         return parsedList;
+    }
+
+    /**
+     * Remove the duplicated entries from a file list (based on their filename and not the full path)
+     *
+     * @param list
+     */
+    private removeDuplicatedFiles(list: string[]) {
+        const filePathCollection: {
+            path: string;
+            base: string;
+        }[] = [];
+        const parsedPath: string[] = [];
+
+        for (const filePath of list) {
+            const i = findIndex(filePathCollection, {
+                base: path.basename(filePath)
+            });
+            if (i === -1) {
+                filePathCollection.push({
+                    base: path.basename(filePath),
+                    path: filePath
+                });
+            }
+        }
+
+        for (const entry of filePathCollection) {
+            parsedPath.push(entry.path);
+        }
+
+        return parsedPath;
     }
 
 

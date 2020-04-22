@@ -93,12 +93,7 @@ export class LaunchersManager {
                 this.setInstalledLaunchers(installedLaunchers);
                 resolve(installedLaunchers);
             });
-
-
         })
-
-
-
     }
 
     /**
@@ -162,13 +157,12 @@ export class LaunchersManager {
             // show notification
 
             this.scanner.notificationsManager.notification({
+                icon: this.scanner.IconsUtil.getIcon(gameData.binaries[0])[64],
                 title: gameData.name + " added",
                 message: gameData.name + " has been added to your Steam library",
             });
 
             this.scanner.steam.updateShortcuts();
-
-
 
             resolve();
         });
@@ -221,6 +215,8 @@ export class LaunchersManager {
                 message: gameData.name + " infos have been reset",
                 icon: notificatioReset
             });
+
+            this.scanner.steam.removeShortcut(gameData);
 
             // relaunch a scan process
             this.getAllGames().then(() => {

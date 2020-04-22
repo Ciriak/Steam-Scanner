@@ -15,6 +15,7 @@ export default class Config {
     private _enableNotifications: boolean = defaultConfig.enableNotifications;
     private _launchOnStartup: boolean = defaultConfig.launchOnStartup;
     private _steamDirectory: string = defaultConfig.steamDirectory;
+    private _steamExe: string = defaultConfig.steamExe;
     private _launchers: typeof launchers = defaultConfig.launchers;
     private scanner: SteamScanner;
     version: string = "0.0.0";
@@ -37,6 +38,15 @@ export default class Config {
     set launchOnStartup(value: boolean) {
         this._launchOnStartup = value;
         this.writeConfig();
+    }
+
+    set steamExe(value: string) {
+        this._steamExe = value;
+        this.writeConfig();
+    }
+
+    get steamExe(): string {
+        return this._steamExe;
     }
 
     get steamDirectory(): string {
@@ -92,6 +102,7 @@ export default class Config {
             launchOnStartup: this._launchOnStartup,
             steamDirectory: this._steamDirectory,
             launchers: this._launchers,
+            steamExe: this._steamExe,
             enableNotifications: this._enableNotifications
         }
         try {

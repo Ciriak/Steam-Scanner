@@ -51,7 +51,7 @@ export class SteamUser {
      */
     public async updateShortcuts(isFirstInstance?: boolean, clean?: boolean) {
 
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
 
             // if clean mode, only remove the short
             // TODO only remove items added by SS
@@ -70,7 +70,6 @@ export class SteamUser {
 
             let updatedShortcuts: boolean = false;
             let addedShortcuts: number = 0;
-
             shortcut.parseFile(this.shortcutsFilePath, (err: Error, shortcutData: any) => {
                 // if can't parse (ex: shortcut file don't exist) , create a clean object
                 if (err || !shortcutData || !shortcutData.shortcuts) {
@@ -81,66 +80,39 @@ export class SteamUser {
                 }
 
                 const launchersList = this.config.launchers;
+
+                // loop each launcher
                 for (const launcherName in launchersList) {
                     if (launchersList.hasOwnProperty(launcherName)) {
                         const launcherConfig = launchersList[launcherName];
                         const launcher = new Launcher(launcherConfig, this.scanner.launchersManager, this.scanner);
+
+                        // each game of the current launcher
                         for (const gameName in launcher.games) {
                             if (launcher.games.hasOwnProperty(gameName)) {
+
+                                // game
                                 const game = launcher.games[gameName];
 
                                 // skip if the binary of the game in unknown
                                 if (!game.binaries || !game.binaries[0]) {
                                     continue;
                                 }
-
-                                log(
-                                    "Looking the " + colors.cyan(gameName) + " in the shortcut file..."
-                                );
-
-                                // check if the game is already in the steam shortcuts
-                                let gameCount: number = 0;
-                                const unwantedIndexList: number[] = [];
-                                for (let i = 0; i < shortcutData.shortcuts.length; i++) {
-                                    const nShortcut = shortcutData.shortcuts[i];
-                                    if (
-                                        nShortcut.appname === gameName ||
-                                        nShortcut.appName === gameName
-                                    ) {
-                                        gameCount++;
-
-                                        // if the game is already found, add the unwanted copy to the index list
-                                        if (gameCount > 1) {
-                                            unwantedIndexList.push(i);
-                                        }
-                                    }
+                                if (isFirstInstance) {
+                                    log(
+                                        "Looking the " + colors.cyan(gameName) + " in the shortcut file..."
+                                    );
                                 }
 
-                                // the game shortcut already exist, skip
-                                if (gameCount > 0) {
+                                // check if the game is already in the steam shortcuts
+                                const { gameCount, unwantedIndexesList } = this.parseEntriesForGame(game, shortcutData);
 
-                                    log("Shortcut already exist for " + gameName);
 
-                                    // if the game has been added twice or more for some reason
-                                    if (gameCount > 1) {
-                                        logWarn("WARNING - " +
-                                            gameName +
-                                            " has been added more than once, cleaning...");
 
-                                        // remove all unwanted , by their index
-                                        unwantedIndexList.reverse(); // reverse the array before => don't fucked up the index list
-                                        for (const unwantedIndex of unwantedIndexList) {
-                                            shortcutData.shortcuts.splice(unwantedIndex, 1);
-                                        }
-                                        log(
-                                            "Removed " +
-                                            unwantedIndexList.length +
-                                            " unwanted shortcut(s)"
-                                        );
-                                        updatedShortcuts = true;
-                                    }
-                                } else {
-                                    // shortcut don't already exist, add it
+                                /**
+                                 * shortcut don't already exist => add it
+                                 */
+                                if (gameCount === 0) {
                                     shortcutData.shortcuts.push({
                                         Exe: game.binaries[0],
                                         tags: [launcher.name, "Steam Scanner"],
@@ -149,6 +121,8 @@ export class SteamUser {
                                         steamScanner: true,
                                         AllowDesktopConfig: true,
                                         AlowOverlay: true,
+                                        // add the current time as the last play time for the shortcut
+                                        LastPlayTime: new Date().getTime() / 1000,
                                     });
                                     updatedShortcuts = true;
                                     addedShortcuts++;
@@ -158,24 +132,56 @@ export class SteamUser {
                                         log("Added a shortcut for " + colors.cyan(game.name) + " => " + game.binaries[0]);
                                     }
                                 }
+
+
+                                /**
+                                 * shortcut already exist => Do nothing
+                                 */
+
+                                if (gameCount === 1) {
+                                    if (isFirstInstance) {
+                                        log("Shortcut already exist for " + gameName);
+                                    }
+                                }
+
+                                /**
+                                 * case : > 1
+                                 * More than one iteration of the shortcut exist => Cleanup
+                                 */
+                                if (gameCount > 1) {
+                                    if (isFirstInstance) {
+                                        logWarn("WARNING - " +
+                                            gameName +
+                                            " has been added more than once, cleaning...");
+                                    }
+
+                                    // remove all unwanted , by their index
+                                    unwantedIndexesList.reverse(); // reverse the array before => don't fucked up the index list
+                                    for (const unwantedIndex of unwantedIndexesList) {
+                                        shortcutData.shortcuts.splice(unwantedIndex, 1);
+                                    }
+                                    if (isFirstInstance) {
+                                        log(
+                                            "Removed " +
+                                            unwantedIndexesList.length +
+                                            " unwanted shortcut(s)"
+                                        );
+                                    }
+                                    updatedShortcuts = true;
+                                }
+
                             }
                         }
                     }
                 }
 
-                if (updatedShortcuts && isFirstInstance) {
-                    log("Updating Steam shortcuts...");
-                    shortcut.writeFile(this.shortcutsFilePath, shortcutData, (errW: Error) => {
-                        log("Writing into shortcuts file...");
-                        if (errW) {
-                            logError(errW.message);
+                // if at least one shortcut has been updated
+                if (updatedShortcuts) {
+                    if (isFirstInstance) {
+                        log("Updating Steam shortcuts...");
+                    }
 
-                            return resolve();
-                        }
-                        log(colors.cyan(String(addedShortcuts)) + " shortcut(s) added, Steam restart required !");
-                    });
-
-
+                    this.writeShortcutFile(shortcutData, isFirstInstance);
                 }
 
                 return resolve();
@@ -183,5 +189,97 @@ export class SteamUser {
 
             return resolve();
         });
+    }
+
+    /**
+     * Remove the entry of a game from the shortcuts file
+     * @param game
+     */
+    public removeShortcut(game: IGame, isFirstInstance?: boolean) {
+
+
+
+        shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: any) => {
+            // if can't parse (ex: shortcut file don't exist) , create a clean object
+            if (err || !shortcutData || !shortcutData.shortcuts) {
+                logError("WARNING - unable to parse the steam shortcuts file");
+                return;
+            }
+
+            let indexToRemove: number = -1;
+
+            for (let shortcutIndex = 0; shortcutIndex < shortcutData.shortcuts.length; shortcutIndex++) {
+                const shortcutEntry = shortcutData.shortcuts[shortcutIndex];
+                if (shortcutEntry.AppName === game.name) {
+                    indexToRemove = shortcutIndex;
+                }
+            }
+
+            if (indexToRemove === -1) {
+                return;
+            }
+
+            shortcutData.shortcuts.splice(indexToRemove, 1);
+            await this.writeShortcutFile(shortcutData, isFirstInstance);
+
+        });
+    }
+
+    /**
+     * Check the entries of the game already present in the shortcut file
+     * @param game game instance
+     * @param shortcutData current shortcut data
+     */
+    private parseEntriesForGame(game: IGame, shortcutData: any): {
+        gameCount: number,
+        unwantedIndexesList: number[]
+    } {
+        let gameCount = 0;
+        const unwantedIndexesList: number[] = [];
+        for (let i = 0; i < shortcutData.shortcuts.length; i++) {
+            const nShortcut = shortcutData.shortcuts[i];
+            if (
+                nShortcut.AppName === game.name
+            ) {
+                gameCount++;
+
+                // if the game is already found, add the unwanted copy to the index list
+                if (gameCount > 1) {
+                    unwantedIndexesList.push(i);
+                }
+            }
+        }
+
+        return {
+            gameCount,
+            unwantedIndexesList
+        }
+    }
+
+    /**
+     * Write the provided data into the shortcuts file
+     * @param shortcutData data to write
+     */
+    private async writeShortcutFile(shortcutData: any, isFirstInstance?: boolean): Promise<void> {
+        return new Promise((resolve) => {
+            if (isFirstInstance) {
+                log("Writing into shortcuts file...");
+            }
+
+            shortcut.writeFile(this.shortcutsFilePath, shortcutData, (err: Error) => {
+                if (err) {
+                    logError(err.message);
+                    // yeah... don't ask
+                    return resolve();
+                }
+
+                if (isFirstInstance) {
+                    log(`${colors.cyan('Shortcut(s) updated')}, Steam restart required !`);
+                }
+
+            });
+            return resolve();
+        })
+
     }
 }
