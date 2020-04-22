@@ -51,7 +51,7 @@ export class SteamUser {
      */
     public async updateShortcuts(isFirstInstance?: boolean, clean?: boolean) {
 
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
 
             // if clean mode, only remove the short
             // TODO only remove items added by SS
@@ -70,7 +70,6 @@ export class SteamUser {
 
             let updatedShortcuts: boolean = false;
             let addedShortcuts: number = 0;
-
             shortcut.parseFile(this.shortcutsFilePath, (err: Error, shortcutData: any) => {
                 // if can't parse (ex: shortcut file don't exist) , create a clean object
                 if (err || !shortcutData || !shortcutData.shortcuts) {
@@ -81,12 +80,18 @@ export class SteamUser {
                 }
 
                 const launchersList = this.config.launchers;
+
+                // loop each launcher
                 for (const launcherName in launchersList) {
                     if (launchersList.hasOwnProperty(launcherName)) {
                         const launcherConfig = launchersList[launcherName];
                         const launcher = new Launcher(launcherConfig, this.scanner.launchersManager, this.scanner);
+
+                        // each game of the current launcher
                         for (const gameName in launcher.games) {
                             if (launcher.games.hasOwnProperty(gameName)) {
+
+                                // game
                                 const game = launcher.games[gameName];
 
                                 // skip if the binary of the game in unknown
@@ -100,31 +105,43 @@ export class SteamUser {
                                 }
 
                                 // check if the game is already in the steam shortcuts
-                                let gameCount: number = 0;
-                                const unwantedIndexList: number[] = [];
-                                for (let i = 0; i < shortcutData.shortcuts.length; i++) {
-                                    const nShortcut = shortcutData.shortcuts[i];
-                                    if (
-                                        nShortcut.appname === gameName ||
-                                        nShortcut.appName === gameName
-                                    ) {
-                                        gameCount++;
+                                const { gameCount, unwantedIndexesList } = this.parseEntriesForGame(game, shortcutData);
 
-                                        // if the game is already found, add the unwanted copy to the index list
-                                        if (gameCount > 1) {
-                                            unwantedIndexList.push(i);
+
+                                switch (gameCount) {
+                                    /**
+                                     * shortcut don't already exist => add it
+                                     */
+                                    case 0:
+                                        shortcutData.shortcuts.push({
+                                            Exe: game.binaries[0],
+                                            tags: [launcher.name, "Steam Scanner"],
+                                            AppName: game.name,
+                                            StartDir: game.folderPath,
+                                            steamScanner: true,
+                                            AllowDesktopConfig: true,
+                                            AlowOverlay: true,
+                                        });
+                                        updatedShortcuts = true;
+                                        addedShortcuts++;
+
+                                        // notify if this is the first instance (and notification are enabled)
+                                        if (isFirstInstance) {
+                                            log("Added a shortcut for " + colors.cyan(game.name) + " => " + game.binaries[0]);
                                         }
-                                    }
-                                }
-
-                                // the game shortcut already exist, skip
-                                if (gameCount > 0) {
-                                    if (isFirstInstance) {
-                                        log("Shortcut already exist for " + gameName);
-                                    }
-
-                                    // if the game has been added twice or more for some reason
-                                    if (gameCount > 1) {
+                                        break;
+                                    /**
+                                     * shortcut already exist => Do nothing
+                                     */
+                                    case 1:
+                                        if (isFirstInstance) {
+                                            log("Shortcut already exist for " + gameName);
+                                        }
+                                    /**
+                                     * case : > 1
+                                     * More than one iteration of the shortcut exist => Cleanup
+                                     */
+                                    default:
                                         if (isFirstInstance) {
                                             logWarn("WARNING - " +
                                                 gameName +
@@ -132,38 +149,22 @@ export class SteamUser {
                                         }
 
                                         // remove all unwanted , by their index
-                                        unwantedIndexList.reverse(); // reverse the array before => don't fucked up the index list
-                                        for (const unwantedIndex of unwantedIndexList) {
+                                        unwantedIndexesList.reverse(); // reverse the array before => don't fucked up the index list
+                                        for (const unwantedIndex of unwantedIndexesList) {
                                             shortcutData.shortcuts.splice(unwantedIndex, 1);
                                         }
                                         if (isFirstInstance) {
                                             log(
                                                 "Removed " +
-                                                unwantedIndexList.length +
+                                                unwantedIndexesList.length +
                                                 " unwanted shortcut(s)"
                                             );
                                         }
                                         updatedShortcuts = true;
-                                    }
-                                } else {
-                                    // shortcut don't already exist, add it
-                                    shortcutData.shortcuts.push({
-                                        Exe: game.binaries[0],
-                                        tags: [launcher.name, "Steam Scanner"],
-                                        AppName: game.name,
-                                        StartDir: game.folderPath,
-                                        steamScanner: true,
-                                        AllowDesktopConfig: true,
-                                        AlowOverlay: true,
-                                    });
-                                    updatedShortcuts = true;
-                                    addedShortcuts++;
-
-                                    // notify if this is the first instance (and notification are enabled)
-                                    if (isFirstInstance) {
-                                        log("Added a shortcut for " + colors.cyan(game.name) + " => " + game.binaries[0]);
-                                    }
+                                        break;
                                 }
+
+
                             }
                         }
                     }
@@ -195,5 +196,36 @@ export class SteamUser {
 
             return resolve();
         });
+    }
+
+    /**
+     * Check the entries of the game already present in the shortcut file
+     * @param game game instance
+     * @param shortcutData current shortcut data
+     */
+    private parseEntriesForGame(game: IGame, shortcutData: any): {
+        gameCount: number,
+        unwantedIndexesList: number[]
+    } {
+        let gameCount = 0;
+        const unwantedIndexesList: number[] = [];
+        for (let i = 0; i < shortcutData.shortcuts.length; i++) {
+            const nShortcut = shortcutData.shortcuts[i];
+            if (
+                nShortcut.AppName === game.name
+            ) {
+                gameCount++;
+
+                // if the game is already found, add the unwanted copy to the index list
+                if (gameCount > 1) {
+                    unwantedIndexesList.push(i);
+                }
+            }
+        }
+
+        return {
+            gameCount,
+            unwantedIndexesList
+        }
     }
 }

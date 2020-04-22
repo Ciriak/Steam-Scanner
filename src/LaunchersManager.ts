@@ -93,12 +93,7 @@ export class LaunchersManager {
                 this.setInstalledLaunchers(installedLaunchers);
                 resolve(installedLaunchers);
             });
-
-
         })
-
-
-
     }
 
     /**
