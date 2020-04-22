@@ -1,6 +1,3 @@
-# Almost complete rework of the codebase
-
-- Support for the new Steam library
-- Auto scan just didn't worked, from now, if we have a doubt, we will ask the user to select the correct exe file
-- New notification system
-- Complete Tray redesign
+- Fixed Launchers label 
+- Fixed a crash related to the launcher name
+- Doesn't show a launcher if no game is found for it

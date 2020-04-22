@@ -1,6 +1,6 @@
 {
   "name": "steam-scanner",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Automatically add your game to you Steam library",
   "main": "scanner.js",
   "scripts": {
@@ -61,7 +61,6 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "auto-launch": "^5.0.5",
     "colors": "^1.4.0",
     "electron-is-dev": "^1.2.0",
     "electron-log": "^4.1.1",
