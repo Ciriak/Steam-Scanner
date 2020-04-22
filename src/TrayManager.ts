@@ -154,7 +154,7 @@ export default class Traymanager {
         }
         const menu: MenuItem[] = [
             new MenuItem({
-                label: launcher.name,
+                label: launcher.label,
                 icon: path.join(app.getAppPath(), launchers[launcher.name].icon),
                 enabled: false
             }),
@@ -196,13 +196,9 @@ export default class Traymanager {
 
         }
 
-        // add a label if no game found for this launcher
+        // Hide the launcher if no game found
         if (gamesMenu.length === 0) {
-            gamesMenu.push(new MenuItem({
-                label: "No game found",
-                enabled: false,
-                role: "about"
-            }))
+            return;
         }
 
         // add the final separator

@@ -10,6 +10,7 @@ import battlenetIcon from "../assets/launchers/battlenet.png";
  */
 const BattleNet: ILauncher = {
     name: "BattleNet",
+    label: "Battle Net",
     exeName: "Battle.net Launcher.exe",
     exePossibleLocations: [
         "$drive\\Program Files (x86)\\Battle.net",
@@ -23,6 +24,7 @@ const BattleNet: ILauncher = {
  */
 const Origin: ILauncher = {
     name: "Origin",
+    label: "Origin",
     exeName: "Origin.exe",
     exePossibleLocations: [
         "$drive\\Program Files (x86)\\Origin",
@@ -42,6 +44,7 @@ const Origin: ILauncher = {
  */
 const Uplay: ILauncher = {
     name: "Uplay",
+    label: "Uplay",
     exeName: "UbisoftGameLauncher.exe",
     exePossibleLocations: [
         "$drive\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher",
@@ -58,6 +61,7 @@ const Uplay: ILauncher = {
 
 const EpicGameLauncher: ILauncher = {
     name: "EpicGameLauncher",
+    label: "Epic Game launcher",
     exeName: "EpicGamesLauncher.exe",
     exePossibleLocations: [
         "$drive\\Program Files (x86)\\Epic Games\\Launcher\\Portal\\Binaries\\Win32",

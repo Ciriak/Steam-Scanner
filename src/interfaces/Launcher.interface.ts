@@ -24,6 +24,7 @@ export interface IInstallationState {
 
 export default interface ILauncher {
     name: string;
+    label: string;
     exeName: string;
     exePossibleLocations: string[];
     /**

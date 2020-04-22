@@ -112,6 +112,7 @@ export class LaunchersManager {
                 exeName: launcher.exeName,
                 exePossibleLocations: launcher.exePossibleLocations,
                 name: launcher.name,
+                label: launcher.label,
                 games: launcher.games,
                 gamesPossibleLocations: launcher.gamesPossibleLocations,
                 exeLocation: launcher.exeLocation,

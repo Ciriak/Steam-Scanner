@@ -11,6 +11,7 @@ import SteamScanner from "./app";
 export class Launcher implements ILauncher {
     private config: Config;
     public name: string;
+    public label: string;
     private nameLabel: string;
     public exeName: string = "";
     public exeLocation?: string = "";
@@ -30,6 +31,7 @@ export class Launcher implements ILauncher {
         this.config = scanner.config;
         this.manager = manager;
         this.name = launcherItem.name;
+        this.label = launcherItem.label;
         this.nameLabel = colors.cyan("[" + this.name + "]");
         this.exePossibleLocations = launcherItem.exePossibleLocations;
         this.gamesPossibleLocations = launcherItem.gamesPossibleLocations;
