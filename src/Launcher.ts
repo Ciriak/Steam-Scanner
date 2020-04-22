@@ -22,7 +22,7 @@ export class Launcher implements ILauncher {
     private manager: LaunchersManager;
     private scanner: SteamScanner;
     public exePossibleLocations: string[] = [];
-    public gamesPossibleLocations?: IGameLocation[] = [];
+    public gamesPossibleLocations?: IGameLocation;
     public icon: string;
 
     constructor(launcherItem: ILauncher, manager: LaunchersManager, scanner: SteamScanner) {
@@ -124,12 +124,10 @@ export class Launcher implements ILauncher {
 
             log(`${this.nameLabel} Looking for game directories...`);
 
-            for (const possibleLocation of this.gamesPossibleLocations) {
+            for (const possibleLocation of this.gamesPossibleLocations.include) {
                 const locationPathList = await addDrivesToPossibleLocations([
-                    possibleLocation.path
+                    possibleLocation
                 ]);
-
-
 
                 for (const locationPath of locationPathList) {
                     // Directory of games
@@ -146,6 +144,11 @@ export class Launcher implements ILauncher {
 
                             // TODO probably need to better check here if the folder is indeed a game folder
                             const parsedGameDir = path.parse(currentGameDir);
+
+                            // check if the "game" folder name is in the exclude list$
+                            if (this.isInGamesExcludeList(parsedGameDir.name)) {
+                                continue;
+                            }
 
                             // check if the game already exist in the list
                             // skip if this is the case
@@ -315,4 +318,19 @@ export class Launcher implements ILauncher {
 
     //     return true;
     // }
+
+    private isInGamesExcludeList(gameFolderName: string): boolean {
+        // no exclude // return false
+        if (!this.gamesPossibleLocations?.exclude) {
+            return false;
+        }
+        for (const ignoredLocation of this.gamesPossibleLocations?.exclude) {
+            if (ignoredLocation === gameFolderName) {
+                // The folder name should be ignored // return true
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
