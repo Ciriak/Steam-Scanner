@@ -6,7 +6,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/la08lmcifr0q6r9q?svg=true)](https://ci.appveyor.com/project/Cyriaqu3/steam-scanner)
 [![Maintainability](https://api.codeclimate.com/v1/badges/ec238fbc7d3ea45dc251/maintainability)](https://codeclimate.com/github/Ciriak/Steam-Scanner/maintainability)
 
-### Get all you games on Steam ! 
+### An utility that add your games from other launchers to your Steam library 
 
 Steam Scanner run as a background process, grab games from others launchers and add them to your Steam library.
 
