@@ -7,6 +7,7 @@ import NotificationsManager from "./Notification";
 import Updater from "./Updater";
 import { logError, log, logWarn } from "./utils/helper.utils";
 import isDev from "electron-is-dev";
+import IconsUtil from "./IconsUtil";
 
 const autoScanInterval = 5 * 60 * 1000;
 
@@ -17,6 +18,7 @@ export default class SteamScanner {
     launchersManager: LaunchersManager;
     notificationsManager: NotificationsManager;
     updater: Updater;
+    IconsUtil: IconsUtil;
     constructor() {
         this.config = new Config(this);
         this.steam = new Steam(this);
@@ -24,6 +26,7 @@ export default class SteamScanner {
         this.trayManager = new Traymanager(this);
         this.notificationsManager = new NotificationsManager(this);
         this.updater = new Updater(this);
+        this.IconsUtil = new IconsUtil();
         this.handleSingleInstance();
         this.handleAutoLaunch();
         this.scan();

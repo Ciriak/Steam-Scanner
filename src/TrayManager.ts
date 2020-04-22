@@ -1,7 +1,6 @@
-import { app, Menu, Tray, MenuItem } from "electron";
+import { app, Menu, Tray, MenuItem, NativeImage } from "electron";
 import trayIconData from "./assets/tray/tray.png";
 import defaultGameIconData from "./assets/tray/unknown-game.png";
-import defaultExeIcon from "./assets/tray/exe.png";
 import ignoreGameIcon from "./assets/tray/ignore.png"
 import resetIcon from "./assets/tray/reset.png";
 import scanIcon from "./assets/tray/reset.png";
@@ -174,9 +173,10 @@ export default class Traymanager {
                 }
                 // if the game is already known and ready to use
                 if (game.binarySet) {
+                    const gameIcon = this.scanner.IconsUtil.getIcon(game.binaries[0]);
                     gameMenu = new MenuItem({
                         label: gameName,
-                        icon: path.join(app.getAppPath(), defaultGameIcon),
+                        icon: gameIcon[32],
                         submenu: this.generateGameOptionsMenu(game)
                     })
                 }
@@ -226,9 +226,11 @@ export default class Traymanager {
         ];
         for (const binary of game.binaries) {
 
+            const icon = this.scanner.IconsUtil.getIcon(binary);
+
             menuItems.push(new MenuItem({
                 label: path.basename(binary),
-                icon: path.join(app.getAppPath(), defaultExeIcon),
+                icon: icon[16],
                 click: () => {
                     game.binaries = [binary];
                     this.scanner.launchersManager.setBinaryForGame(game, true)
