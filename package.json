@@ -79,6 +79,7 @@
     },
     "win": {
       "target": "nsis",
+      "publish": "github",
       "icon": "src/assets/scanner.ico"
     },
     "nsis": {
