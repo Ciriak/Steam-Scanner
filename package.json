@@ -99,6 +99,6 @@
       "category": "Development",
       "artifactName": "${productName}-${version}.${ext}"
     },
-    "publish": false
+    "publish": true
   }
 }
