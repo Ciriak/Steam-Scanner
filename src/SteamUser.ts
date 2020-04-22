@@ -93,10 +93,11 @@ export class SteamUser {
                                 if (!game.binaries || !game.binaries[0]) {
                                     continue;
                                 }
-
-                                log(
-                                    "Looking the " + colors.cyan(gameName) + " in the shortcut file..."
-                                );
+                                if (isFirstInstance) {
+                                    log(
+                                        "Looking the " + colors.cyan(gameName) + " in the shortcut file..."
+                                    );
+                                }
 
                                 // check if the game is already in the steam shortcuts
                                 let gameCount: number = 0;
@@ -118,25 +119,30 @@ export class SteamUser {
 
                                 // the game shortcut already exist, skip
                                 if (gameCount > 0) {
-
-                                    log("Shortcut already exist for " + gameName);
+                                    if (isFirstInstance) {
+                                        log("Shortcut already exist for " + gameName);
+                                    }
 
                                     // if the game has been added twice or more for some reason
                                     if (gameCount > 1) {
-                                        logWarn("WARNING - " +
-                                            gameName +
-                                            " has been added more than once, cleaning...");
+                                        if (isFirstInstance) {
+                                            logWarn("WARNING - " +
+                                                gameName +
+                                                " has been added more than once, cleaning...");
+                                        }
 
                                         // remove all unwanted , by their index
                                         unwantedIndexList.reverse(); // reverse the array before => don't fucked up the index list
                                         for (const unwantedIndex of unwantedIndexList) {
                                             shortcutData.shortcuts.splice(unwantedIndex, 1);
                                         }
-                                        log(
-                                            "Removed " +
-                                            unwantedIndexList.length +
-                                            " unwanted shortcut(s)"
-                                        );
+                                        if (isFirstInstance) {
+                                            log(
+                                                "Removed " +
+                                                unwantedIndexList.length +
+                                                " unwanted shortcut(s)"
+                                            );
+                                        }
                                         updatedShortcuts = true;
                                     }
                                 } else {
@@ -163,16 +169,22 @@ export class SteamUser {
                     }
                 }
 
-                if (updatedShortcuts && isFirstInstance) {
-                    log("Updating Steam shortcuts...");
+                if (updatedShortcuts) {
+                    if (isFirstInstance) {
+                        log("Updating Steam shortcuts...");
+                    }
                     shortcut.writeFile(this.shortcutsFilePath, shortcutData, (errW: Error) => {
-                        log("Writing into shortcuts file...");
+                        if (isFirstInstance) {
+                            log("Writing into shortcuts file...");
+                        }
                         if (errW) {
                             logError(errW.message);
 
                             return resolve();
                         }
-                        log(colors.cyan(String(addedShortcuts)) + " shortcut(s) added, Steam restart required !");
+                        if (isFirstInstance) {
+                            log(colors.cyan(String(addedShortcuts)) + " shortcut(s) added, Steam restart required !");
+                        }
                     });
 
 
