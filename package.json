@@ -67,6 +67,7 @@
     "electron-updater": "^4.2.5",
     "extract-file-icon": "^0.3.2",
     "fs-extra": "^9.0.0",
+    "lodash": "^4.17.15",
     "recursive-readdir": "^2.2.2",
     "steam-shortcut-editor": "^3.1.1"
   },
