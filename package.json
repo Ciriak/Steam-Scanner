@@ -4,6 +4,7 @@
   "description": "Automatically add your game to you Steam library",
   "main": "scanner.js",
   "scripts": {
+    "postinstall": "./node_modules/.bin/electron-rebuild",
     "dev": "webpack --mode=development --watch",
     "build": "npm run clean && webpack --mode=production && electron-builder",
     "electron": "electron dist/scanner.js",
@@ -44,11 +45,12 @@
     "css-loader": "^3.5.2",
     "electron": "^8.2.3",
     "electron-builder": "^22.5.1",
+    "electron-rebuild": "^1.10.1",
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.2.0",
     "mime": "^2.4.4",
     "mocha": "^7.1.1",
-    "native-ext-loader": "^2.3.0",
+    "node-loader": "^0.6.0",
     "nyc": "^15.0.1",
     "sass": "^1.26.3",
     "sass-loader": "^8.0.2",
@@ -89,7 +91,8 @@
       "artifactName": "${productName}-setup-${version}.${ext}",
       "installerIcon": "src/assets/scanner.ico",
       "differentialPackage": false,
-      "deleteAppDataOnUninstall": true
+      "deleteAppDataOnUninstall": true,
+      "warningsAsErrors": false
     },
     "asar": {
       "smartUnpack": false

@@ -1,4 +1,4 @@
-import { app, Menu, Tray, MenuItem, NativeImage } from "electron";
+import { app, Menu, Tray, MenuItem } from "electron";
 import trayIconData from "./assets/tray/tray.png";
 import defaultGameIconData from "./assets/tray/unknown-game.png";
 import ignoreGameIcon from "./assets/tray/ignore.png"
