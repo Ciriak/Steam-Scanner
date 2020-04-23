@@ -1,7 +1,7 @@
 import { app } from "electron";
 import path from "path";
 import extractIcon from "extract-file-icon";
-import { writeFileSync, rmdirSync, fstat, existsSync } from "fs";
+import { writeFileSync, rmdirSync, existsSync } from "fs";
 import { ensureDirSync } from "fs-extra";
 import { logError, log } from "./utils/helper.utils";
 import defaultExeIcon from "./assets/tray/exe.png";

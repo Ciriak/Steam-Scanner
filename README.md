@@ -1,18 +1,27 @@
 # Steam Scanner
-
+<p align="center">
 <img src="./src/assets/scanner.png" width="128px" height="128px">
-
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/Ciriak/Steam-Scanner)
+</p>
+  
+[![GitHub version](https://badge.fury.io/gh/Ciriak%2FSteam-Scanner.svg)](https://github.com/Ciriak/Steam-Scanner)
 [![Build status](https://ci.appveyor.com/api/projects/status/la08lmcifr0q6r9q?svg=true)](https://ci.appveyor.com/project/Cyriaqu3/steam-scanner)
 [![Maintainability](https://api.codeclimate.com/v1/badges/ec238fbc7d3ea45dc251/maintainability)](https://codeclimate.com/github/Ciriak/Steam-Scanner/maintainability)
 
+
+ 
+
+
+
 ### An utility that add your games from other launchers to your Steam library 
 
+<p align="center">
 Steam Scanner run as a background process, grab games from others launchers and add them to your Steam library.
 
 It is available from the system tray
 
 ![](./src/assets/screen-tray.png)
+
+</p>
 
 | Table of contents                        |
 | ---------------------------------------- |

@@ -10,6 +10,8 @@ module.exports = (env, argv) => {
         generatePackageJson();
     }
 
+
+
     return [
 
         /**
@@ -20,10 +22,10 @@ module.exports = (env, argv) => {
             entry: './src/app.ts',
             target: "electron-main",
             devtool: "inline-source-map",
-            node: {
-                __filename: true,
-                __dirname: true
-            },
+            // node: {
+            //     __filename: true,
+            //     __dirname: true
+            // },
             module: {
                 rules: [
                     {
@@ -31,14 +33,18 @@ module.exports = (env, argv) => {
                         use: 'ts-loader',
                         exclude: /node_modules/,
                     },
+                    // {
+                    //     test: /\.node$/,
+                    //     loader: 'native-ext-loader',
+                    //     //use: 'node-addon-loader',
+                    //     //use: 'node-loader',
+                    //     options: {
+                    //         //rewritePath: path.resolve(__dirname, 'dist')
+                    //     },
+                    // },
                     {
                         test: /\.node$/,
-                        loader: 'native-ext-loader',
-                        //use: 'node-addon-loader',
-                        //use: 'node-loader',
-                        options: {
-                            //rewritePath: path.resolve(__dirname, 'dist')
-                        },
+                        use: 'node-loader'
                     },
                     {
                         test: /\.(png|svg|jpg|gif|ico)$/,
@@ -52,6 +58,9 @@ module.exports = (env, argv) => {
             },
             resolve: {
                 extensions: ['.tsx', '.ts', '.js'],
+            },
+            resolveLoader: {
+                modules: ["node_modules"]
             },
             output: {
                 filename: 'scanner.js',
