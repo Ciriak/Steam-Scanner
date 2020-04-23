@@ -17,7 +17,11 @@ const exeBlackList: string[] = [
     "dxsetup.exe",
     "Touchup.exe",
     "touchup.exe",
-    "pbsvc.exe"
+    "pbsvc.exe",
+    "UnityCrashHandler.exe",
+    "UnityCrashHandler64.exe",
+    "CrashReportClient.exe",
+    "EasyAntiCheat_Setup.exe"
 ];
 
 export default exeBlackList;
