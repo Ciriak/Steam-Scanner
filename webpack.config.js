@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs-extra');
-// const CopyPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 // const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = (env, argv) => {
@@ -17,15 +17,13 @@ module.exports = (env, argv) => {
         /**
          * Main process
          */
-
         {
             entry: './src/app.ts',
             target: "electron-main",
             devtool: "inline-source-map",
-            // node: {
-            //     __filename: true,
-            //     __dirname: true
-            // },
+            externals: {
+                "extract-file-icon": 'require("./native/extract-file-icon")'
+            },
             module: {
                 rules: [
                     {
@@ -33,27 +31,12 @@ module.exports = (env, argv) => {
                         use: 'ts-loader',
                         exclude: /node_modules/,
                     },
-                    // {
-                    //     test: /\.node$/,
-                    //     loader: 'native-ext-loader',
-                    //     //use: 'node-addon-loader',
-                    //     //use: 'node-loader',
-                    //     options: {
-                    //         //rewritePath: path.resolve(__dirname, 'dist')
-                    //     },
-                    // },
-                    {
-                        test: /\.node$/,
-                        use: 'node-loader'
-                    },
                     {
                         test: /\.(png|svg|jpg|gif|ico)$/,
                         use: [
                             'file-loader'
                         ]
                     },
-
-
                 ],
             },
             resolve: {
@@ -124,7 +107,10 @@ module.exports = (env, argv) => {
                 path: path.resolve(__dirname, 'dist'),
             },
             plugins: [
-                // new CleanWebpackPlugin(),
+                new CopyPlugin([{
+                    from: 'node_modules/extract-file-icon',
+                    to: 'native/extract-file-icon'
+                }]),
                 new HtmlWebpackPlugin({
                     filename: 'notification.html',
                     title: 'Notification',
