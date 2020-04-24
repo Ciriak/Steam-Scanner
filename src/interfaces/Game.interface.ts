@@ -41,6 +41,17 @@ interface IGame {
   userSet?: boolean;
 
   /**
+   * True if the game should not display notifications
+   * Can be set to false if it is a game that has been previously "removed" or reset
+   */
+  hideNotifications?: boolean;
+
+  /**
+   * True if the game shouldn't be added automatically (if there only one exe for example)
+   */
+  disableAutoAdd?: boolean;
+
+  /**
    * If true, the game won't appear
    */
   hidden?: boolean;

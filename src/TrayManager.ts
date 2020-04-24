@@ -5,6 +5,7 @@ import ignoreGameIcon from "./assets/tray/ignore.png"
 import resetIcon from "./assets/tray/reset.png";
 import scanIcon from "./assets/tray/reset.png";
 import quitIcon from "./assets/tray/quit.png";
+import deleteIcon from "./assets/tray/delete.png";
 
 const trayIcon = trayIconData;
 const defaultGameIcon = defaultGameIconData;
@@ -255,8 +256,8 @@ export default class Traymanager {
                 type: "separator"
             }),
             new MenuItem({
-                icon: path.join(app.getAppPath(), resetIcon),
-                label: "Reset the game infos",
+                icon: path.join(app.getAppPath(), deleteIcon),
+                label: "Delete from the Steam library",
                 click: () => {
                     this.scanner.launchersManager.resetGame(game);
                 }

@@ -34,7 +34,7 @@ export default class GameHelper {
                 if (launcher && launcher.games) {
                     gameConfig = launcher.games[gameData.name];
                     if (gameConfig) {
-                        // if a config is found for this game, reutrn it
+                        // if a config is found for this game, return it
                         return gameConfig
                     }
                 }
@@ -117,11 +117,16 @@ export default class GameHelper {
 
                         if (launcher.games) {
                             this.gameData.binaries = [this.gameData.binaries[0]];
-                            this.gameData.binarySet = true;
                             log(colors.green("Found the executable of " + colors.cyan(this.gameData.name) + " at ") + this.gameData.binaries[0]);
 
+                            // only if the game is authorized to be auso added
+                            if (this.gameData.disableAutoAdd) {
+                                logWarn("Disable auto add is set to TRUE for " + this.gameData.name + ", the exe will have to be manually set by the user");
+                            }
+                            else {
+                                this.scanner.launchersManager.setBinaryForGame(this.gameData);
+                            }
 
-                            this.scanner.launchersManager.setBinaryForGame(this.gameData);
                         }
                     }
                     else {
