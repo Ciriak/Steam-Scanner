@@ -1,4 +1,4 @@
-import { app } from "electron";
+import { app, dialog } from "electron";
 import * as path from "path";
 import { Launcher } from "./Launcher";
 import SteamScanner from "./app";
@@ -143,8 +143,10 @@ export class LaunchersManager {
                 if (userSet) {
                     launcher.games[gameData.name].userSet = true
                 }
+
                 launcher.games[gameData.name].binarySet = true
             }
+
             // retrieve the icon and generate a file
             await this.generateGameIcon(gameData.binaries[0], gameData.launcher, gameData.name);
 
@@ -155,12 +157,17 @@ export class LaunchersManager {
             log(`${colors.cyan(gameData.name)} executable has been set as : ${colors.green(gameData.binaries[0])}`);
 
             // show notification
+            const gameIcon = this.scanner.IconsUtil.getIcon(gameData.binaries[0])[64];
 
-            this.scanner.notificationsManager.notification({
-                icon: this.scanner.IconsUtil.getIcon(gameData.binaries[0])[64],
-                title: gameData.name + " added",
-                message: gameData.name + " has been added to your Steam library",
-            });
+            // little timeout for the image loading
+            setTimeout(() => {
+                this.scanner.notificationsManager.notification({
+                    icon: gameIcon,
+                    title: gameData.name + " added",
+                    message: gameData.name + " has been added to your Steam library",
+                });
+            }, 1000)
+
 
             this.scanner.steam.updateShortcuts();
 
@@ -173,25 +180,38 @@ export class LaunchersManager {
      * @param game
      */
     public ignoreGame(gameData: IGame) {
+        dialog.showMessageBox({
+            title: "Hiding " + gameData.name,
+            type: "question",
+            message: "Are you sure you want to ignore this game ?\nIt will not appear in the list in the future.",
+            buttons: ["Yes", "No"],
+        }).then((response) => {
+            // if user said yes
+            if (response.response === 0) {
+                if (!this.config.launchers[gameData.launcher]) {
+                    logWarn(`Cannot continue, launcher ${gameData.launcher} not found !`);
+                    return;
+                }
+                const launcher = this.config.launchers[gameData.launcher];
 
-        if (!this.config.launchers[gameData.launcher]) {
-            logWarn(`Cannot continue, launcher ${gameData.launcher} not found !`);
-            return;
-        }
-        const launcher = this.config.launchers[gameData.launcher];
+                if (launcher.games && launcher.games[gameData.name]) {
+                    // set the ignore propertie
+                    launcher.games[gameData.name].hidden = true
+                    // commit the changes
+                    this.config.launchers[gameData.launcher] = launcher;
+                    this.config.launchers = { ...this.config.launchers };
+                    log(`${colors.cyan(gameData.name)} has been added to the ignore list`)
+                }
+            }
 
-        if (launcher.games && launcher.games[gameData.name]) {
-            // set the ignore propertie
-            launcher.games[gameData.name].hidden = true
-            // commit the changes
-            this.config.launchers[gameData.launcher] = launcher;
-            this.config.launchers = { ...this.config.launchers };
-            log(`${colors.cyan(gameData.name)} has been added to the ignore list`)
-        }
+        });
+
+
+
     }
 
     /**
-     * Hide and ignore this game in the future
+     * Remove the game from the steam Library
      * @param game
      */
     public resetGame(gameData: IGame) {
@@ -203,25 +223,28 @@ export class LaunchersManager {
         const launcher = this.config.launchers[gameData.launcher];
 
         if (launcher.games && launcher.games[gameData.name]) {
-            // remove the game from the launcher list
-            delete launcher.games[gameData.name]
+            // clear the game binaries
+            launcher.games[gameData.name].binaries = [];
+            launcher.games[gameData.name].binarySet = false;
+            launcher.games[gameData.name].hideNotifications = true;
+            launcher.games[gameData.name].disableAutoAdd = true;
             // commit the changes
             this.config.launchers[gameData.launcher] = launcher;
             this.config.launchers = { ...this.config.launchers };
             log(`${colors.cyan(gameData.name)} infos have been cleaned`)
 
-            this.scanner.notificationsManager.notification({
-                title: "Game info reset",
-                message: gameData.name + " infos have been reset",
-                icon: notificatioReset
+            this.scanner.steam.removeShortcut(gameData).then(() => {
+                this.scanner.notificationsManager.notification({
+                    title: "Game removed",
+                    message: `${gameData.name} has been removed from your Steam Library`,
+                })
+                // relaunch a scan process
+                this.getAllGames().then(() => {
+                    this.scanner.trayManager.setTray();
+                })
             });
 
-            this.scanner.steam.removeShortcut(gameData);
 
-            // relaunch a scan process
-            this.getAllGames().then(() => {
-                this.scanner.trayManager.setTray();
-            })
 
         }
 

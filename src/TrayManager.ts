@@ -5,6 +5,7 @@ import ignoreGameIcon from "./assets/tray/ignore.png"
 import resetIcon from "./assets/tray/reset.png";
 import scanIcon from "./assets/tray/reset.png";
 import quitIcon from "./assets/tray/quit.png";
+import deleteIcon from "./assets/tray/delete.png";
 
 const trayIcon = trayIconData;
 const defaultGameIcon = defaultGameIconData;
@@ -98,7 +99,6 @@ export default class Traymanager {
         // title and tooltip
         this.tray.setTitle("Steam Scanner");
         this.tray.setToolTip("Steam Scanner");
-
         // show a notification if some game need an exe selection
 
         // only one game
@@ -182,7 +182,10 @@ export default class Traymanager {
                 }
                 // if we don't know the game exe yet
                 else {
-                    this.gameNeedExeSelectList.push(game);  // increment the game exe needed count
+                    // only add if the game was supposed to display a notification
+                    if (!game.hideNotifications) {
+                        this.gameNeedExeSelectList.push(game);  // increment the game exe needed count
+                    }
                     gameMenu = new MenuItem({
                         label: gameName,
                         icon: path.join(app.getAppPath(), defaultGameIcon),
@@ -255,8 +258,8 @@ export default class Traymanager {
                 type: "separator"
             }),
             new MenuItem({
-                icon: path.join(app.getAppPath(), resetIcon),
-                label: "Reset the game infos",
+                icon: path.join(app.getAppPath(), deleteIcon),
+                label: "Delete from the Steam library",
                 click: () => {
                     this.scanner.launchersManager.resetGame(game);
                 }

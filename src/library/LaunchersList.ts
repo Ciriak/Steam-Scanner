@@ -70,7 +70,8 @@ const EpicGameLauncher: ILauncher = {
     gamesPossibleLocations: {
         include: [
             "$drive\\Program Files (x86)\\Epic Games",
-            "$drive\\Programmes\\Epic Games"
+            "$drive\\Programmes\\Epic Games",
+            "$drive\\Program Files\\Epic Games"
         ],
         exclude: [
             "Launcher",
