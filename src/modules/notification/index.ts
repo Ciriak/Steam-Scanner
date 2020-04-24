@@ -29,6 +29,9 @@ ipcRenderer.on(NotificationEvents.SET_NOTIFICATION, (event, options: INotificati
 
     hideTimeout = setTimeout(() => {
         contentElement.classList.remove("active");
+        titleElement.textContent = "";
+        messageContent.textContent = "";
+        imageContent.src = defaultIcon;
         clearTimeout(hideTimeout);
     }, (options.duration || 10000) - transitionDuration);
 

@@ -12,9 +12,9 @@
     <div class="content" id="notification-content">
 
         <div class="close-btn" onclick="closeNotification()"></div>
-        <img id="notification-icon" src="null" alt="Icon">
+        <img id="notification-icon" src="null" onerror="this.src=defaultIcon" alt="Icon">
         <div class="notification-text">
-            <h1 id="notification-title">Title</h1>
+            <h1 id="notification-title"></h1>
             <p id="notification-message"></p>
         </div>
 
