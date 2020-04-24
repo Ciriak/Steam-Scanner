@@ -19,7 +19,13 @@ Steam Scanner run as a background process, grab games from others launchers and 
 
 Once installed, it is available from the system tray
 <p align="center">
+
+<img src="./src/assets/scdemo.gif" align="center">
+
 <img src="./src/assets/screen-tray.png" align="center">
+
+
+
  </p>
 
 
