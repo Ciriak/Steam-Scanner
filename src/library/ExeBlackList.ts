@@ -21,7 +21,9 @@ const exeBlackList: string[] = [
     "UnityCrashHandler.exe",
     "UnityCrashHandler64.exe",
     "CrashReportClient.exe",
-    "EasyAntiCheat_Setup.exe"
+    "EasyAntiCheat_Setup.exe",
+    "EasyAntiCheat_launcher.exe",
+    "UplayInstaller.exe",
 ];
 
 export default exeBlackList;

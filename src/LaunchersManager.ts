@@ -157,12 +157,17 @@ export class LaunchersManager {
             log(`${colors.cyan(gameData.name)} executable has been set as : ${colors.green(gameData.binaries[0])}`);
 
             // show notification
+            const gameIcon = this.scanner.IconsUtil.getIcon(gameData.binaries[0])[64];
 
-            this.scanner.notificationsManager.notification({
-                icon: this.scanner.IconsUtil.getIcon(gameData.binaries[0])[64],
-                title: gameData.name + " added",
-                message: gameData.name + " has been added to your Steam library",
-            });
+            // little timeout for the image loading
+            setTimeout(() => {
+                this.scanner.notificationsManager.notification({
+                    icon: gameIcon,
+                    title: gameData.name + " added",
+                    message: gameData.name + " has been added to your Steam library",
+                });
+            }, 1000)
+
 
             this.scanner.steam.updateShortcuts();
 
@@ -206,7 +211,7 @@ export class LaunchersManager {
     }
 
     /**
-     * Hide and ignore this game in the future
+     * Remove the game from the steam Library
      * @param game
      */
     public resetGame(gameData: IGame) {
@@ -228,12 +233,18 @@ export class LaunchersManager {
             this.config.launchers = { ...this.config.launchers };
             log(`${colors.cyan(gameData.name)} infos have been cleaned`)
 
-            this.scanner.steam.removeShortcut(gameData);
+            this.scanner.steam.removeShortcut(gameData).then(() => {
+                this.scanner.notificationsManager.notification({
+                    title: "Game removed",
+                    message: `${gameData.name} has been removed from your Steam Library`,
+                })
+                // relaunch a scan process
+                this.getAllGames().then(() => {
+                    this.scanner.trayManager.setTray();
+                })
+            });
 
-            // relaunch a scan process
-            this.getAllGames().then(() => {
-                this.scanner.trayManager.setTray();
-            })
+
 
         }
 

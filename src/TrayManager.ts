@@ -99,7 +99,6 @@ export default class Traymanager {
         // title and tooltip
         this.tray.setTitle("Steam Scanner");
         this.tray.setToolTip("Steam Scanner");
-
         // show a notification if some game need an exe selection
 
         // only one game
@@ -183,7 +182,10 @@ export default class Traymanager {
                 }
                 // if we don't know the game exe yet
                 else {
-                    this.gameNeedExeSelectList.push(game);  // increment the game exe needed count
+                    // only add if the game was supposed to display a notification
+                    if (!game.hideNotifications) {
+                        this.gameNeedExeSelectList.push(game);  // increment the game exe needed count
+                    }
                     gameMenu = new MenuItem({
                         label: gameName,
                         icon: path.join(app.getAppPath(), defaultGameIcon),
