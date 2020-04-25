@@ -6,7 +6,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = (env, argv) => {
 
     if (argv.mode === 'production') {
-        console.log("[Production mode]");
+        console.log("[Building for production]");
         generatePackageJson();
     }
 
