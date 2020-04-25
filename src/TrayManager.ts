@@ -13,7 +13,6 @@ import path from "path"
 import SteamScanner from "./app";
 import Config from "./Config";
 import ILauncher from "./interfaces/Launcher.interface";
-import launchers from "./library/LaunchersList";
 export default class Traymanager {
     tray?: Tray;
     scanner: SteamScanner;
@@ -148,13 +147,13 @@ export default class Traymanager {
     }
 
     private generateGamesListForLauncher(launcher: ILauncher): MenuItem[] | undefined {
-        if (!launchers[launcher.name]) {
+        if (!this.scanner.config.launchers[launcher.name]) {
             return;
         }
         const menu: MenuItem[] = [
             new MenuItem({
                 label: launcher.label,
-                icon: path.join(app.getAppPath(), launchers[launcher.name].icon),
+                icon: path.join(app.getAppPath(), this.scanner.config.launchers[launcher.name].icon),
                 enabled: false
             }),
             new MenuItem({

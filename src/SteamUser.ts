@@ -5,7 +5,7 @@ import * as shortcut from "steam-shortcut-editor";
 import Config from "./Config";
 import { logWarn, logError, log } from "./utils/helper.utils";
 import { unlinkSync } from "fs-extra";
-import { Launcher } from "./library/launchers/Launcher";
+import { Launcher } from "./Launcher";
 import SteamScanner from "./app";
 import colors from "colors";
 

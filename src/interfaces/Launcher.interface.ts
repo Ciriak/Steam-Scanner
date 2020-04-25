@@ -1,4 +1,4 @@
-import { Launcher } from "../library/launchers/Launcher";
+import { Launcher } from "../Launcher";
 
 export interface IGameLocation {
     /**
@@ -12,6 +12,10 @@ export interface IGameLocation {
      */
     exclude?: string[]
 };
+
+export interface ILaunchersCollection {
+    [name: string]: ILauncher
+}
 
 export interface IGamesCollection {
     [name: string]: IGame

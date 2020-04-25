@@ -1,11 +1,11 @@
 import colors from "colors";
 import fs from "fs-extra";
 import path from "path";
-import Config from "../../Config";
-import ILauncher, { IGameLocation, IInstallationState, IGamesCollection } from "../../interfaces/Launcher.interface";
-import { addDrivesToPossibleLocations, log, logWarn } from "../../utils/helper.utils";
-import GameHelper from "../../GameHelper";
-import SteamScanner from "../../app";
+import Config from "./Config";
+import ILauncher, { IGameLocation, IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
+import { addDrivesToPossibleLocations, log, logWarn } from "./utils/helper.utils";
+import GameHelper from "./GameHelper";
+import SteamScanner from "./app";
 
 export abstract class Launcher implements ILauncher {
     [propName: string]: any

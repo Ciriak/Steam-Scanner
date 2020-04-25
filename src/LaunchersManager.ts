@@ -1,26 +1,21 @@
 import { app, dialog } from "electron";
 import * as path from "path";
-import { Launcher } from "./library/launchers/Launcher";
+import { Launcher } from "./Launcher";
 import SteamScanner from "./app";
 import { logError, log, logWarn } from "./utils/helper.utils";
-import launchers from "./library/LaunchersList";
 import Config from "./Config";
 import ILauncher, { IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
 import colors from "colors";
 import BattleNet from "./library/launchers/BattleNet";
 import Origin from "./library/launchers/Origin";
-
-
-// ===== Pattern for the config file =======
-// For the gamesProperties :
-// %pattern% :getPath method of Electron => https://github.com/electron/electron/blob/master/docs/api/app.md#appgetpathname
-// $this.xxx = a propertie of the current item (ex : name)
+import Uplay from "./library/launchers/Uplay";
+import Epic from "./library/launchers/Epic";
 
 export class LaunchersManager {
     private config: Config;
     public installedLaunchers: Launcher[] = [];
     public scanner: SteamScanner;
-
+    private launchersList: Launcher[] = []
     /**
      * retrieve the supported launchers list from library (not an actual scan)
      * retrieve the "unique" games config from the library
@@ -28,6 +23,15 @@ export class LaunchersManager {
     constructor(scanner: SteamScanner) {
         this.scanner = scanner;
         this.config = scanner.config;
+        /**
+         * Set the launchers list
+         */
+        this.launchersList = [
+            new BattleNet(this.scanner),
+            new Origin(this.scanner),
+            new Uplay(this.scanner),
+            new Epic(this.scanner),
+        ]
     }
 
     /**
@@ -65,12 +69,7 @@ export class LaunchersManager {
             // list installed LauncherS
             log("Checking installed Launchers...");
 
-            const launchersList: Launcher[] = [
-                new BattleNet(this.scanner),
-                new Origin(this.scanner),
-            ]
-
-            for (const launcher of launchersList) {
+            for (const launcher of this.launchersList) {
                 checkList.push(launcher.checkInstallation())
             }
 

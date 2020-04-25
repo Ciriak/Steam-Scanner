@@ -1,4 +1,5 @@
-import { Launcher } from "./Launcher";
+import { Launcher } from "../../Launcher";
+import colors from "colors";
 import battlenetIcon from "../../assets/launchers/battlenet.png";
 import SteamScanner from "../../app";
 export default class BattleNet extends Launcher {
@@ -14,5 +15,6 @@ export default class BattleNet extends Launcher {
     constructor(scanner: SteamScanner) {
         super(scanner);
         this.hydrateFromConfig();
+        this.nameLabel = colors.cyan("[" + this.label + "]");
     }
 }
