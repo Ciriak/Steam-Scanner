@@ -1,13 +1,14 @@
 import { app, dialog } from "electron";
 import * as path from "path";
-import { Launcher } from "./Launcher";
+import { Launcher } from "./library/launchers/Launcher";
 import SteamScanner from "./app";
 import { logError, log, logWarn } from "./utils/helper.utils";
 import launchers from "./library/LaunchersList";
 import Config from "./Config";
 import ILauncher, { IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
 import colors from "colors";
-import notificatioReset from "./assets/notification/reset.png";
+import BattleNet from "./library/launchers/BattleNet";
+import Origin from "./library/launchers/Origin";
 
 
 // ===== Pattern for the config file =======
@@ -64,21 +65,13 @@ export class LaunchersManager {
             // list installed LauncherS
             log("Checking installed Launchers...");
 
-            for (const launcherName in launchers) {
+            const launchersList: Launcher[] = [
+                new BattleNet(this.scanner),
+                new Origin(this.scanner),
+            ]
 
-                if (launchers.hasOwnProperty(launcherName)) {
-
-                    const launcherConfig = { ...this.config.launchers[launcherName], ...launchers[launcherName] }; // use the config copy of the launcher
-                    const launcher = new Launcher(launcherConfig, this, this.scanner);
-                    // check installation except for "library"
-                    // if (launcherName === "Library") {
-                    //     // add lirbary to the launchers list anyway
-                    //     this.detectedLaunchers.push(launcher);
-                    //     this.scanner.config.launchers[launcher.name] = launcher;
-                    //     continue;
-                    // }
-                    checkList.push(launcher.checkInstallation())
-                }
+            for (const launcher of launchersList) {
+                checkList.push(launcher.checkInstallation())
             }
 
             const installedLaunchers: Launcher[] = [];

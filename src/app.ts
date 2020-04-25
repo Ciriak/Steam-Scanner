@@ -20,6 +20,7 @@ export default class SteamScanner {
     updater: Updater;
     IconsUtil: IconsUtil;
     constructor() {
+        app.allowRendererProcessReuse = true; // prevent warning
         this.config = new Config(this);
         this.steam = new Steam(this);
         this.launchersManager = new LaunchersManager(this);

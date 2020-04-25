@@ -1,9 +1,9 @@
 declare module 'steam-shortcut-editor';
 declare module "*.png" {
-    const value: any;
+    const value: string;
     export default value;
 }
 declare module "*.ico" {
-    const value: any;
+    const value: string;
     export default value;
 }

@@ -1,43 +1,58 @@
 import colors from "colors";
-import * as fs from "fs-extra";
-import * as path from "path";
-import Config from "./Config";
-import { LaunchersManager } from "./LaunchersManager";
-import ILauncher, { IGameLocation, IInstallationState, IGamesCollection } from "./interfaces/Launcher.interface";
-import { addDrivesToPossibleLocations, log, logWarn, logError } from "./utils/helper.utils";
-import GameHelper from "./GameHelper";
-import SteamScanner from "./app";
+import fs from "fs-extra";
+import path from "path";
+import Config from "../../Config";
+import ILauncher, { IGameLocation, IInstallationState, IGamesCollection } from "../../interfaces/Launcher.interface";
+import { addDrivesToPossibleLocations, log, logWarn } from "../../utils/helper.utils";
+import GameHelper from "../../GameHelper";
+import SteamScanner from "../../app";
 
-export class Launcher implements ILauncher {
+export abstract class Launcher implements ILauncher {
+    [propName: string]: any
     private config: Config;
-    public name: string;
-    public label: string;
-    private nameLabel: string;
-    public exeName: string = "";
-    public exeLocation?: string = "";
-
-    /**
-     * List of games found for this launcher
-     */
-    public games: IGamesCollection = {};
-    private manager: LaunchersManager;
-    private scanner: SteamScanner;
+    public name: string = "Launcher";
+    public label: string = "Launcher";
+    public exeName: string = "Launcher.exe";
+    public exeLocation?: string;
     public exePossibleLocations: string[] = [];
     public gamesPossibleLocations?: IGameLocation;
-    public icon: string;
+    public readonly games: IGamesCollection = {};
 
-    constructor(launcherItem: ILauncher, manager: LaunchersManager, scanner: SteamScanner) {
+    public readonly icon: string = "";
+
+    /**
+     * Displayed name of the launcher
+     */
+    protected nameLabel: string = "Launcher";
+    /**
+     * Reference to the scanner instance
+     */
+    private scanner: SteamScanner;
+
+    constructor(scanner: SteamScanner) {
         this.scanner = scanner;
         this.config = scanner.config;
-        this.manager = manager;
-        this.name = launcherItem.name;
-        this.label = launcherItem.label;
+    }
+
+    /**
+     * Retrieve the saved data for this launcher and apply them
+     */
+    protected hydrateFromConfig() {
+
+        if (!this.config.launchers[this.name]) {
+            // nothing to apply
+            return;
+        }
+        for (const prop in this.config.launchers[this.name]) {
+            if (this.config.launchers[this.name].hasOwnProperty(prop)) {
+
+                const val = this.config.launchers[this.name][prop];
+                // set the class prop with the saved value
+                this[prop] = val;
+            }
+        }
+
         this.nameLabel = colors.cyan("[" + this.name + "]");
-        this.exePossibleLocations = launcherItem.exePossibleLocations;
-        this.gamesPossibleLocations = launcherItem.gamesPossibleLocations;
-        this.games = launcherItem.games || {};
-        this.exeName = launcherItem.exeName;
-        this.icon = launcherItem.icon;
     }
 
     /**
@@ -45,36 +60,35 @@ export class Launcher implements ILauncher {
      * @return Promise with a boolean
      */
     public async checkInstallation(): Promise<IInstallationState> {
-        log("Checking installation for " + this.name);
+        log(`${this.nameLabel} Checking installation...`);
         return new Promise(async (resolve) => {
-            let launcherConfig = this.config.launchers[this.name];
             // if the binary location is not defined, try to find it
-            if (launcherConfig && launcherConfig.exeName && launcherConfig.exeLocation) {
-                this.exeLocation = launcherConfig.exeLocation;
-
-                return resolve({
-                    launcher: this,
-                    installed: true
-                });
+            if (this.exeName && this.exeLocation) {
+                // if the exe still exists
+                if (fs.existsSync(this.exeLocation)) {
+                    log(`${this.nameLabel} is installed in ${colors.magenta(this.exeLocation)}`);
+                    return resolve({
+                        launcher: this,
+                        installed: true
+                    });
+                }
+                else {
+                    logWarn(`${this.nameLabel} executable is missing !`);
+                }
             }
 
             const parsedPossibleLocations: string[] = await addDrivesToPossibleLocations(
                 this.exePossibleLocations
             );
 
-            // first we locate the drm directory
+            // first we locate the launcher directory
             for (let loc of parsedPossibleLocations) {
                 loc = path.normalize(path.join(loc, this.exeName));
-                // try to list all the users in the userdata folder of steam
+                // check if the launcher exe exists
                 if (fs.existsSync(loc)) {
-                    this.exeLocation = loc;
 
-                    try {
-                        launcherConfig = this;
-                        // this.config.save();
-                    } catch (error) {
-                        logError(error);
-                    }
+                    // set the exeLocation propertie
+                    this.exeLocation = loc;
                     break;
                 }
             }
