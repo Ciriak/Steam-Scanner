@@ -6,4 +6,5 @@ export default interface IConfig {
   launchers: ILaunchersCollection;
   launchOnStartup: boolean;
   enableNotifications: boolean;
+  autoRestartSteam: boolean;
 }

@@ -56,6 +56,15 @@ export default class Traymanager {
             }
         });
 
+        const restartSteamOption = new MenuItem({
+            type: "checkbox",
+            label: "Restart Steam on change",
+            checked: this.config.autoRestartSteam,
+            click: () => {
+                this.config.autoRestartSteam = !this.config.autoRestartSteam
+            }
+        });
+
         const scanButton = new MenuItem({
             label: "Scan games",
             icon: path.join(app.getAppPath(), scanIcon),
@@ -80,6 +89,7 @@ export default class Traymanager {
             separator,
             scanButton,
             notificationsOption,
+            restartSteamOption,
             separator
         ].concat(launchersMenuItems));
 

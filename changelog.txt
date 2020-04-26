@@ -1,4 +1,1 @@
-- Added support for the Epic Game Store
-- Added a way to remove a game once it was added to the library
-- Game removed from the library will not be auto-added
-- Fixed an issue with the notification icon
+- Added an option to restart Steam automatically on shortcut change

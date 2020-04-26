@@ -16,7 +16,7 @@ export abstract class Launcher implements ILauncher {
     public exeLocation?: string;
     public exePossibleLocations: string[] = [];
     public gamesPossibleLocations?: IGameLocation;
-    public readonly games: IGamesCollection = {};
+    public games: IGamesCollection = {};
 
     public readonly icon: string = "";
 
@@ -127,7 +127,7 @@ export abstract class Launcher implements ILauncher {
     /**
      * Load the game directories into the class
      */
-    private async loadGamesDirectories(): Promise<any> {
+    protected async loadGamesDirectories(): Promise<any> {
 
         let count: number = 0;
 
@@ -200,7 +200,7 @@ export abstract class Launcher implements ILauncher {
     /**
      * Load the game binaries into the game instances
      */
-    private async loadGamesBinaries(): Promise<any> {
+    protected async loadGamesBinaries(): Promise<any> {
         return new Promise(async (resolve) => {
             for (const gameName in this.games) {
                 // only search if binary is not set yet
@@ -335,7 +335,7 @@ export abstract class Launcher implements ILauncher {
     //     return true;
     // }
 
-    private isInGamesExcludeList(gameFolderName: string): boolean {
+    protected isInGamesExcludeList(gameFolderName: string): boolean {
         // no exclude // return false
         if (!this.gamesPossibleLocations?.exclude) {
             return false;

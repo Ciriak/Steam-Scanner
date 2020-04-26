@@ -65,9 +65,14 @@ export default class IconsUtil {
      */
     clear() {
         if (existsSync(this.baseIconPath)) {
-            rmdirSync(this.baseIconPath, {
-                recursive: true
-            });
+            try {
+                rmdirSync(this.baseIconPath, {
+                    recursive: true
+                });
+            } catch (error) {
+                logError("Failed to clean the temp icons folder : \n" + error);
+            }
+
         }
 
     }
