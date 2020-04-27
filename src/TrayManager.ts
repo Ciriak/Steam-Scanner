@@ -13,6 +13,7 @@ import path from "path"
 import SteamScanner from "./app";
 import Config from "./Config";
 import ILauncher from "./interfaces/Launcher.interface";
+import IGame from "./interfaces/Game.interface";
 export default class Traymanager {
     tray?: Tray;
     scanner: SteamScanner;

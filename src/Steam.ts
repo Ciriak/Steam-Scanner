@@ -7,6 +7,7 @@ import SteamScanner from "./app";
 import colors from "colors";
 import { exec, execFile } from "child_process";
 import { app } from "electron";
+import IGame from "./interfaces/Game.interface";
 /**
  * manage the interactions with Steam
  */

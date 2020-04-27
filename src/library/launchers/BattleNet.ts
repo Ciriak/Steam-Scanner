@@ -40,10 +40,17 @@ export default class BattleNet extends Launcher {
             for (const gamePath of gamesList) {
 
                 const gameName = path.basename(gamePath);
+
+                // ignore if game info already sets
+                if (this.games[gameName]) {
+                    continue;
+                }
+
                 this.games[gameName] = {
                     folderPath: gamePath,
                     launcher: this.name,
                     name: gameName,
+                    label: gameName,
                     binaries: []
                 }
             }

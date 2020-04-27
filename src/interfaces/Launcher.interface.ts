@@ -1,4 +1,5 @@
 import { Launcher } from "../Launcher";
+import IGame from "./Game.interface";
 
 export interface IGameLocation {
     /**

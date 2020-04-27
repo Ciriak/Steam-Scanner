@@ -6,7 +6,8 @@ import colors from "colors";
 import path from "path";
 import exeBlackList from "./library/ExeBlackList";
 import { findIndex } from "lodash";
-
+import gamesLibrary from "./library/games/GamesLibrary"
+import IGame from "./interfaces/Game.interface";
 /**
  * Provide utilities for game manipulations
  */
@@ -18,7 +19,6 @@ export default class GameHelper {
         this.scanner = scanner;
         this.config = scanner.config;
         this.gameData = this.checkGameData(gameData);
-
     }
 
 
@@ -97,7 +97,18 @@ export default class GameHelper {
      */
     public async findGameExecutable(): Promise<any> {
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
+
+
+            /**
+             * Try to find a reference executable in the library
+             */
+            this.gameData = this.checkExecutableInLibrary(this.gameData);
+
+            // stop if binary set from the library
+            if (this.gameData.binarySet) {
+                return resolve();
+            }
 
             switch (this.gameData.binaries.length) {
                 // no binary found
@@ -161,6 +172,48 @@ export default class GameHelper {
 
         });
 
+    }
+
+    /**
+     * Check if we know the game in the "library" if so, we set the stored properties 
+     */
+    private checkExecutableInLibrary(game: IGame): IGame {
+        if (!gamesLibrary[game.name]) {
+            return game;
+        }
+
+        const libraryGameInfos = gamesLibrary[game.name];
+
+        gameFilesloop: for (const binary of game.binaries) {
+            for (const libBinary of libraryGameInfos.binaries) {
+                if (path.basename(binary) === path.basename(libBinary)) {
+                    game.binaries = [binary];
+                    if (!game.disableAutoAdd) {
+                        this.scanner.launchersManager.setBinaryForGame(this.gameData);
+                    }
+                    break gameFilesloop;
+                }
+            }
+        }
+
+        game.label = libraryGameInfos.label || game.label;
+
+        return game;
+    }
+
+
+
+    /**
+     * Take a list of binaries files and add the full game path to each of them
+     * @param game game object
+     * @param filesList exe path list
+     */
+    private addFolderPathToBinariesList(game: IGame, filesList: string[]) {
+        const parsedList: string[] = [];
+        for (const filePath of filesList) {
+            parsedList.push(path.join(game.folderPath, filePath));
+        }
+        return parsedList;
     }
 
     /**

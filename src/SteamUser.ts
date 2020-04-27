@@ -8,6 +8,7 @@ import { unlinkSync } from "fs-extra";
 import { Launcher } from "./Launcher";
 import SteamScanner from "./app";
 import colors from "colors";
+import IGame from "./interfaces/Game.interface";
 
 export class SteamUser {
     public userId: string;

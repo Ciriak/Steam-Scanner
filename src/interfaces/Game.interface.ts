@@ -1,11 +1,37 @@
+export interface IGamesLibrary {
+  /**
+   * Name of the folder known for containing this game
+   */
+  [folderName: string]: {
+    [prop: string]: any;
+    /**
+     * Possible binaries for the game
+     */
+    binaries: string[],
+    /**
+     * Label for this game
+     */
+    label?: string;
+  }
+}
+
 /**
  * Represent a game that has been identified
  */
-interface IGame {
+export default interface IGame {
+  [prop: string]: any;
   /**
    * Name of the game
    */
   name: string;
+
+  /**
+   * Label of the game
+   *
+   * Name will be reused by default
+   */
+  label: string;
+
   /**
    * Name of the folder (if different of the game name itself)
    */

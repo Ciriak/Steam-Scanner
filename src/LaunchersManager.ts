@@ -10,6 +10,7 @@ import BattleNet from "./library/launchers/BattleNet";
 import Origin from "./library/launchers/Origin";
 import Uplay from "./library/launchers/Uplay";
 import Epic from "./library/launchers/Epic";
+import IGame from "./interfaces/Game.interface";
 
 export class LaunchersManager {
     private config: Config;
@@ -43,6 +44,7 @@ export class LaunchersManager {
             // get games from all installed Launcher
             const waitList: Promise<IGamesCollection>[] = [];
             for (const launcher of this.installedLaunchers) {
+
                 const isLibrary = launcher.name === "Library";
                 waitList.push(launcher.getGames());
             }

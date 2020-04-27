@@ -20,7 +20,8 @@
       ],
       "skipFiles": [
         "<node_internals>/**/*.js"
-      ]
+      ],
+      "restart": true
     }
   ]
 }
