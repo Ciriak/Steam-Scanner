@@ -10,6 +10,9 @@ const gamesLibrary: IGamesLibrary = {
     },
     "World Of Warcraft": {
         binaries: ["World of Warcraft Launcher.exe"]
+    },
+    "Battlefield 4": {
+        binaries: ["bf4.exe"]
     }
 }
 
