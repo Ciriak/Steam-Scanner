@@ -249,7 +249,6 @@ export default class Traymanager {
                 }
             }));
         }
-
         return Menu.buildFromTemplate(menuItems);
 
     }
