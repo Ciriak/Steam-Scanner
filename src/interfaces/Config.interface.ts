@@ -1,9 +1,10 @@
-import launchers from "../library/LaunchersList";
+import { ILaunchersCollection } from "./Launcher.interface";
 
 export default interface IConfig {
   steamDirectory: string;
   steamExe: string;
-  launchers: typeof launchers;
+  launchers: ILaunchersCollection;
   launchOnStartup: boolean;
   enableNotifications: boolean;
+  autoRestartSteam: boolean;
 }

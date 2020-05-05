@@ -7,6 +7,7 @@ import SteamScanner from "./app";
 import colors from "colors";
 import { exec, execFile } from "child_process";
 import { app } from "electron";
+import IGame from "./interfaces/Game.interface";
 /**
  * manage the interactions with Steam
  */
@@ -128,7 +129,10 @@ export default class Steam {
                 }
             }
 
-            this.restartSteam();
+            if (this.config.autoRestartSteam) {
+                this.restartSteam();
+            }
+
 
             return resolve();
         })
@@ -147,7 +151,9 @@ export default class Steam {
                 }
             }
 
-            this.restartSteam();
+            if (this.config.autoRestartSteam) {
+                this.restartSteam();
+            }
 
             return resolve();
         })
@@ -162,8 +168,11 @@ export default class Steam {
         // kill the active steam process
         exec('taskkill /f /IM "steam.exe"');
         // launch the exe
-        execFile("steam.exe", null, {
-            cwd: this.config.steamDirectory
-        });
+        setTimeout(() => {
+            execFile("steam.exe", null, {
+                cwd: this.config.steamDirectory
+            });
+        }, 3000);
+
     }
 }

@@ -5,8 +5,8 @@ import path from "path";
 import { app } from "electron";
 import { log, logWarn, logError } from "./utils/helper.utils";
 const appName = "steam-scanner";
-import launchers from "./library/LaunchersList";
 import SteamScanner from "./app";
+import { ILaunchersCollection } from "./interfaces/Launcher.interface";
 
 /**
  * Class that manage the config
@@ -16,7 +16,8 @@ export default class Config {
     private _launchOnStartup: boolean = defaultConfig.launchOnStartup;
     private _steamDirectory: string = defaultConfig.steamDirectory;
     private _steamExe: string = defaultConfig.steamExe;
-    private _launchers: typeof launchers = defaultConfig.launchers;
+    private _launchers: any = defaultConfig.launchers;
+    private _autoRestartSteam: boolean = defaultConfig.autoRestartSteam;
     private scanner: SteamScanner;
     version: string = "0.0.0";
     configPath = path.join(app.getPath("appData"), appName);
@@ -28,6 +29,15 @@ export default class Config {
 
     set enableNotifications(value: boolean) {
         this._enableNotifications = value;
+        this.writeConfig();
+    }
+
+    get autoRestartSteam(): boolean {
+        return this._autoRestartSteam;
+    }
+
+    set autoRestartSteam(value: boolean) {
+        this._autoRestartSteam = value;
         this.writeConfig();
     }
 
@@ -58,11 +68,11 @@ export default class Config {
         this.writeConfig();
     }
 
-    get launchers(): typeof launchers {
+    get launchers(): ILaunchersCollection {
         return this._launchers;
     }
 
-    set launchers(value: typeof launchers) {
+    set launchers(value: ILaunchersCollection) {
         this._launchers = value;
         this.writeConfig();
     }
@@ -85,6 +95,7 @@ export default class Config {
             this.launchers = config.launchers;
             this.launchOnStartup = config.launchOnStartup;
             this.steamDirectory = config.steamDirectory;
+            this.autoRestartSteam = config.autoRestartSteam;
         } catch (error) {
             logWarn("Unable to load the config");
             const config = this.writeDefaultConfig();
@@ -103,7 +114,8 @@ export default class Config {
             steamDirectory: this._steamDirectory,
             launchers: this._launchers,
             steamExe: this._steamExe,
-            enableNotifications: this._enableNotifications
+            enableNotifications: this._enableNotifications,
+            autoRestartSteam: this._autoRestartSteam,
         }
         try {
             writeJsonSync(this.configFilePath, configToWrite);

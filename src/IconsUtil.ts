@@ -28,9 +28,9 @@ export default class IconsUtil {
             // return base if path don't exist
             if (!existsSync(filePath)) {
                 return {
-                    "16": defaultExeIcon,
-                    "32": defaultExeIcon,
-                    "64": defaultExeIcon
+                    "16": path.join(app.getAppPath(), defaultExeIcon),
+                    "32": path.join(app.getAppPath(), defaultExeIcon),
+                    "64": path.join(app.getAppPath(), defaultExeIcon)
                 }
             }
             const iconData16 = extractIcon(filePath, 16);
@@ -52,9 +52,9 @@ export default class IconsUtil {
             // return the default exe icon if unable to generate
             logError(error);
             return {
-                "16": defaultExeIcon,
-                "32": defaultExeIcon,
-                "64": defaultExeIcon
+                "16": path.join(app.getAppPath(), defaultExeIcon),
+                "32": path.join(app.getAppPath(), defaultExeIcon),
+                "64": path.join(app.getAppPath(), defaultExeIcon)
             }
         }
 
@@ -65,9 +65,14 @@ export default class IconsUtil {
      */
     clear() {
         if (existsSync(this.baseIconPath)) {
-            rmdirSync(this.baseIconPath, {
-                recursive: true
-            });
+            try {
+                rmdirSync(this.baseIconPath, {
+                    recursive: true
+                });
+            } catch (error) {
+                logError("Failed to clean the temp icons folder : \n" + error);
+            }
+
         }
 
     }

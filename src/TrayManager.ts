@@ -13,7 +13,7 @@ import path from "path"
 import SteamScanner from "./app";
 import Config from "./Config";
 import ILauncher from "./interfaces/Launcher.interface";
-import launchers from "./library/LaunchersList";
+import IGame from "./interfaces/Game.interface";
 export default class Traymanager {
     tray?: Tray;
     scanner: SteamScanner;
@@ -57,6 +57,15 @@ export default class Traymanager {
             }
         });
 
+        const restartSteamOption = new MenuItem({
+            type: "checkbox",
+            label: "Restart Steam on change",
+            checked: this.config.autoRestartSteam,
+            click: () => {
+                this.config.autoRestartSteam = !this.config.autoRestartSteam
+            }
+        });
+
         const scanButton = new MenuItem({
             label: "Scan games",
             icon: path.join(app.getAppPath(), scanIcon),
@@ -81,6 +90,7 @@ export default class Traymanager {
             separator,
             scanButton,
             notificationsOption,
+            restartSteamOption,
             separator
         ].concat(launchersMenuItems));
 
@@ -148,13 +158,13 @@ export default class Traymanager {
     }
 
     private generateGamesListForLauncher(launcher: ILauncher): MenuItem[] | undefined {
-        if (!launchers[launcher.name]) {
+        if (!this.scanner.config.launchers[launcher.name]) {
             return;
         }
         const menu: MenuItem[] = [
             new MenuItem({
                 label: launcher.label,
-                icon: path.join(app.getAppPath(), launchers[launcher.name].icon),
+                icon: path.join(app.getAppPath(), this.scanner.config.launchers[launcher.name].icon),
                 enabled: false
             }),
             new MenuItem({
@@ -240,7 +250,6 @@ export default class Traymanager {
                 }
             }));
         }
-
         return Menu.buildFromTemplate(menuItems);
 
     }
