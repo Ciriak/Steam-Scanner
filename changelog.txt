@@ -1,2 +1,3 @@
+- New Logo
 - Added a new screen when starting the app for the first time
 - Fixed a bug where some games were added to the library after beeing hidden

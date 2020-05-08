@@ -83,7 +83,9 @@ export default class SteamScanner {
      * Check if we should show the setup screen, if true, display it
      */
     private handleSetupScreen() {
+        if (this.config.firstLaunch) {
 
+        }
     }
 }
 
