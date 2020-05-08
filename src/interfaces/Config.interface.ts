@@ -7,4 +7,5 @@ export default interface IConfig {
   launchOnStartup: boolean;
   enableNotifications: boolean;
   autoRestartSteam: boolean;
+  firstLaunch: boolean;
 }
