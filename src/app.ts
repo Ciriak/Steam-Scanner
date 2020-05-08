@@ -30,6 +30,7 @@ export default class SteamScanner {
         this.IconsUtil = new IconsUtil();
         this.handleSingleInstance();
         this.handleAutoLaunch();
+        this.handleSetupScreen();
         this.scan();
         setTimeout(() => {
             this.scan();
@@ -76,6 +77,15 @@ export default class SteamScanner {
         });
 
         log("Auto launch ready and set !");
+    }
+
+    /**
+     * Check if we should show the setup screen, if true, display it
+     */
+    private handleSetupScreen() {
+        if (this.config.firstLaunch) {
+
+        }
     }
 }
 

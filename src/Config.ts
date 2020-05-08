@@ -18,6 +18,7 @@ export default class Config {
     private _steamExe: string = defaultConfig.steamExe;
     private _launchers: any = defaultConfig.launchers;
     private _autoRestartSteam: boolean = defaultConfig.autoRestartSteam;
+    private _firstLaunch: boolean = defaultConfig.firstLaunch;
     private scanner: SteamScanner;
     version: string = "0.0.0";
     configPath = path.join(app.getPath("appData"), appName);
@@ -47,6 +48,15 @@ export default class Config {
 
     set launchOnStartup(value: boolean) {
         this._launchOnStartup = value;
+        this.writeConfig();
+    }
+
+    get firstLaunch(): boolean {
+        return this._firstLaunch;
+    }
+
+    set firstlaunch(value: boolean) {
+        this._firstLaunch = value;
         this.writeConfig();
     }
 
@@ -114,6 +124,7 @@ export default class Config {
             steamDirectory: this._steamDirectory,
             launchers: this._launchers,
             steamExe: this._steamExe,
+            firstLaunch: this._firstLaunch,
             enableNotifications: this._enableNotifications,
             autoRestartSteam: this._autoRestartSteam,
         }
