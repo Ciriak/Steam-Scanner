@@ -206,13 +206,19 @@ export abstract class Launcher implements ILauncher {
                 // only search if binary is not set yet
                 if (this.games.hasOwnProperty(gameName)) {
                     const gameData = this.games[gameName];
+
+                    const gameInstance = new GameHelper(this.games[gameName], this.scanner);
+
+                    // force a label refresh every time
+                    this.games[gameName].label = gameInstance.getLabel(this.games[gameName]);
+
                     // stop if we should ignore the game
                     if (gameData.binarySet || gameData.hidden) {
                         continue;
                     }
-                    const gameInstance = new GameHelper(this.games[gameName], this.scanner);
-
                     this.games[gameName].binaries = await gameInstance.getBinaries();
+
+
                     await gameInstance.findGameExecutable();
                 }
             }

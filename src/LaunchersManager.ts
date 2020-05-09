@@ -154,13 +154,13 @@ export class LaunchersManager {
             const gameIcon = this.scanner.IconsUtil.getIcon(gameData.binaries[0])[64];
 
             // little timeout for the image loading
-            setTimeout(() => {
-                this.scanner.notificationsManager.notification({
-                    icon: gameIcon,
-                    title: gameData.name + " added",
-                    message: gameData.name + " has been added to your Steam library",
-                });
-            }, 1000)
+
+            this.scanner.notificationsManager.notification({
+                icon: gameIcon,
+                title: gameData.name + " added",
+                message: gameData.name + " has been added to your Steam library",
+            });
+
 
 
             this.scanner.steam.updateShortcuts();
