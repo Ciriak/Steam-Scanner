@@ -184,14 +184,15 @@ export default class Traymanager {
             if (launcher.games.hasOwnProperty(gameName)) {
                 let gameMenu: MenuItem;
                 const game = launcher.games[gameName];
-                if (game.hidden) {  // ignore hidden game
+                // ignore hidden game
+                if (game.hidden) {
                     continue;
                 }
                 // if the game is already known and ready to use
                 if (game.binarySet) {
                     const gameIcon = this.scanner.IconsUtil.getIcon(game.binaries[0]);
                     gameMenu = new MenuItem({
-                        label: gameName,
+                        label: game.label,
                         icon: gameIcon[32],
                         submenu: this.generateGameOptionsMenu(game)
                     })
@@ -203,7 +204,7 @@ export default class Traymanager {
                         this.gameNeedExeSelectList.push(game);  // increment the game exe needed count
                     }
                     gameMenu = new MenuItem({
-                        label: gameName,
+                        label: game.label,
                         icon: path.join(app.getAppPath(), defaultGameIcon),
                         sublabel: "Select the game .exe",
                         submenu: this.generateGameExeList(game)
