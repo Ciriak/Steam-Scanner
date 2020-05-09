@@ -8,4 +8,5 @@ export default interface IConfig {
   enableNotifications: boolean;
   autoRestartSteam: boolean;
   firstLaunch: boolean;
+  apiUrl: string;
 }

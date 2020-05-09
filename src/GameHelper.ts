@@ -1,4 +1,4 @@
-import { log, logWarn } from "./utils/helper.utils";
+import { log, logWarn, logError } from "./utils/helper.utils";
 import SteamScanner from "./app";
 import Config from "./Config";
 import recursive from "recursive-readdir";
@@ -8,6 +8,9 @@ import exeBlackList from "./library/ExeBlackList";
 import { findIndex } from "lodash";
 import gamesLibrary from "./library/games/GamesLibrary"
 import IGame from "./interfaces/Game.interface";
+import axios from "axios";
+import { createWriteStream, ensureDirSync } from "fs-extra";
+import { app } from "electron";
 /**
  * Provide utilities for game manipulations
  */
