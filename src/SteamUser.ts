@@ -81,9 +81,9 @@ export class SteamUser {
                 }
 
                 // loop each launcher
-                for (const launcher of this.scanner.launchersManager.installedLaunchers) {
+                for (const installedLauncher of this.scanner.launchersManager.installedLaunchers) {
 
-
+                    const launcher = this.config.launchers[installedLauncher.name];
 
                     // each game of the current launcher
                     for (const gameName in launcher.games) {
@@ -96,16 +96,19 @@ export class SteamUser {
                             if (!game.binaries || !game.binaries[0]) {
                                 continue;
                             }
+
+                            if (game.hidden) {
+                                continue;
+                            }
+
                             if (isFirstInstance) {
                                 log(
-                                    "Looking the " + colors.cyan(gameName) + " in the shortcut file..."
+                                    "Looking for " + colors.cyan(gameName) + " in the shortcut file..."
                                 );
                             }
 
                             // check if the game is already in the steam shortcuts
                             const { gameCount, unwantedIndexesList } = this.parseEntriesForGame(game, shortcutData);
-
-
 
                             /**
                              * shortcut don't already exist => add it
@@ -154,7 +157,7 @@ export class SteamUser {
                                 }
 
                                 // remove all unwanted , by their index
-                                unwantedIndexesList.reverse(); // reverse the array before => don't fucked up the index list
+                                unwantedIndexesList.reverse(); // reverse the array before => force the removing of the last item
                                 for (const unwantedIndex of unwantedIndexesList) {
                                     shortcutData.shortcuts.splice(unwantedIndex, 1);
                                 }
@@ -191,33 +194,32 @@ export class SteamUser {
      * Remove the entry of a game from the shortcuts file
      * @param game
      */
-    public removeShortcut(game: IGame, isFirstInstance?: boolean) {
-
-
-
-        shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: any) => {
-            // if can't parse (ex: shortcut file don't exist) , create a clean object
-            if (err || !shortcutData || !shortcutData.shortcuts) {
-                logError("WARNING - unable to parse the steam shortcuts file");
-                return;
-            }
-
-            let indexToRemove: number = -1;
-
-            for (let shortcutIndex = 0; shortcutIndex < shortcutData.shortcuts.length; shortcutIndex++) {
-                const shortcutEntry = shortcutData.shortcuts[shortcutIndex];
-                if (shortcutEntry.AppName === game.name) {
-                    indexToRemove = shortcutIndex;
+    public async removeShortcut(game: IGame, isFirstInstance?: boolean) {
+        return new Promise((resolve) => {
+            shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: any) => {
+                // if can't parse (ex: shortcut file don't exist) , create a clean object
+                if (err || !shortcutData || !shortcutData.shortcuts) {
+                    logError("WARNING - unable to parse the steam shortcuts file");
+                    return;
                 }
-            }
 
-            if (indexToRemove === -1) {
-                return;
-            }
+                let indexToRemove: number = -1;
 
-            shortcutData.shortcuts.splice(indexToRemove, 1);
-            await this.writeShortcutFile(shortcutData, isFirstInstance);
+                for (let shortcutIndex = 0; shortcutIndex < shortcutData.shortcuts.length; shortcutIndex++) {
+                    const shortcutEntry = shortcutData.shortcuts[shortcutIndex];
+                    if (shortcutEntry.AppName === game.name) {
+                        indexToRemove = shortcutIndex;
+                    }
+                }
 
+                if (indexToRemove === -1) {
+                    return resolve();
+                }
+
+                shortcutData.shortcuts.splice(indexToRemove, 1);
+                await this.writeShortcutFile(shortcutData, isFirstInstance);
+                return resolve();
+            });
         });
     }
 
