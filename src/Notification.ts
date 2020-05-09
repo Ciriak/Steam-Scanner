@@ -17,6 +17,7 @@ export default class NotificationsManager {
     private browserWindow?: BrowserWindow;
     private scanner: SteamScanner;
     private hideTimeout?: NodeJS.Timeout;
+    private displayTimeout?: NodeJS.Timeout;
     private activeNotification?: INotificationOptions;
 
     constructor(scanner: SteamScanner) {
@@ -86,25 +87,31 @@ export default class NotificationsManager {
             options.duration = notificationDelay;
         }
 
-        this.activeNotification = options;
-
-        // send the options to the notification window
-        this.browserWindow?.webContents.send(NotificationEvents.SET_NOTIFICATION, options)
-
-
-
-        // show the window
-        this.browserWindow?.show();
-
-        // clear the existing timeout if needed
-        if (this.hideTimeout) {
-            clearTimeout(this.hideTimeout);
+        if (this.displayTimeout) {
+            clearTimeout(this.displayTimeout);
         }
 
-        // set a timeout
-        this.hideTimeout = setTimeout(() => {
-            this.close();
-        }, notificationDelay);
+        this.displayTimeout = setTimeout(() => {
+            this.activeNotification = options;
+
+            // send the options to the notification window
+            this.browserWindow?.webContents.send(NotificationEvents.SET_NOTIFICATION, options)
+
+            // show the window
+            this.browserWindow?.show();
+
+            // clear the existing timeout if needed
+            if (this.hideTimeout) {
+                clearTimeout(this.hideTimeout);
+            }
+
+            // set a timeout
+            this.hideTimeout = setTimeout(() => {
+                this.close();
+            }, notificationDelay);
+        }, 1000);
+
+
 
 
     }
