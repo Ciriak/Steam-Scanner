@@ -19,6 +19,7 @@ export default class Traymanager {
     scanner: SteamScanner;
     config: Config;
     gameNeedExeSelectList: IGame[] = [];
+    private alreadySet: boolean = false;
     constructor(scanner: SteamScanner) {
         this.scanner = scanner;
         this.config = scanner.config;
@@ -101,10 +102,6 @@ export default class Traymanager {
 
         this.tray.setContextMenu(contextMenu);
 
-        // show context menu even on normal click
-        this.tray.on("click", () => {
-            this.tray?.popUpContextMenu();
-        })
 
         // title and tooltip
         this.tray.setTitle("Steam Scanner");
@@ -127,6 +124,15 @@ export default class Traymanager {
                 shouldOpenMenu: true
             })
         }
+
+        // show context menu even on normal click
+        if (!this.alreadySet) {
+            this.tray.on("click", () => {
+                this.tray?.popUpContextMenu();
+            })
+        }
+
+        this.alreadySet = true;
 
     }
 
