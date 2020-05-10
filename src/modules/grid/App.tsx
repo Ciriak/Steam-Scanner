@@ -13,6 +13,7 @@ function App() {
 
     const [canSave, setCanSave] = useState(false);
     const [showSavedAlert, setShowSavedAlert] = useState(false);
+    const [gridActive, setGridActive] = useState(ipcRenderer.sendSync(GridManagerEvents.GET_STATE_ACTIVE));
 
     const { register, handleSubmit } = useForm({
         defaultValues: config
@@ -31,6 +32,19 @@ function App() {
         setCanSave(true);
     }
 
+    const getGrid = () => {
+        if (gridActive) {
+            return;
+        }
+        ipcRenderer.send(GridManagerEvents.RUN_STEAM_GRID);
+        setGridActive(true);
+    }
+
+    const stopGetGrid = () => {
+        ipcRenderer.send(GridManagerEvents.STOP_STEAM_GRID);
+        setGridActive(false);
+    }
+
     return (
         <div className="grid-manager">
             <Container>
@@ -39,6 +53,9 @@ function App() {
                     <Form.Group controlId="retrieveAssets">
                         <Form.Check ref={register} name="enableGrid" type="checkbox" label="Automatically retrieve grid assets (Cover image, icon, etc...)" />
                     </Form.Group>
+
+                    {gridView()}
+
                     <Alert variant="secondary">
                         Steam Scanner can use your tokens from external services to retrieve some grids assets more efficiency
                     </Alert>
@@ -78,6 +95,23 @@ function App() {
 
         </div>
     );
+
+    function gridView() {
+        if (gridActive) {
+            return (
+                <Row className="grid-in-progress-info">
+                    <span>Retrieving cover images...</span>
+                    <span>  </span>
+                    <Button variant='outline-danger' size="sm" className="mt-2 mb-2" onClick={() => { stopGetGrid() }}>Stop</Button>
+                </Row>
+            )
+        }
+        else {
+            return (
+                <Button variant='secondary' className="mt-2 mb-2" disabled={gridActive} onClick={() => { getGrid() }}>Retrieve cover images</Button>
+            )
+        }
+    }
 
 
 }

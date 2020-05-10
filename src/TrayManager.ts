@@ -76,8 +76,13 @@ export default class Traymanager {
             }
         });
 
+        let gridButtonLabel = "Steam Grid settings";
+        if (this.scanner.gridManager.active) {
+            gridButtonLabel += " [Running]"
+        }
+
         const gridButton = new MenuItem({
-            label: "Steam Grid settings",
+            label: gridButtonLabel,
             icon: path.join(app.getAppPath(), gridIcon),
             click: () => {
                 this.scanner.gridManager.openSettings();

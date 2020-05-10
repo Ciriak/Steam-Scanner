@@ -1,30 +1,41 @@
 import { app, BrowserWindow, ipcMain, shell } from "electron";
 import path from "path";
-import { rmdirSync, existsSync, createWriteStream } from "fs-extra";
 import { logError, logWarn, log } from "./utils/helper.utils";
-import IGame from "./interfaces/Game.interface";
-import axios from "axios";
 import Config from "./Config";
 import { execFile } from "child_process";
 import colors from "colors";
 import SteamScanner from "./app";
-import IConfig from "./interfaces/Config.interface";
 
 export enum GridManagerEvents {
     GET_CONFIG = "GRID_GET_CONFIG",
-    SET_CONFIG = "GRID_SET_CONFIG"
+    SET_CONFIG = "GRID_SET_CONFIG",
+    GET_STATE_ACTIVE = "GRID_GET_STATE_ACTIVE",
+    EVENT_STATE_ACTIVE = "GRID_EVENT_STATE_ACTIVE",
+    RUN_STEAM_GRID = "GRID_RUN_STEAM_GRID",
+    STOP_STEAM_GRID = "GRID_STOP_STEAM_GRID"
 }
 
 
 export default class GridManager {
+    public active: boolean = false;
     private config: Config;
-    private active: boolean = false;
+    private scanner: SteamScanner;
     private shouldRerun: boolean = false;
     private browserWindow?: BrowserWindow;
     private steamGridProcess: any;
     constructor(scanner: SteamScanner) {
+        this.scanner = scanner;
         this.config = scanner.config;
         this.initIPCListeners();
+    }
+
+    /**
+     * Stop the SteamGrid process
+     */
+    stopGrid() {
+        if (this.steamGridProcess) {
+            this.steamGridProcess.kill('SIGINT');
+        }
     }
 
     /**
@@ -64,18 +75,30 @@ export default class GridManager {
             args = args.concat(["--types", 'animated,static'])
         }
 
+        this.setActiveState(true);
+        ipcMain.emit(GridManagerEvents.EVENT_STATE_ACTIVE, true);
+
         this.steamGridProcess = execFile(gridExe, args, {
             windowsHide: true
         });
 
         this.steamGridProcess.on('close', () => {
-            this.active = false;
+            this.setActiveState(false);
+            ipcMain.emit(GridManagerEvents.EVENT_STATE_ACTIVE, false);
 
             // rerun if needed
             if (this.shouldRerun) {
                 this.getGrid();
             }
         })
+    }
+
+    private setActiveState(state: boolean) {
+        this.active = state;
+        // emit the update event
+        ipcMain.emit(GridManagerEvents.EVENT_STATE_ACTIVE, state);
+        // refresh the tray
+        this.scanner.trayManager.setTray();
     }
 
     /**
@@ -103,9 +126,9 @@ export default class GridManager {
                 nodeIntegration: true
             }
         });
-        // this.browserWindow.webContents.openDevTools({
-        //     mode: "detach"
-        // });
+        this.browserWindow.webContents.openDevTools({
+            mode: "detach"
+        });
         this.browserWindow.loadURL(path.join(app.getAppPath(), "grid.html"));
 
         // Open links in browser window
@@ -144,6 +167,20 @@ export default class GridManager {
 
             log("Config updated from the grid settings view");
             log(newConfig);
-        })
+        });
+
+        ipcMain.on(GridManagerEvents.RUN_STEAM_GRID, () => {
+            log(colors.cyan(GridManagerEvents.RUN_STEAM_GRID + " request received"));
+            this.getGrid();
+        });
+
+        ipcMain.on(GridManagerEvents.STOP_STEAM_GRID, () => {
+            log(colors.cyan(GridManagerEvents.STOP_STEAM_GRID + " request received"));
+            this.stopGrid();
+        });
+
+        ipcMain.on(GridManagerEvents.GET_STATE_ACTIVE, (e) => {
+            e.returnValue = this.active;
+        });
     }
 }
