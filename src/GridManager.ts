@@ -17,7 +17,6 @@ export enum GridManagerEvents {
 
 
 export default class GridManager {
-    baseCoverPath: string = path.join(app.getPath("appData"), "steam-scanner", "cachedcovers");
     private config: Config;
     private active: boolean = false;
     private shouldRerun: boolean = false;
@@ -25,39 +24,6 @@ export default class GridManager {
     private steamGridProcess: any;
     constructor(scanner: SteamScanner) {
         this.config = scanner.config;
-        app.on('ready', () => {
-            this.browserWindow = new BrowserWindow({
-                autoHideMenuBar: true,
-                show: false,
-                hasShadow: false,
-                maximizable: false,
-                minWidth: 800,
-                minHeight: 450,
-                webPreferences: {
-                    nodeIntegration: true
-                }
-            });
-            this.browserWindow.webContents.openDevTools({
-                mode: "detach"
-            });
-            this.browserWindow.loadURL(path.join(app.getAppPath(), "grid.html"));
-
-            // Open links in browser window
-            this.browserWindow?.webContents.on('new-window', (e: any, url) => {
-                e.preventDefault();
-                shell.openExternal(url);
-            });
-
-            // hide browser window instead of closing it
-            this.browserWindow?.on("close", (e: any) => {
-                e.preventDefault();
-                this.browserWindow?.hide();
-            });
-
-        });
-
-
-
         this.initIPCListeners();
     }
 
@@ -110,6 +76,48 @@ export default class GridManager {
                 this.getGrid();
             }
         })
+    }
+
+    /**
+     * Create the browserwindow for the steam grid settings
+     */
+    openSettings() {
+
+
+        // open if the instance already exists
+        if (this.browserWindow) {
+            this.browserWindow.show();
+            return;
+        }
+
+        // create a new browser window instance
+        this.browserWindow = new BrowserWindow({
+            autoHideMenuBar: true,
+            show: true,
+            hasShadow: false,
+            maximizable: false,
+            minWidth: 800,
+            minHeight: 450,
+            darkTheme: true,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        // this.browserWindow.webContents.openDevTools({
+        //     mode: "detach"
+        // });
+        this.browserWindow.loadURL(path.join(app.getAppPath(), "grid.html"));
+
+        // Open links in browser window
+        this.browserWindow?.webContents.on('new-window', (e: any, url) => {
+            e.preventDefault();
+            shell.openExternal(url);
+        });
+
+        // hide browser window instead of closing it
+        this.browserWindow?.on("close", () => {
+            delete this.browserWindow;
+        });
     }
 
     private initIPCListeners() {
