@@ -4,6 +4,7 @@ import defaultGameIconData from "./assets/tray/unknown-game.png";
 import ignoreGameIcon from "./assets/tray/ignore.png"
 import resetIcon from "./assets/tray/reset.png";
 import scanIcon from "./assets/tray/reset.png";
+import gridIcon from "./assets/tray/grid.png";
 import quitIcon from "./assets/tray/quit.png";
 import deleteIcon from "./assets/tray/delete.png";
 
@@ -75,6 +76,14 @@ export default class Traymanager {
             }
         });
 
+        const gridButton = new MenuItem({
+            label: "Steam Grid settings",
+            icon: path.join(app.getAppPath(), gridIcon),
+            click: () => {
+                this.scanner.gridManager.openSettings();
+            }
+        });
+
         const quitButton = new MenuItem({
             label: "Quit",
             icon: path.join(app.getAppPath(), quitIcon),
@@ -90,6 +99,7 @@ export default class Traymanager {
             header,
             separator,
             scanButton,
+            gridButton,
             notificationsOption,
             restartSteamOption,
             separator
