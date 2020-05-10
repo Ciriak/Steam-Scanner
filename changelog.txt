@@ -1,4 +1,2 @@
-- New Logo
-- Fixed a bug where some games were added to the library after beeing hidden
-- Added spaces to some game names when it is possible
-- Fixed some memory leaks
+- Added support for cover images
+- Added a settings panel for cover images
