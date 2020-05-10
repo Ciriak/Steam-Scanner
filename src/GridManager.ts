@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, shell } from "electron";
 import path from "path";
 import { logError, logWarn, log } from "./utils/helper.utils";
 import Config from "./Config";
-import { execFile } from "child_process";
+import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 import colors from "colors";
 import SteamScanner from "./app";
 
@@ -15,6 +15,8 @@ export enum GridManagerEvents {
     STOP_STEAM_GRID = "GRID_STOP_STEAM_GRID"
 }
 
+const processTimeoutDelay = 60 * 1000 * 10; // 10min
+
 
 export default class GridManager {
     public active: boolean = false;
@@ -22,7 +24,8 @@ export default class GridManager {
     private scanner: SteamScanner;
     private shouldRerun: boolean = false;
     private browserWindow?: BrowserWindow;
-    private steamGridProcess: any;
+    private steamGridProcess?: ChildProcessWithoutNullStreams;
+    private processTimeout?: NodeJS.Timeout;
     constructor(scanner: SteamScanner) {
         this.scanner = scanner;
         this.config = scanner.config;
@@ -80,9 +83,27 @@ export default class GridManager {
 
         log(`Starting SteamGrid with the args : ${args}`);
 
-        this.steamGridProcess = execFile(gridExe, args, {
+        this.steamGridProcess = spawn(gridExe, args, {
             windowsHide: true
         });
+
+        this.steamGridProcess.stdout.on('data', (data) => {
+            log(`${colors.magenta("[Steam Grid]")} > ${String(data)}`)
+        });
+
+        this.steamGridProcess.stderr.on('data', (data) => {
+            logError(`${colors.magenta("[Steam Grid]")} > ${String(data)}`);
+        });
+
+        // clear the timeout
+        if (this.processTimeout) {
+            clearTimeout(this.processTimeout);
+        }
+
+        // set the timeout
+        this.processTimeout = setTimeout(() => {
+            this.stopGrid();
+        }, processTimeoutDelay)
 
         this.steamGridProcess.on('close', () => {
             this.setActiveState(false);
