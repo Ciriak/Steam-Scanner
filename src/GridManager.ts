@@ -126,9 +126,9 @@ export default class GridManager {
                 nodeIntegration: true
             }
         });
-        this.browserWindow.webContents.openDevTools({
-            mode: "detach"
-        });
+        // this.browserWindow.webContents.openDevTools({
+        //     mode: "detach"
+        // });
         this.browserWindow.loadURL(path.join(app.getAppPath(), "grid.html"));
 
         // Open links in browser window
