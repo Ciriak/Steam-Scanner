@@ -71,7 +71,12 @@ function App() {
 
                 </Form>
             </Container>
-        </div >
+
+            <div className="steamgrid-credits">
+                Powered by <a href="https://github.com/boppreh/steamgrid" target="_blank">[SteamGrid]</a>
+            </div>
+
+        </div>
     );
 
 
