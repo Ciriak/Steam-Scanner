@@ -78,6 +78,8 @@ export default class GridManager {
         this.setActiveState(true);
         ipcMain.emit(GridManagerEvents.EVENT_STATE_ACTIVE, true);
 
+        log(`Starting SteamGrid with the args : ${args}`);
+
         this.steamGridProcess = execFile(gridExe, args, {
             windowsHide: true
         });
