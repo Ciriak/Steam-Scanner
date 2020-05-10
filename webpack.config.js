@@ -109,12 +109,74 @@ module.exports = (env, argv) => {
             plugins: [
                 new CopyPlugin([{
                     from: 'node_modules/extract-file-icon',
-                    to: 'native/extract-file-icon'
+                    to: 'native/extract-file-icon',
+                    from: 'src/external',
+                    to: 'native'
                 }]),
                 new HtmlWebpackPlugin({
                     filename: 'notification.html',
                     title: 'Notification',
                     template: './src/modules/notification/index.ejs',
+                }),
+            ],
+        },
+        /**
+         * Grid
+         */
+        {
+            entry: './src/modules/grid/index.tsx',
+            target: "electron-renderer",
+            devtool: "inline-source-map",
+            module: {
+                rules: [
+                    {
+                        test: /\.tsx?$/,
+                        use: 'ts-loader',
+                        exclude: /node_modules/,
+                    },
+                    {
+                        test: /\.(png|svg|jpg|gif|ico)$/,
+                        use: [
+                            'file-loader'
+                        ]
+                    },
+                    {
+                        test: /\.(woff|woff2|eot|ttf|otf)$/,
+                        use: [
+                            'file-loader',
+                        ],
+                    },
+                    {
+                        test: /\.s[ac]ss$/i,
+                        use: [
+                            // Creates `style` nodes from JS strings
+                            'style-loader',
+                            // Translates CSS into CommonJS
+                            'css-loader',
+                            // Compiles Sass to CSS
+                            'sass-loader',
+                        ],
+                    },
+                ],
+            },
+            resolve: {
+                extensions: ['.tsx', '.ts', '.js'],
+            },
+            output: {
+                filename: 'grid.js',
+                path: path.resolve(__dirname, 'dist'),
+            },
+            plugins: [
+                new CopyPlugin([{
+                    from: 'node_modules/extract-file-icon',
+                    to: 'native/extract-file-icon',
+                    from: 'src/external',
+                    to: 'native'
+                }]),
+                new HtmlWebpackPlugin({
+                    filename: 'grid.html',
+                    title: 'Grid',
+                    template: './src/modules/grid/index.ejs',
                 }),
             ],
         }];

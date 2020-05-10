@@ -8,5 +8,7 @@ export const defaultConfig: IConfig = {
     steamDirectory: "",
     steamExe: "",
     launchers: {},
-    apiUrl: "https://steam-scanner-api.herokuapp.com"
+    apiUrl: "https://steam-scanner-api.herokuapp.com",
+    enableGrid: true,
+    animatedCover: false
 };

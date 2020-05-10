@@ -1,13 +1,14 @@
 import Traymanager from "./TrayManager";
 import Config from "./Config";
 import Steam from "./Steam";
-import { app } from "electron";
+import { app, shell } from "electron";
 import { LaunchersManager } from "./LaunchersManager";
 import NotificationsManager from "./Notification";
 import Updater from "./Updater";
 import { logError, log, logWarn } from "./utils/helper.utils";
 import isDev from "electron-is-dev";
 import IconsUtil from "./IconsUtil";
+import GridManager from "./GridManager";
 
 const autoScanInterval = 5 * 60 * 1000;
 
@@ -17,6 +18,7 @@ export default class SteamScanner {
     steam: Steam;
     launchersManager: LaunchersManager;
     notificationsManager: NotificationsManager;
+    gridManager: GridManager;
     updater: Updater;
     IconsUtil: IconsUtil;
     constructor() {
@@ -26,12 +28,13 @@ export default class SteamScanner {
         this.launchersManager = new LaunchersManager(this);
         this.trayManager = new Traymanager(this);
         this.notificationsManager = new NotificationsManager(this);
+        this.gridManager = new GridManager(this);
         this.updater = new Updater(this);
         this.IconsUtil = new IconsUtil();
         this.handleSingleInstance();
         this.handleAutoLaunch();
-        this.handleSetupScreen();
         this.scan();
+        this.handleLinksFromWebView();
         setTimeout(() => {
             this.scan();
         }, autoScanInterval)
@@ -79,13 +82,19 @@ export default class SteamScanner {
         log("Auto launch ready and set !");
     }
 
-    /**
-     * Check if we should show the setup screen, if true, display it
-     */
-    private handleSetupScreen() {
-        if (this.config.firstLaunch) {
+    private handleLinksFromWebView() {
+        app.on('web-contents-created', (e, contents) => {
 
-        }
+            // Check for a webview
+            if (contents.getType() === 'webview') {
+
+                // Listen for any new window events
+                contents.on('new-window', (ev: any, url) => {
+                    ev.preventDefault()
+                    shell.openExternal(url)
+                })
+            }
+        })
     }
 }
 

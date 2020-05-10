@@ -1,0 +1,79 @@
+@import "~bootstrap/scss/bootstrap";
+
+* {
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+@font-face {
+    font-family: "Motiva Sans";
+    src: url("../../assets/fonts/MotivaSans-Regular.ttf");
+   }
+
+body{
+    margin: 0;
+    padding: 0;
+    font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
+    color: #c6d4df;
+    
+    overflow: hidden;
+
+    .content{
+        position: absolute;
+        right: -400px;
+        background-color: #141414;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        transition-duration: 0.5s;
+        .close-btn{
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 5px;
+            cursor: pointer;
+            opacity: 0.4;
+            transition-duration: 0.1s;
+            width: 16px;
+            height: 16px;
+            background-image: url('../../assets/tray/close.png');
+            background-size: cover;
+            &:hover{
+                opacity: 1.0;
+            }
+        }
+
+        img{
+            width: 70px;
+            height: 70px;
+            margin: 15px;
+           
+        }
+        .notification-text{
+            height: 100%;
+            padding: 10px;
+            flex: 1;
+            h1{
+                margin: 0;
+                font-size: 18vh;
+                margin-bottom: 5px;
+                font-family: "Motiva Sans", Sans-serif;
+                font-weight: bold;
+            }
+            p{
+                color: #ccc;
+                font-size: 12vh;
+                margin: 0;
+                font-family: "Motiva Sans", Sans-serif;
+                font-weight: 300;
+            }
+        }
+
+        &.active{
+            right: 0px;
+        }
+    }
+}

@@ -9,4 +9,7 @@ export default interface IConfig {
   autoRestartSteam: boolean;
   firstLaunch: boolean;
   apiUrl: string;
+  steamGridDbToken?: string;
+  enableGrid: boolean;
+  animatedCover: boolean;
 }

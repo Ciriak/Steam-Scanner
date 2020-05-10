@@ -1,14 +1,13 @@
 import { } from "lodash";
 import * as path from "path";
 import * as shortcut from "steam-shortcut-editor";
-
 import Config from "./Config";
 import { logWarn, logError, log } from "./utils/helper.utils";
 import { unlinkSync } from "fs-extra";
-import { Launcher } from "./Launcher";
 import SteamScanner from "./app";
 import colors from "colors";
 import IGame from "./interfaces/Game.interface";
+import GridManager from "./GridManager";
 
 export class SteamUser {
     public userId: string;
@@ -66,6 +65,10 @@ export class SteamUser {
 
                 return resolve();
 
+            }
+
+            if (isFirstInstance) {
+                this.scanner.gridManager.getGrid();
             }
 
 
