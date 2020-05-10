@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog } from "electron";
 import path from "path";
 import { logError, logWarn, log } from "./utils/helper.utils";
 import Config from "./Config";
@@ -12,7 +12,8 @@ export enum GridManagerEvents {
     GET_STATE_ACTIVE = "GRID_GET_STATE_ACTIVE",
     EVENT_STATE_ACTIVE = "GRID_EVENT_STATE_ACTIVE",
     RUN_STEAM_GRID = "GRID_RUN_STEAM_GRID",
-    STOP_STEAM_GRID = "GRID_STOP_STEAM_GRID"
+    STOP_STEAM_GRID = "GRID_STOP_STEAM_GRID",
+    RESET_STEAM_GRID = "GRID_RESET_STEAM_GRID",
 }
 
 const processTimeoutDelay = 60 * 1000 * 10; // 10min
@@ -205,5 +206,34 @@ export default class GridManager {
         ipcMain.on(GridManagerEvents.GET_STATE_ACTIVE, (e) => {
             e.returnValue = this.active;
         });
+
+        /**
+         * Grid reset
+         */
+        ipcMain.on(GridManagerEvents.RESET_STEAM_GRID, (e) => {
+            dialog.showMessageBox({
+                title: "Reset Steam Grid",
+                type: "question",
+                message: "Are you sure you want to reset the Steam Grid ?\nThis will also restart the Steam client",
+                buttons: ["Yes", "No"],
+            }).then((response) => {
+                // if user said yes
+                if (response.response === 0) {
+                    this.resetGrid();
+                }
+            });
+        });
+    }
+
+    /**
+     * Clear all items in the grid folder
+     */
+    private async resetGrid() {
+        log(colors.magenta("Resetting the Steam grids..."));
+        for (const steamUser of this.scanner.steam.steamUsers) {
+            await steamUser.cleanGrid();
+        }
+        this.scanner.steam.restartSteam();
+        log(colors.magenta("Steam grids cleaned"));
     }
 }

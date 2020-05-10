@@ -45,6 +45,10 @@ function App() {
         setGridActive(false);
     }
 
+    const resetGrid = () => {
+        ipcRenderer.send(GridManagerEvents.RESET_STEAM_GRID);
+    }
+
     return (
         <div className="grid-manager">
             <Container>
@@ -73,13 +77,20 @@ function App() {
                                 <Form.Check type="checkbox" ref={register} name="animatedCover" label="Allow animated cover images" />
                             </Form.Group>
                         </Col>
-
+                    </Row>
+                    <Row>
 
                     </Row>
                     <Row>
-                        <Button type="submit" variant="primary" disabled={!canSave}>
-                            Save
+                        <Col>
+                            <Button type="submit" variant="primary" disabled={!canSave}>
+                                Save
                         </Button>
+                        </Col>
+                        <Col className="text-right">
+                            <Button variant="link" size="sm" onClick={() => resetGrid()}>Reset the grid</Button>
+                        </Col>
+
                     </Row>
 
                     <Alert className="mt-2" variant="success" show={showSavedAlert} onClose={() => setShowSavedAlert(false)} dismissible>
@@ -108,7 +119,9 @@ function App() {
         }
         else {
             return (
-                <Button variant='secondary' className="mt-2 mb-2" disabled={gridActive} onClick={() => { getGrid() }}>Retrieve cover images</Button>
+                <Row>
+                    <Button variant='secondary' className="mt-2 mb-2" disabled={gridActive} onClick={() => { getGrid() }}>Retrieve cover images</Button>
+                </Row>
             )
         }
     }

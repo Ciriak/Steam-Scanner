@@ -3,11 +3,12 @@ import * as path from "path";
 import * as shortcut from "steam-shortcut-editor";
 import Config from "./Config";
 import { logWarn, logError, log } from "./utils/helper.utils";
-import { unlinkSync } from "fs-extra";
+import { unlinkSync, removeSync, rmdir } from "fs-extra";
 import SteamScanner from "./app";
 import colors from "colors";
 import IGame from "./interfaces/Game.interface";
 import GridManager from "./GridManager";
+import rimraf from "rimraf";
 
 export class SteamUser {
     public userId: string;
@@ -221,6 +222,24 @@ export class SteamUser {
 
                 shortcutData.shortcuts.splice(indexToRemove, 1);
                 await this.writeShortcutFile(shortcutData, isFirstInstance);
+                return resolve();
+            });
+        });
+    }
+
+    /**
+     * Remove all files from the grid of the user
+     */
+    public async cleanGrid(): Promise<void> {
+        return new Promise(async (resolve) => {
+            const gridDir = path.join(this.userDirectory, "config", "grid");
+
+            rimraf(gridDir, (err) => {
+                if (err) {
+                    logError(err.message);
+                    return resolve();
+                }
+                log(`Grid cleaned for the user ${colors.magenta(this.userId)}`);
                 return resolve();
             });
         });
