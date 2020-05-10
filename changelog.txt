@@ -1,2 +1,3 @@
 - Added support for cover images
 - Added a settings panel for cover images
+- Fixed shortcuts using a wrong label in the Steam library
