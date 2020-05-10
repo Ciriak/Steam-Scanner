@@ -3,7 +3,7 @@ import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import "./app.scss";
 import IConfig from '../../interfaces/Config.interface';
-import { ipcRenderer, remote, shell } from "electron";
+import { ipcRenderer } from "electron";
 import { GridManagerEvents } from '../../GridManager';
 
 

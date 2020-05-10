@@ -120,7 +120,7 @@ export class SteamUser {
                                 shortcutData.shortcuts.push({
                                     Exe: game.binaries[0],
                                     tags: [launcher.name, "Steam Scanner"],
-                                    AppName: game.name,
+                                    AppName: game.label,
                                     StartDir: game.folderPath,
                                     steamScanner: true,
                                     AllowDesktopConfig: true,
