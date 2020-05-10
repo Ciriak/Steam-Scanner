@@ -5,9 +5,11 @@ const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = (env, argv) => {
 
+    generatePackageJson();
+
     if (argv.mode === 'production') {
         console.log("[Building for production]");
-        generatePackageJson();
+
     }
 
 
@@ -51,6 +53,14 @@ module.exports = (env, argv) => {
             },
             plugins: [
                 // new CleanWebpackPlugin(),
+                new CopyPlugin([{
+                    from: 'node_modules/extract-file-icon',
+                    to: 'native/extract-file-icon'
+                },
+                {
+                    from: 'src/external',
+                    to: 'native'
+                }]),
             ],
         },
         /**
@@ -107,12 +117,7 @@ module.exports = (env, argv) => {
                 path: path.resolve(__dirname, 'dist'),
             },
             plugins: [
-                new CopyPlugin([{
-                    from: 'node_modules/extract-file-icon',
-                    to: 'native/extract-file-icon',
-                    from: 'src/external',
-                    to: 'native'
-                }]),
+
                 new HtmlWebpackPlugin({
                     filename: 'notification.html',
                     title: 'Notification',
@@ -167,12 +172,6 @@ module.exports = (env, argv) => {
                 path: path.resolve(__dirname, 'dist'),
             },
             plugins: [
-                new CopyPlugin([{
-                    from: 'node_modules/extract-file-icon',
-                    to: 'native/extract-file-icon',
-                    from: 'src/external',
-                    to: 'native'
-                }]),
                 new HtmlWebpackPlugin({
                     filename: 'grid.html',
                     title: 'Grid',
@@ -186,7 +185,7 @@ module.exports = (env, argv) => {
  * Generate a clean package JSOn for the build process
  */
 function generatePackageJson() {
-    console.log("Generating production package json...");
+    console.log("Generating product package json...");
     try {
         const data = fs.readJsonSync("./package.json");
         const pjson = {
