@@ -1,6 +1,6 @@
 {
   "name": "steam-scanner",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Automatically add your game to you Steam library",
   "main": "scanner.js",
   "scripts": {
@@ -61,6 +61,10 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
+    "@types/react": "^16.9.34",
+    "@types/react-dom": "^16.9.7",
+    "@types/rimraf": "^3.0.0",
+    "bootstrap": "^4.4.1",
     "colors": "^1.4.0",
     "electron-is-dev": "^1.2.0",
     "electron-log": "^4.1.1",
@@ -69,7 +73,12 @@
     "fs-extra": "^9.0.0",
     "lodash": "^4.17.15",
     "protobufjs": "^6.9.0",
+    "react": "^16.13.1",
+    "react-bootstrap": "^1.0.1",
+    "react-dom": "^16.13.1",
+    "react-hook-form": "^5.6.3",
     "recursive-readdir": "^2.2.2",
+    "rimraf": "^3.0.2",
     "steam-shortcut-editor": "^3.1.1"
   },
   "build": {

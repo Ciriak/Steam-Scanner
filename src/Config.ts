@@ -12,13 +12,18 @@ import { ILaunchersCollection } from "./interfaces/Launcher.interface";
  * Class that manage the config
  */
 export default class Config {
+    [key: string]: any;
     private _enableNotifications: boolean = defaultConfig.enableNotifications;
     private _launchOnStartup: boolean = defaultConfig.launchOnStartup;
     private _steamDirectory: string = defaultConfig.steamDirectory;
     private _steamExe: string = defaultConfig.steamExe;
     private _launchers: any = defaultConfig.launchers;
+    private _apiUrl: any = defaultConfig.apiUrl;
     private _autoRestartSteam: boolean = defaultConfig.autoRestartSteam;
     private _firstLaunch: boolean = defaultConfig.firstLaunch;
+    private _steamGridDbToken?: string = defaultConfig.steamGridDbToken;
+    private _enableGrid: boolean = defaultConfig.enableGrid;
+    private _animatedCover: boolean = defaultConfig.animatedCover;
     private scanner: SteamScanner;
     version: string = "0.0.0";
     configPath = path.join(app.getPath("appData"), appName);
@@ -51,6 +56,10 @@ export default class Config {
         this.writeConfig();
     }
 
+    get apiUrl(): string {
+        return this._apiUrl;
+    }
+
     get firstLaunch(): boolean {
         return this._firstLaunch;
     }
@@ -69,6 +78,24 @@ export default class Config {
         return this._steamExe;
     }
 
+    set enableGrid(value: boolean) {
+        this._enableGrid = value;
+        this.writeConfig();
+    }
+
+    get enableGrid(): boolean {
+        return this._enableGrid;
+    }
+
+    set animatedCover(value: boolean) {
+        this._animatedCover = value;
+        this.writeConfig();
+    }
+
+    get animatedCover(): boolean {
+        return this._animatedCover;
+    }
+
     get steamDirectory(): string {
         return this._steamDirectory;
     }
@@ -84,6 +111,15 @@ export default class Config {
 
     set launchers(value: ILaunchersCollection) {
         this._launchers = value;
+        this.writeConfig();
+    }
+
+    get steamGridDbToken(): string | undefined {
+        return this._steamGridDbToken || undefined;
+    }
+
+    set steamGridDbToken(value: string | undefined) {
+        this._steamGridDbToken = value;
         this.writeConfig();
     }
 
@@ -106,6 +142,9 @@ export default class Config {
             this.launchOnStartup = config.launchOnStartup;
             this.steamDirectory = config.steamDirectory;
             this.autoRestartSteam = config.autoRestartSteam;
+            this.steamGridDbToken = config.steamGridDbToken;
+            this.animatedCover = config.animatedCover;
+            this.enableGrid = config.enableGrid;
         } catch (error) {
             logWarn("Unable to load the config");
             const config = this.writeDefaultConfig();
@@ -125,8 +164,12 @@ export default class Config {
             launchers: this._launchers,
             steamExe: this._steamExe,
             firstLaunch: this._firstLaunch,
+            apiUrl: this._apiUrl,
             enableNotifications: this._enableNotifications,
             autoRestartSteam: this._autoRestartSteam,
+            steamGridDbToken: this._steamGridDbToken,
+            enableGrid: this._enableGrid,
+            animatedCover: this._animatedCover
         }
         try {
             writeJsonSync(this.configFilePath, configToWrite);

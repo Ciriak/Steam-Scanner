@@ -124,9 +124,14 @@ export default class Steam {
             let first = true;
             for (const user of this.steamUsers) {
                 await user.updateShortcuts(first);
+                // await user.removeUnwantedShortcuts(false, first);
                 if (first) {
                     first = false;
                 }
+            }
+
+            if (this.config.enableGrid) {
+                this.scanner.gridManager.getGrid();
             }
 
             if (this.config.autoRestartSteam) {
@@ -145,7 +150,7 @@ export default class Steam {
         return new Promise(async (resolve) => {
             let first = true;
             for (const user of this.steamUsers) {
-                await user.removeShortcut(game, first);
+                await user.removeShortcut(game.label, first);
                 if (first) {
                     first = false;
                 }
