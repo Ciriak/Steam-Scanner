@@ -24,6 +24,9 @@ function App() {
      * @param data
      */
     const onSubmit = (data: any) => {
+        if (!canSave) {
+            return;
+        }
         ipcRenderer.send(GridManagerEvents.SET_CONFIG, data);
         setCanSave(false);
         setShowSavedAlert(true);
@@ -36,6 +39,10 @@ function App() {
         if (gridActive) {
             return;
         }
+
+        // save before
+
+
         ipcRenderer.send(GridManagerEvents.RUN_STEAM_GRID);
         setGridActive(true);
     }
