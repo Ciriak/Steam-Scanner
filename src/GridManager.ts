@@ -5,6 +5,7 @@ import Config from "./Config";
 import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 import colors from "colors";
 import SteamScanner from "./app";
+import { existsSync, copyFileSync, copyFile } from "fs-extra";
 
 export enum GridManagerEvents {
     GET_CONFIG = "GRID_GET_CONFIG",
@@ -27,10 +28,13 @@ export default class GridManager {
     private browserWindow?: BrowserWindow;
     private steamGridProcess?: ChildProcessWithoutNullStreams;
     private processTimeout?: NodeJS.Timeout;
+    private gridOriginalExe = path.join(app.getAppPath(), "native", "steamgrid.exe");
+    private gridExe = path.join(app.getPath("appData"), "steam-scanner", "steamgrid.exe");
     constructor(scanner: SteamScanner) {
         this.scanner = scanner;
         this.config = scanner.config;
         this.initIPCListeners();
+        this.ensureSteamGridExe();
     }
 
     /**
@@ -38,6 +42,9 @@ export default class GridManager {
      */
     stopGrid() {
         if (this.steamGridProcess) {
+            if (this.shouldRerun) {
+                this.shouldRerun = false;
+            }
             this.steamGridProcess.kill('SIGINT');
         }
     }
@@ -63,7 +70,6 @@ export default class GridManager {
         }
 
         log(colors.magenta("Starting Steam Grid Process..."))
-        const gridExe = path.join(app.getAppPath(), "native", "steamgrid.exe");
 
         let args: string[] = [];
 
@@ -76,15 +82,15 @@ export default class GridManager {
         // set the steamGridDb token if available in the config
         if (this.config.animatedCover) {
             log(colors.magenta("SteamGrid will use animated covers image when possible"));
-            args = args.concat(["--types", 'animated,static'])
+            args = args.concat(["--types", 'animated'])
         }
 
         this.setActiveState(true);
         ipcMain.emit(GridManagerEvents.EVENT_STATE_ACTIVE, true);
 
-        log(`Starting SteamGrid with the args : ${args}`);
+        log(`Starting SteamGrid\nCommand : ${this.gridExe} ${args.join(" ")}`);
 
-        this.steamGridProcess = spawn(gridExe, args, {
+        this.steamGridProcess = spawn(this.gridExe, args, {
             windowsHide: true
         });
 
@@ -107,6 +113,7 @@ export default class GridManager {
         }, processTimeoutDelay)
 
         this.steamGridProcess.on('close', () => {
+            log("Steam grid process stopped");
             this.setActiveState(false);
             ipcMain.emit(GridManagerEvents.EVENT_STATE_ACTIVE, false);
 
@@ -230,10 +237,26 @@ export default class GridManager {
      */
     private async resetGrid() {
         log(colors.magenta("Resetting the Steam grids..."));
+        this.scanner.steam.restartSteam();
         for (const steamUser of this.scanner.steam.steamUsers) {
             await steamUser.cleanGrid();
         }
-        this.scanner.steam.restartSteam();
         log(colors.magenta("Steam grids cleaned"));
+    }
+
+    /**
+     * Ensure that the SteamGrid executablme is available to the OS
+     *
+     * This is due to the fact that Electron is unable to spawn a process that is stored in an asar archive
+     *
+     * So we copy the exe outside before
+     */
+    private ensureSteamGridExe() {
+        if (!existsSync(this.gridExe)) {
+            log("SteamGrid.exe not available ... copying...");
+            copyFile(this.gridOriginalExe, this.gridExe).then(() => {
+                log(colors.green("SteamGrid.exe copied to the appData directory !"));
+            });
+        }
     }
 }
