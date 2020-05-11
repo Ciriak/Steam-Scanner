@@ -114,7 +114,7 @@ export default class GameHelper {
     /**
      * Try to find the game executable using the binaries list
      */
-    public async findGameExecutable(): Promise<any> {
+    public async findGameExecutable(): Promise<void> {
 
         return new Promise((resolve) => {
 

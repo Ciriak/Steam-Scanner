@@ -182,7 +182,7 @@ module.exports = (env, argv) => {
 }
 
 /**
- * Generate a clean package JSOn for the build process
+ * Generate a clean package JSON for the build process
  */
 function generatePackageJson() {
     console.log("Generating product package json...");

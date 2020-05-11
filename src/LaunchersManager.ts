@@ -165,11 +165,6 @@ export class LaunchersManager {
 
             this.scanner.steam.updateShortcuts();
 
-            // retrieve the grid if the option is enabled
-            if (this.config.enableGrid) {
-                this.scanner.gridManager.getGrid();
-            }
-
             resolve();
         });
     }

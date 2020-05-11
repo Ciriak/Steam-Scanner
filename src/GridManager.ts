@@ -5,7 +5,7 @@ import Config from "./Config";
 import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 import colors from "colors";
 import SteamScanner from "./app";
-import { existsSync, copyFileSync, copyFile } from "fs-extra";
+import { existsSync, copyFile } from "fs-extra";
 
 export enum GridManagerEvents {
     GET_CONFIG = "GRID_GET_CONFIG",
@@ -17,7 +17,7 @@ export enum GridManagerEvents {
     RESET_STEAM_GRID = "GRID_RESET_STEAM_GRID",
 }
 
-const processTimeoutDelay = 60 * 1000 * 10; // 10min
+const processTimeoutDelay = (60 * 1000) * 20; // 10min
 
 
 export default class GridManager {
@@ -40,10 +40,15 @@ export default class GridManager {
     /**
      * Stop the SteamGrid process
      */
-    stopGrid() {
+    stopGrid(restart?: boolean) {
         if (this.steamGridProcess) {
             if (this.shouldRerun) {
                 this.shouldRerun = false;
+            }
+
+
+            if (restart) {
+                this.shouldRerun = true;
             }
             this.steamGridProcess.kill('SIGINT');
         }
@@ -54,24 +59,15 @@ export default class GridManager {
      */
     getGrid() {
 
-        if (!this.config.enableGrid) {
-            logWarn("Steam Grid is disabled : cover images won't be retrieved");
-            return;
-        }
-
         if (this.active) {
-            logWarn("A Steam Grid process is currently in progress, it will be rerun on end");
-            this.shouldRerun = true;
+            logWarn("A Steam Grid process is currently in progress, restarting...");
+            this.stopGrid(true);
             return;
-        }
-
-        if (this.shouldRerun) {
-            this.shouldRerun = false;
         }
 
         log(colors.magenta("Starting Steam Grid Process..."))
 
-        let args: string[] = [];
+        let args: string[] = ['--skipsteam', '--styles', 'alternate,white_logo'];
 
         // set the steamGridDb token if available in the config
         if (this.config.steamGridDbToken) {
