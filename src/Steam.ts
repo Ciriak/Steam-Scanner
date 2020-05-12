@@ -124,6 +124,10 @@ export default class Steam {
             for (const user of this.steamUsers) {
                 await user.resetShortcut();
             }
+
+            // clean the grids
+            await this.scanner.gridManager.resetGrid();
+
             if (this.config.autoRestartSteam) {
                 this.scanner.steam.restartSteam();
             }

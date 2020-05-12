@@ -17,5 +17,4 @@ export interface ISteamShortcutEntry {
     ShortcutPath: string;
     StartDir: string;
     tags: string[];
-    steamScanner?: boolean;
 }

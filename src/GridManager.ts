@@ -250,10 +250,11 @@ export default class GridManager {
     /**
      * Clear all items in the grid folder
      */
-    private async resetGrid() {
+    public async resetGrid() {
         log(colors.magenta("Cleaning the Steam grids..."));
         // restart steam to prevent an issue with writing rights
         this.scanner.steam.restartSteam();
+
         for (const steamUser of this.scanner.steam.steamUsers) {
             await steamUser.cleanGrid();
         }

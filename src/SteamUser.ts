@@ -127,7 +127,6 @@ export class SteamUser {
                                     icon: "",
                                     // add the current time as the last play time for the shortcut
                                     LastPlayTime: new Date().getTime() / 1000,
-                                    steamScanner: true
                                 });
                                 updatedShortcuts = true;
 
