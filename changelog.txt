@@ -1,1 +1,2 @@
-- Optimized the Steam grid process
+- Optimized the Steam grid process (Cover images)
+- Fixed a bug where some games where added to Steam with the wrong exe
