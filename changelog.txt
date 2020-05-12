@@ -1,2 +1,4 @@
 - Optimized the Steam grid process (Cover images)
 - Fixed a bug where some games where added to Steam with the wrong exe
+- Less notification, Steam scanner will be less intrusive
+- Does not restart Steam by default
