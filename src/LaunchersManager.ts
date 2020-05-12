@@ -235,10 +235,10 @@ export class LaunchersManager {
             log(`${colors.cyan(gameData.name)} infos have been cleaned`)
 
             this.scanner.steam.removeShortcut(gameData).then(() => {
-                this.scanner.notificationsManager.notification({
-                    title: "Game removed",
-                    message: `${gameData.name} has been removed from your Steam Library`,
-                })
+                // this.scanner.notificationsManager.notification({
+                //     title: "Game removed",
+                //     message: `${gameData.name} has been removed from your Steam Library`,
+                // })
                 // relaunch a scan process
                 this.getAllGames().then(() => {
                     this.scanner.trayManager.setTray();

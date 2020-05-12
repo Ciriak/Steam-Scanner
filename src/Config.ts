@@ -158,7 +158,7 @@ export default class Config {
      */
     public async resetConfig(): Promise<IConfig> {
         return new Promise(async (resolve) => {
-            logWarn("Resetting the config...");
+            logWarn("Cleaning the config...");
             const config = this.writeDefaultConfig();
             this.reset = true;
             return resolve(config);

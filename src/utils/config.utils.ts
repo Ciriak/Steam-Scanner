@@ -2,7 +2,7 @@ import IConfig from "../interfaces/Config.interface";
 
 export const defaultConfig: IConfig = {
     enableNotifications: true,
-    autoRestartSteam: true,
+    autoRestartSteam: false,
     launchOnStartup: true,
     firstLaunch: true,
     steamDirectory: "",
