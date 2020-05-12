@@ -18,6 +18,7 @@ export enum GridManagerEvents {
 }
 
 const processTimeoutDelay = (60 * 1000) * 2; // 2min
+const gridProcessStartDelay = 3000;
 
 
 export default class GridManager {
@@ -27,7 +28,8 @@ export default class GridManager {
     private shouldRerun: boolean = false;
     private browserWindow?: BrowserWindow;
     private steamGridProcess?: ChildProcessWithoutNullStreams;
-    private processTimeout?: NodeJS.Timeout;
+    private processQuitTimeout?: NodeJS.Timeout;
+    private processStartTimeout?: NodeJS.Timeout;
     private gridOriginalExe = path.join(app.getAppPath(), "native", "steamgrid.exe");
     private gridExe = path.join(app.getPath("appData"), "steam-scanner", "steamgrid.exe");
     constructor(scanner: SteamScanner) {
@@ -57,6 +59,24 @@ export default class GridManager {
      * Use SteamGrid to retrieve the cover images
      */
     getGrid() {
+
+        // clear the timeout
+        if (this.processStartTimeout) {
+            clearTimeout(this.processStartTimeout);
+        }
+
+        // set the timeout
+        this.processStartTimeout = setTimeout(() => {
+            this.startGridProcess();
+        }, gridProcessStartDelay)
+
+
+    }
+
+    /**
+     * Start a steamGrid process
+     */
+    private startGridProcess() {
 
         if (this.active) {
             logWarn("A Steam Grid process is currently in progress, restarting...");
@@ -98,12 +118,12 @@ export default class GridManager {
         });
 
         // clear the timeout
-        if (this.processTimeout) {
-            clearTimeout(this.processTimeout);
+        if (this.processQuitTimeout) {
+            clearTimeout(this.processQuitTimeout);
         }
 
         // set the timeout
-        this.processTimeout = setTimeout(() => {
+        this.processQuitTimeout = setTimeout(() => {
             this.stopGrid();
         }, processTimeoutDelay)
 

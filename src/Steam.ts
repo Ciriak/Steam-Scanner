@@ -117,6 +117,22 @@ export default class Steam {
     }
 
     /**
+     * Reset all the shortcut files
+     */
+    public async resetShortcuts(): Promise<void> {
+        return new Promise(async (resolve) => {
+            for (const user of this.steamUsers) {
+                await user.resetShortcut();
+            }
+            if (this.config.autoRestartSteam) {
+                this.scanner.steam.restartSteam();
+            }
+            return resolve();
+        });
+
+    }
+
+    /**
      * Update the shortcuts for EACH user
      */
     public async updateShortcuts(): Promise<void> {
@@ -180,4 +196,23 @@ export default class Steam {
         }, 3000);
 
     }
+
+    /**
+     * Look for any leftover shortcut in the shortcut file and clean thoses who are not supposed to be here
+     * @param shortcutData
+     * @param {boolean} removeSteamScannerShortcuts if true, will remove all shortcuts added by Steam Scanner
+     * @return {boolean} true if the shortcuts have been updated (items removed)
+     */
+    // public async removeUnwantedShortcuts(removeSteamScannerShortcuts?: boolean): Promise<boolean> {
+    //     return new Promise(async (resolve) => {
+    //         let first = true;
+    //         for (const user of this.steamUsers) {
+    //             await user.removeUnwantedShortcuts(removeSteamScannerShortcuts, first)
+    //             if (first) {
+    //                 first = false;
+    //             }
+    //         }
+    //         return resolve();
+    //     });
+    // }
 }

@@ -27,7 +27,8 @@ export default class Config {
     private scanner: SteamScanner;
     version: string = "0.0.0";
     configPath = path.join(app.getPath("appData"), appName);
-    configFilePath = path.join(this.configPath, "config.json")
+    configFilePath = path.join(this.configPath, "config.json");
+    reset: boolean = false;
 
     get enableNotifications(): boolean {
         return this._enableNotifications;
@@ -134,7 +135,7 @@ export default class Config {
      *
      * If unable to load the config, it will generate a clean one
      */
-    private load() {
+    private async load() {
         try {
             const config = readJsonSync(this.configFilePath) as IConfig;
             this.enableNotifications = config.enableNotifications;
@@ -147,9 +148,22 @@ export default class Config {
             this.enableGrid = config.enableGrid;
         } catch (error) {
             logWarn("Unable to load the config");
-            const config = this.writeDefaultConfig();
-            return config;
+            const newConfig = await this.resetConfig();
+            return newConfig;
         }
+    }
+
+    /**
+     * Reset the whole config and clean the Steam shortcut files
+     */
+    public async resetConfig(): Promise<IConfig> {
+        return new Promise(async (resolve) => {
+            logWarn("Resetting the config...");
+            const config = this.writeDefaultConfig();
+            this.reset = true;
+            return resolve(config);
+        });
+
     }
 
 
