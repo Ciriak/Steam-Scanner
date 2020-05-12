@@ -8,6 +8,7 @@ import SteamScanner from "./app";
 import colors from "colors";
 import IGame from "./interfaces/Game.interface";
 import rimraf from "rimraf";
+import ISteamShortcut from "./interfaces/Shortcut.interface";
 
 export class SteamUser {
     public userId: string;
@@ -67,7 +68,7 @@ export class SteamUser {
 
             let updatedShortcuts: boolean = false;
 
-            shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: any) => {
+            shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: ISteamShortcut) => {
                 // if can't parse (ex: shortcut file don't exist) , create a clean object
                 if (err || !shortcutData || !shortcutData.shortcuts) {
                     shortcutData = {
@@ -115,11 +116,18 @@ export class SteamUser {
                                     tags: [launcher.name, "Steam Scanner"],
                                     AppName: game.label,
                                     StartDir: game.folderPath,
-                                    steamScanner: true,
                                     AllowDesktopConfig: true,
-                                    AlowOverlay: true,
+                                    AllowOverlay: true,
+                                    Devkit: false,
+                                    DevkitGameID: "",
+                                    IsHidden: false,
+                                    LaunchOptions: "",
+                                    OpenVR: false,
+                                    ShortcutPath: "",
+                                    icon: "",
                                     // add the current time as the last play time for the shortcut
                                     LastPlayTime: new Date().getTime() / 1000,
+                                    steamScanner: true
                                 });
                                 updatedShortcuts = true;
 
@@ -191,7 +199,7 @@ export class SteamUser {
      */
     public async removeShortcut(AppName: string, isFirstInstance?: boolean) {
         return new Promise((resolve) => {
-            shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: any) => {
+            shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: ISteamShortcut) => {
                 // if can't parse (ex: shortcut file don't exist) , create a clean object
                 if (err || !shortcutData || !shortcutData.shortcuts) {
                     logWarn("WARNING - unable to parse the steam shortcuts file");
@@ -246,7 +254,7 @@ export class SteamUser {
      * @param game game instance
      * @param shortcutData current shortcut data
      */
-    private parseEntriesForGame(game: IGame, shortcutData: any): {
+    private parseEntriesForGame(game: IGame, shortcutData: ISteamShortcut): {
         gameCount: number,
         unwantedIndexesList: number[]
     } {
@@ -354,7 +362,7 @@ export class SteamUser {
      * Write the provided data into the shortcuts file
      * @param shortcutData data to write
      */
-    private async writeShortcutFile(shortcutData: any, isFirstInstance?: boolean): Promise<void> {
+    private async writeShortcutFile(shortcutData: ISteamShortcut, isFirstInstance?: boolean): Promise<void> {
         return new Promise((resolve) => {
             if (isFirstInstance) {
                 log("Writing into shortcuts file...");
