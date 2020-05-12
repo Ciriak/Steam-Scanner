@@ -88,8 +88,8 @@ export class SteamUser {
                             // game
                             const game = launcher.games[gameName];
 
-                            // skip if the binary of the game in unknown
-                            if (!game.binaries || !game.binaries[0]) {
+                            // skip if the binary of the game is not set
+                            if (!game.binarySet) {
                                 continue;
                             }
 
