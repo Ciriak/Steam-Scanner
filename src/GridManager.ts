@@ -17,7 +17,7 @@ export enum GridManagerEvents {
     RESET_STEAM_GRID = "GRID_RESET_STEAM_GRID",
 }
 
-const processTimeoutDelay = (60 * 1000) * 20; // 10min
+const processTimeoutDelay = (60 * 1000) * 2; // 2min
 
 
 export default class GridManager {
@@ -46,7 +46,6 @@ export default class GridManager {
                 this.shouldRerun = false;
             }
 
-
             if (restart) {
                 this.shouldRerun = true;
             }
@@ -67,7 +66,7 @@ export default class GridManager {
 
         log(colors.magenta("Starting Steam Grid Process..."))
 
-        let args: string[] = ['--skipsteam', '--styles', 'alternate,white_logo'];
+        let args: string[] = ['--nonsteamonly'];
 
         // set the steamGridDb token if available in the config
         if (this.config.steamGridDbToken) {

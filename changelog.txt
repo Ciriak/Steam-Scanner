@@ -1,3 +1,1 @@
-- Added support for cover images using [Steam Grid](https://github.com/boppreh/steamgrid) (Experimental)
-- Added a settings panel for cover images
-- Fixed shortcuts using a wrong label in the Steam library
+- Optimized the Steam grid process

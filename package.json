@@ -1,6 +1,6 @@
 {
   "name": "steam-scanner",
-  "version": "0.2.8",
+  "version": "0.3.0",
   "description": "Automatically add your game to you Steam library",
   "main": "scanner.js",
   "scripts": {
