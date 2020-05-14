@@ -111,22 +111,29 @@ export class SteamUser {
                              * shortcut don't already exist => add it
                              */
                             if (gameCount === 0) {
+
+                                /**
+                                 * **NOTE**
+                                 * The order of the properties matter here
+                                 * Since steamGrid regex seem to be based on the properties order
+                                 * I wasted so many hours because of that
+                                 */
                                 shortcutData.shortcuts.push({
-                                    Exe: game.binaries[0],
-                                    tags: [launcher.name, "Steam Scanner"],
                                     AppName: game.label,
-                                    StartDir: game.folderPath,
+                                    Exe: '"' + game.binaries[0] + '"',
+                                    StartDir: '"' + game.folderPath + '\\"',
+                                    icon: "",
+                                    ShortcutPath: "",
+                                    LaunchOptions: "",
+                                    IsHidden: false,
                                     AllowDesktopConfig: true,
                                     AllowOverlay: true,
+                                    OpenVR: false,
                                     Devkit: false,
                                     DevkitGameID: "",
-                                    IsHidden: false,
-                                    LaunchOptions: "",
-                                    OpenVR: false,
-                                    ShortcutPath: "",
-                                    icon: "",
                                     // add the current time as the last play time for the shortcut
-                                    LastPlayTime: new Date().getTime() / 1000,
+                                    LastPlayTime: new Date().valueOf() / 1000,
+                                    tags: [launcher.name, "Steam Scanner"],
                                 });
                                 updatedShortcuts = true;
 
