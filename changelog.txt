@@ -3,3 +3,4 @@
 - Does not display a game in the menu if there is no executable to select
 - Less notification, Steam scanner will be less intrusive
 - Does not restart Steam by default
+- When a game has been uninstalled, it shortcut is removed from your Steam library
