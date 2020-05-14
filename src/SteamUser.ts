@@ -8,6 +8,7 @@ import SteamScanner from "./app";
 import colors from "colors";
 import IGame from "./interfaces/Game.interface";
 import rimraf from "rimraf";
+import ISteamShortcut from "./interfaces/Shortcut.interface";
 
 export class SteamUser {
     public userId: string;
@@ -67,7 +68,7 @@ export class SteamUser {
 
             let updatedShortcuts: boolean = false;
 
-            shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: any) => {
+            shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: ISteamShortcut) => {
                 // if can't parse (ex: shortcut file don't exist) , create a clean object
                 if (err || !shortcutData || !shortcutData.shortcuts) {
                     shortcutData = {
@@ -88,8 +89,8 @@ export class SteamUser {
                             // game
                             const game = launcher.games[gameName];
 
-                            // skip if the binary of the game in unknown
-                            if (!game.binaries || !game.binaries[0]) {
+                            // skip if the binary of the game is not set
+                            if (!game.binarySet) {
                                 continue;
                             }
 
@@ -110,16 +111,29 @@ export class SteamUser {
                              * shortcut don't already exist => add it
                              */
                             if (gameCount === 0) {
+
+                                /**
+                                 * **NOTE**
+                                 * The order of the properties matter here
+                                 * Since steamGrid regex seem to be based on the properties order
+                                 * I wasted so many hours because of that
+                                 */
                                 shortcutData.shortcuts.push({
-                                    Exe: game.binaries[0],
-                                    tags: [launcher.name, "Steam Scanner"],
                                     AppName: game.label,
-                                    StartDir: game.folderPath,
-                                    steamScanner: true,
+                                    Exe: '"' + game.binaries[0] + '"',
+                                    StartDir: '"' + game.folderPath + '\\"',
+                                    icon: "",
+                                    ShortcutPath: "",
+                                    LaunchOptions: "",
+                                    IsHidden: false,
                                     AllowDesktopConfig: true,
-                                    AlowOverlay: true,
+                                    AllowOverlay: true,
+                                    OpenVR: false,
+                                    Devkit: false,
+                                    DevkitGameID: "",
                                     // add the current time as the last play time for the shortcut
-                                    LastPlayTime: new Date().getTime() / 1000,
+                                    LastPlayTime: new Date().valueOf() / 1000,
+                                    tags: [launcher.name, "Steam Scanner"],
                                 });
                                 updatedShortcuts = true;
 
@@ -191,7 +205,7 @@ export class SteamUser {
      */
     public async removeShortcut(AppName: string, isFirstInstance?: boolean) {
         return new Promise((resolve) => {
-            shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: any) => {
+            shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: ISteamShortcut) => {
                 // if can't parse (ex: shortcut file don't exist) , create a clean object
                 if (err || !shortcutData || !shortcutData.shortcuts) {
                     logWarn("WARNING - unable to parse the steam shortcuts file");
@@ -215,63 +229,12 @@ export class SteamUser {
 
                 shortcutData.shortcuts.splice(indexToRemove, 1);
 
-                log(`Removing a shortcut for the app ${AppName}`)
+                log(`Removing a shortcut ${colors.cyan(AppName)} for the user ${this.userId}`)
 
                 await this.writeShortcutFile(shortcutData, isFirstInstance);
                 return resolve();
             });
         });
-    }
-
-    /**
-     * Look for any leftover shortcut in the shortcut file and clean thoses who are not supposed to be here
-     * @param shortcutData
-     * @param {boolean} removeSteamScannerShortcuts if true, will remove all shortcuts added by Steam Scanner
-     * @return {boolean} true if the shortcuts have been updated (items removed)
-     */
-    public async removeUnwantedShortcuts(removeSteamScannerShortcuts?: boolean, firstInstance?: boolean): Promise<boolean> {
-        return new Promise(async (resolve) => {
-            const gamesList = await this.scanner.launchersManager.getAllGames();
-            let shortcutsUpdated: boolean = false;
-
-            shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: any) => {
-
-                if (err) {
-                    logError(err.message);
-                    return resolve();
-                }
-
-                for (const sc of shortcutData.shortcuts) {
-                    let found: boolean = false;
-                    // skip if this shortcut has not been added by Steam scanner
-                    if (!sc.steamScanner) {
-                        continue;
-                    }
-
-                    // search in all known games
-                    for (const gameName in gamesList) {
-                        if (gamesList.hasOwnProperty(gameName)) {
-                            const game = gamesList[gameName];
-                            // shortcut appName is a known game > skip this item
-                            if (game.label === sc.AppName && !removeSteamScannerShortcuts) {
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    // if the shortcut was added by SC and is not found in the gamesList > remove it
-                    if (!found) {
-                        await this.removeShortcut(sc.AppName, firstInstance);
-                        shortcutsUpdated = true;
-                    }
-                }
-
-                return resolve(shortcutsUpdated);
-
-            });
-        });
-
     }
 
     /**
@@ -297,16 +260,25 @@ export class SteamUser {
      * @param game game instance
      * @param shortcutData current shortcut data
      */
-    private parseEntriesForGame(game: IGame, shortcutData: any): {
+    private parseEntriesForGame(game: IGame, shortcutData: ISteamShortcut): {
         gameCount: number,
         unwantedIndexesList: number[]
     } {
         let gameCount = 0;
         const unwantedIndexesList: number[] = [];
+
+        // skip if binary not set for the game
+        if (!game.binarySet) {
+            return {
+                gameCount,
+                unwantedIndexesList
+            }
+        }
+
         for (let i = 0; i < shortcutData.shortcuts.length; i++) {
             const nShortcut = shortcutData.shortcuts[i];
             if (
-                nShortcut.AppName === game.label
+                nShortcut.Exe === game.binaries[0]
             ) {
                 gameCount++;
 
@@ -324,10 +296,79 @@ export class SteamUser {
     }
 
     /**
+     * Reset the shortcut file for this user
+     */
+    public async resetShortcut(): Promise<void> {
+        log(colors.yellow(`Reseting shortcut for the user ${colors.cyan(this.userId)}...`));
+        return new Promise(async (resolve) => {
+            const shortcutData = {
+                shortcuts: []
+            }
+            await this.writeShortcutFile(shortcutData, true);
+            return resolve();
+        });
+    }
+
+    /**
+     * Look for any leftover shortcut in the shortcut file and clean thoses who are not supposed to be here
+     * @param shortcutData
+     * @param {boolean} removeSteamScannerShortcuts if true, will remove all shortcuts added by Steam Scanner
+     * @return {boolean} true if the shortcuts have been updated (items removed)
+     */
+    // public async removeUnwantedShortcuts(removeSteamScannerShortcuts?: boolean, firstInstance?: boolean): Promise<boolean> {
+    //     return new Promise(async (resolve) => {
+    //         const gamesList = this.scanner.launchersManager.gamesList;
+    //         let shortcutsUpdated: boolean = false;
+
+    //         shortcut.parseFile(this.shortcutsFilePath, async (err: Error, shortcutData: any) => {
+
+    //             if (err) {
+    //                 logError(err.message);
+    //                 return resolve();
+    //             }
+
+    //             for (const sc of shortcutData.shortcuts) {
+    //                 let found: boolean = false;
+    //                 // skip if this shortcut has not been added by Steam scanner
+    //                 if (!sc.steamScanner) {
+    //                     continue;
+    //                 }
+
+    //                 // search in all known games
+    //                 for (const gameName in gamesList) {
+    //                     if (gamesList.hasOwnProperty(gameName)) {
+    //                         const game = gamesList[gameName];
+    //                         // skip if binary not set for this game
+    //                         if (!game.binarySet) {
+    //                             continue;
+    //                         }
+    //                         // shortcut appName is a known game > skip this item
+    //                         if (game.binaries[0] === sc.Exe && !removeSteamScannerShortcuts) {
+    //                             found = true;
+    //                             break;
+    //                         }
+    //                     }
+    //                 }
+
+    //                 // if the shortcut was added by SC and is not found in the gamesList > remove it
+    //                 if (!found) {
+    //                     await this.removeShortcut(sc.AppName, firstInstance);
+    //                     shortcutsUpdated = true;
+    //                 }
+    //             }
+
+    //             return resolve(shortcutsUpdated);
+
+    //         });
+    //     });
+
+    // }
+
+    /**
      * Write the provided data into the shortcuts file
      * @param shortcutData data to write
      */
-    private async writeShortcutFile(shortcutData: any, isFirstInstance?: boolean): Promise<void> {
+    private async writeShortcutFile(shortcutData: ISteamShortcut, isFirstInstance?: boolean): Promise<void> {
         return new Promise((resolve) => {
             if (isFirstInstance) {
                 log("Writing into shortcuts file...");

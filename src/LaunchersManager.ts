@@ -16,7 +16,8 @@ export class LaunchersManager {
     private config: Config;
     public installedLaunchers: Launcher[] = [];
     public scanner: SteamScanner;
-    private launchersList: Launcher[] = []
+    public gamesList: IGamesCollection = {};
+    private launchersList: Launcher[] = [];
     /**
      * retrieve the supported launchers list from library (not an actual scan)
      * retrieve the "unique" games config from the library
@@ -39,20 +40,26 @@ export class LaunchersManager {
      * Update the games list for all launchers and return all games
      */
     public async getAllGames(): Promise<IGamesCollection> {
-        return new Promise((resolve) => {
+        return new Promise(async (resolve) => {
             let gamesList: IGamesCollection = {};
             // get games from all installed Launcher
             const waitList: Promise<IGamesCollection>[] = [];
             for (const launcher of this.installedLaunchers) {
-
-                const isLibrary = launcher.name === "Library";
+                // const isLibrary = launcher.name === "Library";
                 waitList.push(launcher.getGames());
+            }
+
+            // if the config has been reset, clean all the shortcuts
+            if (this.config.reset) {
+                // TODO : clean some stuff here
+                this.config.reset = false;
             }
 
             Promise.all(waitList).then((results) => {
                 for (const result of results) {
                     gamesList = { ...result };
                 }
+                this.gamesList = gamesList;
                 return resolve(gamesList);
             });
         });
@@ -228,10 +235,10 @@ export class LaunchersManager {
             log(`${colors.cyan(gameData.name)} infos have been cleaned`)
 
             this.scanner.steam.removeShortcut(gameData).then(() => {
-                this.scanner.notificationsManager.notification({
-                    title: "Game removed",
-                    message: `${gameData.name} has been removed from your Steam Library`,
-                })
+                // this.scanner.notificationsManager.notification({
+                //     title: "Game removed",
+                //     message: `${gameData.name} has been removed from your Steam Library`,
+                // })
                 // relaunch a scan process
                 this.getAllGames().then(() => {
                     this.scanner.trayManager.setTray();

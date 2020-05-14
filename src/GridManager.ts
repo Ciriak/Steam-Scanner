@@ -17,7 +17,8 @@ export enum GridManagerEvents {
     RESET_STEAM_GRID = "GRID_RESET_STEAM_GRID",
 }
 
-const processTimeoutDelay = (60 * 1000) * 20; // 10min
+const processTimeoutDelay = (60 * 1000) * 2; // 2min
+const gridProcessStartDelay = 3000;
 
 
 export default class GridManager {
@@ -27,7 +28,8 @@ export default class GridManager {
     private shouldRerun: boolean = false;
     private browserWindow?: BrowserWindow;
     private steamGridProcess?: ChildProcessWithoutNullStreams;
-    private processTimeout?: NodeJS.Timeout;
+    private processQuitTimeout?: NodeJS.Timeout;
+    private processStartTimeout?: NodeJS.Timeout;
     private gridOriginalExe = path.join(app.getAppPath(), "native", "steamgrid.exe");
     private gridExe = path.join(app.getPath("appData"), "steam-scanner", "steamgrid.exe");
     constructor(scanner: SteamScanner) {
@@ -46,7 +48,6 @@ export default class GridManager {
                 this.shouldRerun = false;
             }
 
-
             if (restart) {
                 this.shouldRerun = true;
             }
@@ -59,6 +60,24 @@ export default class GridManager {
      */
     getGrid() {
 
+        // clear the timeout
+        if (this.processStartTimeout) {
+            clearTimeout(this.processStartTimeout);
+        }
+
+        // set the timeout
+        this.processStartTimeout = setTimeout(() => {
+            this.startGridProcess();
+        }, gridProcessStartDelay)
+
+
+    }
+
+    /**
+     * Start a steamGrid process
+     */
+    private startGridProcess() {
+
         if (this.active) {
             logWarn("A Steam Grid process is currently in progress, restarting...");
             this.stopGrid(true);
@@ -67,7 +86,7 @@ export default class GridManager {
 
         log(colors.magenta("Starting Steam Grid Process..."))
 
-        let args: string[] = ['--skipsteam', '--styles', 'alternate,white_logo'];
+        let args: string[] = ['--nonsteamonly'];
 
         // set the steamGridDb token if available in the config
         if (this.config.steamGridDbToken) {
@@ -99,12 +118,12 @@ export default class GridManager {
         });
 
         // clear the timeout
-        if (this.processTimeout) {
-            clearTimeout(this.processTimeout);
+        if (this.processQuitTimeout) {
+            clearTimeout(this.processQuitTimeout);
         }
 
         // set the timeout
-        this.processTimeout = setTimeout(() => {
+        this.processQuitTimeout = setTimeout(() => {
             this.stopGrid();
         }, processTimeoutDelay)
 
@@ -231,9 +250,11 @@ export default class GridManager {
     /**
      * Clear all items in the grid folder
      */
-    private async resetGrid() {
-        log(colors.magenta("Resetting the Steam grids..."));
+    public async resetGrid() {
+        log(colors.magenta("Cleaning the Steam grids..."));
+        // restart steam to prevent an issue with writing rights
         this.scanner.steam.restartSteam();
+
         for (const steamUser of this.scanner.steam.steamUsers) {
             await steamUser.cleanGrid();
         }

@@ -123,23 +123,6 @@ export default class Traymanager {
         this.tray.setToolTip("Steam Scanner");
         // show a notification if some game need an exe selection
 
-        // only one game
-        if (this.gameNeedExeSelectList.length === 1) {
-            this.scanner.notificationsManager.notification({
-                title: "Manual exe selection needed",
-                message: `We found various possible executables for ${this.gameNeedExeSelectList[0].name}, click on this notification to select the correct one`,
-                shouldOpenMenu: true
-            })
-        }
-        // more than one game
-        if (this.gameNeedExeSelectList.length > 1) {
-            this.scanner.notificationsManager.notification({
-                title: "Manual exe selection needed",
-                message: `We found various possible executables for ${this.gameNeedExeSelectList.length} games, click on this notification to select the correct one`,
-                shouldOpenMenu: true
-            })
-        }
-
         // show context menu even on normal click
         if (!this.alreadySet) {
             this.tray.on("click", () => {
@@ -203,6 +186,12 @@ export default class Traymanager {
                 if (game.hidden) {
                     continue;
                 }
+
+                // ignore if no binary to show
+                if (game.binaries.length === 0) {
+                    continue;
+                }
+
                 // if the game is already known and ready to use
                 if (game.binarySet) {
                     const gameIcon = this.scanner.IconsUtil.getIcon(game.binaries[0]);

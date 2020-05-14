@@ -6,6 +6,7 @@ import ILauncher, { IGameLocation, IInstallationState, IGamesCollection } from "
 import { addDrivesToPossibleLocations, log, logWarn } from "./utils/helper.utils";
 import GameHelper from "./GameHelper";
 import SteamScanner from "./app";
+import IGame from "./interfaces/Game.interface";
 
 export abstract class Launcher implements ILauncher {
     [propName: string]: any
@@ -208,6 +209,12 @@ export abstract class Launcher implements ILauncher {
                     const gameData = this.games[gameName];
 
                     const gameInstance = new GameHelper(this.games[gameName], this.scanner);
+                    const isInstalled = await gameInstance.checkGameInstallation();
+                    // skip if the game is not installed anymore
+                    if (!isInstalled) {
+                        await this.removeGame(gameInstance.gameData);
+                        continue;
+                    }
 
                     // force a label refresh every time
                     this.games[gameName].label = gameInstance.getLabel(this.games[gameName]);
@@ -225,6 +232,33 @@ export abstract class Launcher implements ILauncher {
 
             resolve();
 
+        });
+
+    }
+
+    /**
+     * Remove a game from the Steam library and the launcher instance
+     * @param game game to remove
+     */
+    protected async removeGame(game: IGame): Promise<void> {
+        return new Promise(async (resolve) => {
+            await this.scanner.steam.removeShortcut(game);
+            this.scanner.notificationsManager.notification({
+                title: game.label + " removed",
+                message: game.label + "'s folder no longer existed<br>The game has been removed from your Steam library"
+            });
+
+            // delete the game from the launcher
+            delete this.games[game.name];
+            if (this.config.launchers[this.name]) {
+                // delete the game references in the config
+                delete this.config.launchers[this.name].games[game.name];
+                // force a save
+                this.config.launchers = { ...this.config.launchers };
+            }
+
+
+            return resolve();
         });
 
     }

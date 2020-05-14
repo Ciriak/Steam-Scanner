@@ -1,3 +1,6 @@
-- Added support for cover images using [Steam Grid](https://github.com/boppreh/steamgrid) (Experimental)
-- Added a settings panel for cover images
-- Fixed shortcuts using a wrong label in the Steam library
+- Fixed a bug where cover images couldn't be discovered until at least one game was launched
+- Fixed a bug where some games where added to Steam with the wrong .exe
+- Does not display a game in the menu if there is no executable to select
+- Less notification, Steam scanner will be less intrusive
+- Does not restart Steam by default
+- When a game has been uninstalled, it shortcut is removed from your Steam library

@@ -78,13 +78,13 @@ function App() {
                         </Form.Text>
                     </Form.Group>
 
-                    <Row>
+                    {/* <Row>
                         <Col>
                             <Form.Group controlId="allowAnimatedCover">
                                 <Form.Check type="checkbox" ref={register} name="animatedCover" label="Allow animated cover images" />
                             </Form.Group>
                         </Col>
-                    </Row>
+                    </Row> */}
                     <Row>
 
                     </Row>
