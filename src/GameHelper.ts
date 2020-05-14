@@ -9,6 +9,7 @@ import { findIndex } from "lodash";
 import gamesLibrary from "./library/games/GamesLibrary"
 import IGame from "./interfaces/Game.interface";
 import defaultIcon from "./assets/scanner.png";
+import { exists } from "fs-extra";
 /**
  * Provide utilities for game manipulations
  */
@@ -19,34 +20,40 @@ export default class GameHelper {
     constructor(gameData: IGame, scanner: SteamScanner) {
         this.scanner = scanner;
         this.config = scanner.config;
-        this.gameData = this.checkGameData(gameData);
+        this.gameData = gameData;
+        this.checkGameData();
     }
 
 
 
     /**
-     * Check if some data already saved exist
+     * Check if some data already saved exist for the game
      */
-    private checkGameData(gameData: IGame): IGame {
-        try {
-            let gameConfig: IGame | null = null;
-            if (gameData.name && gameData.launcher && this.config.launchers[gameData.launcher]) {
-                const launcher = this.config.launchers[gameData.launcher];
-                if (launcher && launcher.games) {
-                    gameConfig = launcher.games[gameData.name];
-                    if (gameConfig) {
-                        // if a config is found for this game, return it
-                        return gameConfig
+    private async checkGameData(): Promise<IGame> {
+        return new Promise(async (resolve) => {
+            try {
+                let gameConfig: IGame | null = null;
+                if (this.gameData.name && this.gameData.launcher && this.config.launchers[this.gameData.launcher]) {
+                    const launcher = this.config.launchers[this.gameData.launcher];
+                    if (launcher && launcher.games) {
+                        gameConfig = launcher.games[this.gameData.name];
+                        if (gameConfig) {
+                            // if a config is found for this game, return it
+                            this.gameData = gameConfig;
+                            return resolve(gameConfig);
+                        }
                     }
                 }
-            }
 
-            // else return the original provided config
-            return gameData
-        } catch (error) {
-            logWarn(error);
-            return gameData
-        }
+                // else return the original provided config
+                return resolve(this.gameData)
+            } catch (error) {
+                // in case of error return the original provided config
+                logWarn(error);
+                return resolve(this.gameData)
+            }
+        })
+
 
     }
 
@@ -193,6 +200,44 @@ export default class GameHelper {
 
         });
 
+    }
+
+    /**
+     * Check if a game is still installed on the computer
+     *
+     * If not, remove it's shortcut
+     * @param game
+     * @return refreshed game data or null if the game is not available anymore
+     */
+    public checkGameInstallation(): Promise<boolean> {
+        const game = this.gameData;
+        return new Promise((resolve) => {
+            // check the game folder
+            exists(game.folderPath, async (folderExist) => {
+                if (!folderExist) {
+                    logWarn(`Game folder for ${game.label} don't exists anymore... it's shortcut will be removed`);
+                    return resolve(false);
+                }
+
+                // check the game exe
+                if (game.binarySet) {
+                    exists(game.binaries[0], async (binaryExist) => {
+                        if (!binaryExist) {
+                            logWarn(`Executable for ${game.label} don't exists anymore... it's shortcut will be removed and the game data refreshed`);
+                            await this.scanner.steam.removeShortcut(game);
+                            // update the game instance
+                            this.gameData.binarySet = false;
+                            this.gameData.disableAutoAdd = true;
+                            // return true (since the game is still installed)
+                            return resolve(true);
+                        }
+                    });
+                }
+
+                return resolve(true);
+
+            });
+        });
     }
 
     /**

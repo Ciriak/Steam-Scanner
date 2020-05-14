@@ -52,7 +52,7 @@ export default interface ILauncher {
     /**
      * Saved list of games associated with the launcher
      */
-    games?: IGamesCollection;
+    games: IGamesCollection;
     /**
      * Saved exe location of the launcher
      */
