@@ -1,4 +1,4 @@
-declare module 'steam-shortcut-editor';
+declare module 'node-steam-shortcuts';
 declare module "*.json" {
     const value: string;
     export default value;
