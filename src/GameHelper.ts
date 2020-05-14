@@ -8,9 +8,7 @@ import exeBlackList from "./library/ExeBlackList";
 import { findIndex } from "lodash";
 import gamesLibrary from "./library/games/GamesLibrary"
 import IGame from "./interfaces/Game.interface";
-import axios from "axios";
-import { createWriteStream, ensureDirSync } from "fs-extra";
-import { app } from "electron";
+import defaultIcon from "./assets/scanner.png";
 /**
  * Provide utilities for game manipulations
  */
@@ -173,7 +171,6 @@ export default class GameHelper {
                         if (launcher && launcher.games) {
                             launcher.games[this.gameData.name] = this.gameData;
                         }
-
                     }
 
                     /*
@@ -181,10 +178,15 @@ export default class GameHelper {
                       add the game the the listener, things happend in "Scanner.ts"
                     */
                     log(`Found ${colors.cyan(String(this.gameData.binaries.length))} possible executable(s) for the game ${colors.cyan(this.gameData.name)}`);
-                    // notifier.notify({
-                    //     title: "Game found",
-                    //     message: `We have found ${this.gameData.binaries.length} files that can be the game executable, please select one`
-                    // })
+
+                    this.scanner.notificationsManager.notification({
+                        icon: defaultIcon,
+                        title: "Manual exe selection needed",
+                        message: `We found various possible executables for ${this.gameData.label}, click on this notification to select the correct one`,
+                        shouldOpenMenu: true
+                    })
+
+
 
                     return resolve();
             }
