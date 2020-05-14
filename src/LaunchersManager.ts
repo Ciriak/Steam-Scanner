@@ -51,7 +51,7 @@ export class LaunchersManager {
 
             // if the config has been reset, clean all the shortcuts
             if (this.config.reset) {
-                await this.scanner.steam.resetShortcuts();
+                // TODO : clean some stuff here
                 this.config.reset = false;
             }
 

@@ -1,4 +1,5 @@
-- Optimized the Steam grid process (Cover images)
-- Fixed a bug where some games where added to Steam with the wrong exe
+- Fixed a bug where cover images couldn't be discovered until at least one game was launched
+- Fixed a bug where some games where added to Steam with the wrong .exe
+- Does not display a game in the menu if there is no executable to select
 - Less notification, Steam scanner will be less intrusive
 - Does not restart Steam by default
