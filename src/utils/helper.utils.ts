@@ -1,4 +1,4 @@
-import * as elcLog from "electron-log";
+import electronLog from "electron-log";
 import colors from "colors";
 import path from "path"
 /**
@@ -6,7 +6,7 @@ import path from "path"
  * @param message
  */
 export function log(message: string) {
-    elcLog.log(message);
+    electronLog.log(message);
 }
 
 /**
@@ -14,7 +14,7 @@ export function log(message: string) {
  * @param message
  */
 export function logWarn(message: string) {
-    elcLog.warn(colors.yellow(message));
+    electronLog.warn(colors.yellow(message));
 }
 
 /**
@@ -22,7 +22,7 @@ export function logWarn(message: string) {
  * @param message
  */
 export function logError(message: string) {
-    elcLog.error(colors.red(message));
+    electronLog.error(colors.red(message));
 }
 
 /**
@@ -30,7 +30,7 @@ export function logError(message: string) {
  * @param message
  */
 export function logDebug(message: string) {
-    elcLog.debug(colors.cyan(message));
+    electronLog.debug(colors.cyan(message));
 }
 
 /**
