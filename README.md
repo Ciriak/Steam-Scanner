@@ -53,8 +53,9 @@ Only **Windows** is supported
 | --------------------------------------------------------------------------------- | --------- |
 | <img src="https://i.imgur.com/C0PYnQH.png" width="18px" height="18px"> Uplay      | ✔️        |
 | <img src="https://i.imgur.com/0iLlyMK.png" width="18px" height="18px"> Origin     | ✔️        |
-| <img src="https://i.imgur.com/ffu3VTv.png" width="18px" height="18px"> BattleNet  | 🔁 WIP    |
-| <img src="https://i.imgur.com/ES8Pr1w.png" width="18px" height="18px"> GOG Galaxy | ❌        |
+| <img src="https://i.imgur.com/ffu3VTv.png" width="18px" height="18px"> BattleNet  | ✔️    |
+| <img src="https://i.imgur.com/6Nn9euq.png" height="18px"> Epic Game Store  | ✔️    |
+| <img src="https://i.imgur.com/ES8Pr1w.png" width="18px" height="18px"> GOG Galaxy | 🔁 WIP        |
 | <img src="https://i.imgur.com/zN8Cdvs.png" width="18px" height="18px"> Twitch DA  | ❌        |
 | <img src="https://i.imgur.com/KUhFAXu.png"  width="18px" height="18px"> MS Store  | ❌        |
 
